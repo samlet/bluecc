@@ -1,0 +1,11 @@
+[workspace]
+members = [
+    "entity-meta",
+    "entity-seed",
+    "reader"
+]
+
+[profile.release]
+panic = "abort"
+lto = true
+

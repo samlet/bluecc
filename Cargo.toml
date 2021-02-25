@@ -1,7 +1,9 @@
 [workspace]
 members = [
+	"common",
     "entity-meta",
     "entity-seed",
+	"stubs",
     "reader"
 ]
 

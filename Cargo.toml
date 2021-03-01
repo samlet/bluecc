@@ -4,7 +4,10 @@ members = [
     "entity-meta",
     "entity-seed",
 	"stubs",
-    "reader"
+    "reader",
+    "learn",
+	"meta-server",
+    "functor"
 ]
 
 [profile.release]

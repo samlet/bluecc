@@ -1,0 +1,2 @@
+meta:
+    cargo run --bin meta-cli

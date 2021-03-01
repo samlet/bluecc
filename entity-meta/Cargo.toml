@@ -1,0 +1,31 @@
+[package]
+name = "entity-meta"
+version = "0.1.0"
+authors = ["Samlet Wu <xiaofei.wu@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+common = { version = "0.1.0", path = "../common"}
+ink_storage = { version = "3.0.0-rc2", default-features = false }
+ink_primitives = { version = "3.0.0-rc2", default-features = false }
+ink_prelude = { version = "3.0.0-rc2", default-features = false }
+scale = { package = "parity-scale-codec", version = "2.0", default-features = false, features = ["derive", "full"] }
+derive_more = { version = "0.99", default-features = false, features = ["from"] }
+
+prost = "0.7"
+# Only necessary if using Protobuf well-known types:
+prost-types = "0.7"
+
+[features]
+default = ["std"]
+std = [
+    "ink_prelude/std",
+    "ink_primitives/std",
+    "ink_storage/std",
+    "scale/std",
+]
+
+[build-dependencies]
+prost-build = { version = "0.7" }

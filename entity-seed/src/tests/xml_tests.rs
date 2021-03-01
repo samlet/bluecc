@@ -59,7 +59,11 @@ pub struct FieldTypeDef{
     #[serde(rename = "sql-type", default)]
     pub sql_type: String,
     #[serde(rename = "java-type", default)]
-    pub java_type: String
+    pub java_type: String,
+    #[serde(rename = "query-type", default)]
+    pub query_type: String,
+    #[serde(rename = "insert-type", default)]
+    pub insert_type: String
 }
 #[derive(Debug, Deserialize)]
 pub struct FieldTypes{
@@ -225,18 +229,50 @@ pub fn get_field_mappings() -> FieldTypes{
     from_str(str::from_utf8(include_bytes!("fieldtypemysql.xml")).unwrap()).unwrap()
 }
 impl FieldTypes{
-    pub fn sql_type(&self, field_type:&str) -> String{
+    fn get_field(&self, field_type:&str) -> &FieldTypeDef{
         self.field_types.iter()
-            .find(|x| x.field_type==field_type)
-            .unwrap().sql_type.clone()
+            .find(|x| x.field_type==field_type).unwrap()
+    }
+    pub fn sql_type(&self, field_type:&str) -> String{
+        self.get_field(field_type).sql_type.clone()
+    }
+    pub fn query_type(&self, field_type:&str) -> String{
+        let fld=self.get_field(field_type);
+        if fld.query_type.is_empty(){
+            if fld.java_type=="String"{
+                "String".to_string()
+            }else{
+                format!("**UNK({})**", field_type)
+            }
+        }else{
+            fld.query_type.clone()
+        }
+    }
+    pub fn insert_type(&self, field_type:&str) -> String{
+        let fld=self.get_field(field_type);
+        if fld.insert_type.is_empty(){
+            if !fld.query_type.is_empty(){
+                fld.query_type.clone()
+            }
+            else if fld.java_type=="String"{
+                "&'a str".to_string()
+            }else{
+                format!("**UNK({})**", field_type)
+            }
+        }else{
+            fld.insert_type.clone()
+        }
     }
 }
 
 #[test]
 fn field_mapping_works() {
     let model:FieldTypes=from_str(str::from_utf8(include_bytes!("fieldtypemysql.xml")).unwrap()).unwrap();
-    let ft=model.field_types.iter().find(|x| x.field_type=="id");
-    println!("{}", ft.expect("not find").sql_type);
+    let ft=model.field_types.iter().find(|x| x.field_type=="id").unwrap();
+    println!("{}, {}", ft.sql_type, ft.insert_type);
+
+    let fld=model.field_types.iter().find(|x| x.field_type=="integer").unwrap();
+    println!("is empty: {}", fld.query_type.is_empty());
 }
 
 static COUNTRIES: phf::Map<&'static str, &'static str> = phf_map! {

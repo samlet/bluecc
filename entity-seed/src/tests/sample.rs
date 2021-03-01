@@ -32,7 +32,7 @@ $ cargo run --bin sample list
 async fn main(args: Args) -> anyhow::Result<()> {
     match args.cmd {
         Some(Command::Gen { entity }) => {
-            entity_gen_works(entity.as_str());
+            entity_gen_works(entity.as_str(), "ent");
         }
         Some(Command::List {  }) => {
             println!("list all entities");
@@ -42,16 +42,17 @@ async fn main(args: Args) -> anyhow::Result<()> {
             }
         }
         None => {
-            println!("Printing list of all todos");
-            // list_todos(&pool).await?;
-            entity_gen_works("Example");
+            println!("gen stuffs");
+            entity_gen_works("Example", "ent");
+            println!(".. model");
+            entity_gen_works("Example", "model");
         }
     }
 
     Ok(())
 }
 
-fn entity_gen_works(entity_name: &str) {
+fn entity_gen_works(entity_name: &str, template_name: &str) {
     use tera::{Result, Context, Filter, Function};
     use tera::Tera;
     use serde_json::{json, Value};
@@ -69,6 +70,14 @@ fn entity_gen_works(entity_name: &str) {
     }
     fn snake_case(value: &Value, _args: &HashMap<String, Value>) -> Result<Value> {
         let val=inflector::cases::snakecase::to_snake_case(value.as_str().unwrap());
+        Ok(Value::String(format!("{}", val)))
+    }
+    fn query_type(value: &Value, _args: &HashMap<String, Value>) -> Result<Value> {
+        let val=FIELD_MAPPINGS.query_type(value.as_str().unwrap());
+        Ok(Value::String(format!("{}", val)))
+    }
+    fn insert_type(value: &Value, _args: &HashMap<String, Value>) -> Result<Value> {
+        let val=FIELD_MAPPINGS.insert_type(value.as_str().unwrap());
         Ok(Value::String(format!("{}", val)))
     }
 
@@ -90,12 +99,28 @@ CREATE TABLE {{ent['entity-name'] | snake_case -}} (
     )
         .unwrap();
 
+    tera.add_raw_template(
+        "model",
+        r#"
+#[derive(Queryable)]
+pub struct {{ent['entity-name'] -}} {
+    pub id: i64,
+{%- for fld in flds %}
+    pub {{fld.name | snake_case}}: {{fld['type'] | query_type}}{% if not loop.last %},{% endif %}
+{%- endfor %}
+}
+        "#,
+    )
+        .unwrap();
+
     let mut context = Context::new();
     tera.register_filter("sqltype", SqlType);
+    tera.register_filter("query_type", query_type);
+    tera.register_filter("insert_type", insert_type);
     tera.register_filter("snake_case", snake_case);
     context.insert("ent", &ent);
     context.insert("flds", &ent.fields);
-    let result = tera.render("ent", &context);
+    let result = tera.render(template_name, &context);
     println!("{}", result.unwrap());
 }
 

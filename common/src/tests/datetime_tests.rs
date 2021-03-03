@@ -3,6 +3,16 @@ use chrono::offset::LocalResult;
 
 #[test]
 fn datetime_works() {
+    let d = NaiveDate::from_ymd(2015, 6, 3);
+    let t = NaiveTime::from_hms_milli(12, 34, 56, 789);
+
+    let dt = NaiveDateTime::new(d, t);
+    assert_eq!(dt.date(), d);
+    assert_eq!(dt.time(), t);
+}
+
+#[test]
+fn datetime_ops_works() {
     let dt = Utc.ymd(2014, 7, 8).and_hms(9, 10, 11); // `2014-07-08T09:10:11Z`
     // July 8 is 188th day of the year 2014 (`o` for "ordinal")
     assert_eq!(dt, Utc.yo(2014, 189).and_hms(9, 10, 11));

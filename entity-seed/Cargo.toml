@@ -52,6 +52,8 @@ quaint = {version="0.2.0-alpha.13", features=["serde-support", "full-sqlite", "f
 tokio = { version = "0.2.25", features = ["macros", "time"] }
 tempfile = "3.1.0"
 
+reqwest = { version = "0.10", features = ["json"] }
+
 [dev-dependencies]
 simple_logger = "1.0.1"
 docmatic = "0.1.2"

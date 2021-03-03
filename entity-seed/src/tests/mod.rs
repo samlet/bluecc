@@ -18,4 +18,5 @@ mod functor_tests;
 mod kvdb_tests;
 mod linq_tests;
 mod seed_gen;
+mod requests;
 

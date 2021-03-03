@@ -7,4 +7,5 @@ mod json_tests;
 mod name_tests;
 mod toml_tests;
 mod datetime_tests;
+mod closures_tests;
 

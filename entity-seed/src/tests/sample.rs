@@ -6,11 +6,15 @@
 use structopt::StructOpt;
 use std::collections::HashMap;
 use entity_seed::tests::xml_tests::{FIELD_MAPPINGS, get_field_mappings, example_models, FieldTypes};
+use std::path::PathBuf;
 
 #[derive(StructOpt)]
 struct Args {
     #[structopt(subcommand)]
     cmd: Option<Command>,
+    /// Output file, stdout if not present
+    #[structopt(short = "o", long = "output", parse(from_os_str))]
+    output: Option<PathBuf>,
 }
 
 #[derive(StructOpt)]
@@ -24,12 +28,20 @@ enum Command {
 $ cargo run --bin sample gen Example
 $ cargo run --bin sample gen ExampleStatus
 $ cargo run --bin sample list
+$ cargo run --bin sample -- -o out_file list
 ```
 */
 
 #[async_std::main]
 #[paw::main]
 async fn main(args: Args) -> anyhow::Result<()> {
+    use tempfile::Builder as TempfileBuilder;
+
+    let tempfile = TempfileBuilder::new().tempfile_in("./")?;
+    println!(".. generate files .. to {}", args.output
+        .or(Some(PathBuf::from(tempfile.path())))
+        .unwrap().display());
+
     match args.cmd {
         Some(Command::Gen { entity }) => {
             entity_gen_works(entity.as_str(), "ent");
@@ -42,7 +54,6 @@ async fn main(args: Args) -> anyhow::Result<()> {
             }
         }
         None => {
-            println!("gen stuffs");
             entity_gen_works("Example", "ent");
             println!(".. model");
             entity_gen_works("Example", "model");

@@ -1,9 +1,29 @@
-DROP TABLE packages;
---DROP TABLE follows;
-DROP TABLE crate_owners;
-DROP TABLE api_tokens;
+DROP TABLE publish_rate_overrides;
+DROP TABLE publish_limit_buckets;
+DROP TABLE versions_published_by;
+DROP TABLE version_owner_actions;
+DROP TABLE background_jobs;
+DROP TABLE readme_renderings;
+DROP TABLE crate_owner_invitations;
 DROP TABLE emails;
+DROP TABLE api_tokens;
 
-DROP TABLE users;
+DROP TABLE reserved_crate_names;
+DROP TABLE badges;
+DROP TABLE crates_categories;
+DROP TABLE categories;
+DROP TABLE teams;
+DROP TABLE crates_keywords;
+DROP TABLE keywords;
+DROP TABLE crate_owners;
+DROP TABLE version_authors;
+DROP TABLE follows;
+DROP TABLE dependencies;
+DROP TABLE version_downloads;
+DROP TABLE metadata;
+DROP TABLE versions;
 DROP TABLE crates;
+DROP TABLE users;
 
+DROP FUNCTION canon_crate_name(text);
+DROP FUNCTION set_updated_at_ignore_downloads();

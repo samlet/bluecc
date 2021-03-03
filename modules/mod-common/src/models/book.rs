@@ -1,8 +1,9 @@
 use serde_derive::{Deserialize, Serialize};
 use crate::schema::books;
 
-#[derive(Serialize, Debug, Clone, Queryable)]
-pub struct BookDTO {
+#[derive(Serialize, Debug, Clone, Queryable, QueryableByName)]
+#[table_name = "books"]
+pub struct Book {
     pub id: i64,
     pub title: String,
     pub author: String,
@@ -62,8 +63,7 @@ impl FromSql<Text, Pg> for BookStatus {
 use diesel::prelude::*;
 use diesel::r2d2::{ConnectionManager, PooledConnection};
 use crate::errors::{AppError,ErrorType};
-
-type PooledPg = PooledConnection<ConnectionManager<PgConnection>>;
+use crate::{PooledPg, AppResult};
 
 pub struct BookManager {
     connection: PooledPg,
@@ -74,7 +74,7 @@ impl BookManager {
         BookManager {connection}
     }
 
-    pub fn create_book(&self, dto: CreateBookDTO) -> Result<BookDTO, AppError> {
+    pub fn create_book(&self, dto: CreateBookDTO) -> AppResult<Book> {
         use crate::schema::books;
 
         diesel::insert_into(books::table) // insert into books table
@@ -85,7 +85,7 @@ impl BookManager {
             }) // if error occurred map it to AppError
     }
 
-    pub fn list_books(&self) -> Result<Vec<BookDTO>, AppError> {
+    pub fn list_books(&self) -> AppResult<Vec<Book>> {
         use crate::schema::books::dsl::*;
 
         books
@@ -95,7 +95,7 @@ impl BookManager {
             })
     }
 
-    pub fn update_book_status(&self, book_id: i64, new_status: BookStatus) -> Result<usize, AppError> {
+    pub fn update_book_status(&self, book_id: i64, new_status: BookStatus) -> AppResult<usize> {
         use crate::schema::books::dsl::*;
 
         let updated = diesel::update(books)
@@ -112,7 +112,7 @@ impl BookManager {
         return Ok(updated)
     }
 
-    pub fn delete_book(&self, book_id: i64) -> Result<usize, AppError> {
+    pub fn delete_book(&self, book_id: i64) -> AppResult<usize> {
         use crate::schema::books::dsl::*;
 
         let deleted = diesel::delete(books.filter(id.eq(book_id)))
@@ -157,6 +157,22 @@ mod tests {
     use super::*;
     use crate::{establish_connection, establish_connection_with_pool};
     use crate::api::IdResponse;
+    use flate2::Status;
+    use diesel::sql_query;
+    use diesel::sql_types::Integer;
+
+    fn insert_seed(db_manager:&BookManager) -> IdResponse {
+        let new_book: AddBook=AddBook{
+            title: "hello".to_string(),
+            author: "samlet".to_string(),
+            status: BookStatus::WantToRead
+        };
+        let create_book_dto = new_book.to_dto();
+        let r=db_manager.create_book(create_book_dto).map(|book|
+            { IdResponse::new(book.id) }
+        );
+        r.unwrap()
+    }
 
     #[test]
     fn book_works() {
@@ -175,4 +191,83 @@ mod tests {
 
         println!("{:?}", id_response);
     }
+
+    #[test]
+    fn update_works() {
+        let connection = establish_connection_with_pool();
+        let db_manager=BookManager{ connection };
+
+        let book_id=1;
+        let status_update: UpdateStatus=UpdateStatus{ status: BookStatus::Finished };
+        let id_response = db_manager.update_book_status(book_id, status_update.status).map(|_|
+            { IdResponse::new(book_id) }
+        );
+        println!("{:?}", id_response);
+    }
+
+    #[test]
+    fn list_works() {
+        let connection = establish_connection_with_pool();
+        let db_manager=BookManager{ connection };
+
+        let result = db_manager.list_books();
+        for x in result.unwrap().iter() {
+            println!("{:?}", x);
+        }
+    }
+
+    #[test]
+    fn delete_works() {
+        let connection = establish_connection_with_pool();
+        let db_manager=BookManager{ connection };
+
+        let book_id=insert_seed(&db_manager).id;
+        let result = db_manager.delete_book(book_id).map(|_| -> () {()});
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn filter_works() {
+        use crate::schema::books::dsl::*;
+        let connection = establish_connection_with_pool();
+        let db_manager=BookManager{ connection };
+
+        let r=books.filter(status.eq(BookStatus::WantToRead))
+            .execute(&db_manager.connection)
+            .map_err(|err| {
+                AppError::from_diesel_err(err, "while updating book status")
+            });
+        println!("{:#?}", r);
+
+        let data:AppResult<Vec<Book>> = books
+            .filter(status.eq(BookStatus::WantToRead))
+            .order_by(title.asc())
+            .then_order_by(id.desc())
+            .load(&db_manager.connection)
+            .map_err(|err| {
+                AppError::from_diesel_err(err, "while listing books")
+            });
+        assert!(data.is_ok());
+        println!("{:#?}", data.unwrap());
+    }
+
+    #[test]
+    fn sql_select_works() {
+        let connection = establish_connection_with_pool();
+
+        let data = sql_query("SELECT * FROM books ORDER BY id")
+            .load::<Book>(&connection);
+        println!("{:#?}", data.unwrap());
+
+        // let books = sql_query("SELECT * FROM books WHERE id > ? AND title <> ?");
+        // let data = books
+        //     .bind::<Integer, _>(1)
+        //     .bind::<Text, _>("tess")
+        //     .get_results::<Book>(&connection);
+        // println!("{:#?}", data.unwrap());
+    }
+
 }
+
+
+

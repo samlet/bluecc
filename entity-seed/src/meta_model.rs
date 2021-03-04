@@ -27,12 +27,16 @@ impl Entity{
         pks.iter().join(", ").to_string()
     }
 
-    pub fn belongs(&self) -> Vec<BelongsTo>{
-        let rels=self.relations
-            .iter().map(|x|
-            BelongsTo{
-                field_name: to_snake_case(&x.keymaps.get(0).unwrap().field_name),
-                model_name:x.rel_entity_name.clone()
+    pub fn belongs(&self) -> Vec<BelongsTo> {
+        let rels = self.relations
+            .iter().map(|x| {
+            let key = &x.keymaps.get(0).unwrap();
+            BelongsTo {
+                field_name: to_snake_case(key.field_name.as_str()),
+                model_name: x.rel_entity_name.clone(),
+                rel_field_name: to_snake_case(key.get_rel_field()),
+                fk_name: x.fk_name.clone()
+            }
             })
             .collect::<Vec<_>>();
         rels
@@ -109,8 +113,11 @@ pub struct EntityModel{
 #[derive(Serialize, Deserialize)]
 pub struct BelongsTo{
     pub field_name: String,
-    pub model_name: String
+    pub model_name: String,
+    pub rel_field_name: String,
+    pub fk_name: String
 }
+
 impl EntityModel {
     pub fn get_entity(&self, name: &str) -> &Entity {
         self.entities.iter().find(|n|n.entity_name==name).expect("find entity")

@@ -123,6 +123,11 @@ CREATE TABLE {{ent['entity-name'] | snake_case -}} (
     PRIMARY KEY ({{pks}})
 {%- endif %}
 );
+
+{% for item in belongs %}
+ALTER TABLE {{ent['entity-name'] | snake_case }} ADD CONSTRAINT {{item.fk_name}}
+    FOREIGN KEY ({{item.field_name}}) REFERENCES {{item.model_name | snake_case -}} ({{item.rel_field_name}});
+{%- endfor %}
         "#,
     )
         .unwrap();

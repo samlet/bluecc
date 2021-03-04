@@ -29,7 +29,8 @@ impl Entity{
 
     pub fn belongs(&self) -> Vec<BelongsTo> {
         let rels = self.relations
-            .iter().map(|x| {
+            .iter().filter(|x| x.single_belongs())
+            .map(|x| {
             let key = &x.keymaps.get(0).unwrap();
             BelongsTo {
                 field_name: to_snake_case(key.field_name.as_str()),

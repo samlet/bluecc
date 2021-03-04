@@ -1,4 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports, deprecated))]
 
 pub mod xml_tests;
 mod collection_tests;
@@ -20,4 +20,5 @@ mod seed_gen;
 mod requests;
 
 pub mod app_context;
+mod service_models;
 

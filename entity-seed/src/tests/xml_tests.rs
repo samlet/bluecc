@@ -3,7 +3,6 @@
 use serde_xml_rs::{from_reader, from_str};
 use std::str;
 use itertools::Itertools;
-use phf::{phf_map};
 use std::collections::HashMap;
 
 use crate::meta_model::*;
@@ -188,6 +187,7 @@ fn field_mapping_works() {
     println!("is empty: {}", fld.query_type.is_empty());
 }
 
+use phf::{phf_map};
 static COUNTRIES: phf::Map<&'static str, &'static str> = phf_map! {
     "US" => "United States",
     "UK" => "United Kingdom",

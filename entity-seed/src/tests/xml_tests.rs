@@ -6,6 +6,9 @@ use itertools::Itertools;
 use phf::{phf_map};
 use std::collections::HashMap;
 
+use crate::meta_model::*;
+use super::app_context::*;
+
 #[derive(Debug, Deserialize, PartialEq)]
 struct Item {
     pub name: String,
@@ -18,57 +21,6 @@ struct Project {
 
     #[serde(rename = "Item", default)]
     pub items: Vec<Item>
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Entity{
-    #[serde(rename = "entity-name", default)]
-    pub entity_name: String,
-    #[serde(rename = "field", default)]
-    pub fields: Vec<ModelField>,
-    #[serde(rename = "relation", default)]
-    pub relations: Vec<ModelRelation>
-}
-#[derive(Debug, Serialize, Deserialize)]
-pub struct ModelField{
-    #[serde(rename = "name", default)]
-    pub field_name: String,
-    #[serde(rename = "type", default)]
-    pub field_type: String
-}
-#[derive(Debug, Serialize, Deserialize)]
-pub struct ModelRelation{
-    #[serde(rename = "type", default)]
-    pub rel_type: String
-}
-#[derive(Debug, Serialize, Deserialize)]
-pub struct EntityModel{
-    pub title: String,
-    pub description: String,
-    pub version: String,
-    #[serde(rename = "default-resource-name", default)]
-    pub default_resource_name: String,
-    #[serde(rename = "entity", default)]
-    pub entities: Vec<Entity>
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct FieldTypeDef{
-    #[serde(rename = "type", default)]
-    pub field_type: String,
-    #[serde(rename = "sql-type", default)]
-    pub sql_type: String,
-    #[serde(rename = "java-type", default)]
-    pub java_type: String,
-    #[serde(rename = "query-type", default)]
-    pub query_type: String,
-    #[serde(rename = "insert-type", default)]
-    pub insert_type: String
-}
-#[derive(Debug, Deserialize)]
-pub struct FieldTypes{
-    #[serde(rename = "field-type-def", default)]
-    pub field_types: Vec<FieldTypeDef>
 }
 
 #[test]
@@ -136,11 +88,6 @@ pub fn example_model() -> EntityModel{
     from_reader(s.as_bytes()).unwrap()
 }
 
-pub fn example_models() -> EntityModel{
-    // from_reader(include_bytes!("entitymodel_example.xml").unwrap()).unwrap()
-    from_str(str::from_utf8(include_bytes!("entitymodel_example.xml")).unwrap()).unwrap()
-}
-
 impl EntityModel {
     pub fn get_entity(&self, name: &str) -> &Entity {
         self.entities.iter().find(|n|n.entity_name==name).expect("find entity")
@@ -149,17 +96,19 @@ impl EntityModel {
 
 #[test]
 fn entity_model_works() {
-    let model: EntityModel = example_model();
-    println!("{:#?}", model);
+    // let model: EntityModel = example_model();
+    let model = &APP_CONTEXT.models;
+        println!("{:#?}", model);
     let ent=model.entities.iter().find(|n|n.entity_name=="Example").unwrap();
     for f in &ent.fields{
-        println!("{}", f.field_name);
+        println!("{}: {}", f.field_name, f.is_primary);
     }
+
+    let pks:Vec<String>=ent.primary_keys.iter().map(|x| x.field_name.clone()).collect();
+    println!("primary key: {}", pks.iter().join(", ").to_string());
+    assert_eq!(1, pks.len());
 }
 
-lazy_static! {
-    pub static ref FIELD_MAPPINGS:FieldTypes=get_field_mappings();
-}
 #[test]
 fn entity_gen_works() {
     use tera::{Result, Context, Filter, Function};
@@ -169,7 +118,7 @@ fn entity_gen_works() {
     struct SqlType;
     impl Filter for SqlType {
         fn filter(&self, value: &Value, _args: &HashMap<String, Value>) -> Result<Value> {
-            let val=FIELD_MAPPINGS.sql_type(value.as_str().unwrap());
+            let val=APP_CONTEXT.field_mappings.sql_type(value.as_str().unwrap());
             Ok(Value::String(format!("{}", val)))
         }
 
@@ -223,46 +172,6 @@ fn fields_works() {
         .format_with(",\n", |elt, f|
             f(&format_args!("pub {}: {}", elt.field_name, elt.field_type)));
     println!("{}", data_formatter);
-}
-
-pub fn get_field_mappings() -> FieldTypes{
-    from_str(str::from_utf8(include_bytes!("fieldtypemysql.xml")).unwrap()).unwrap()
-}
-impl FieldTypes{
-    fn get_field(&self, field_type:&str) -> &FieldTypeDef{
-        self.field_types.iter()
-            .find(|x| x.field_type==field_type).unwrap()
-    }
-    pub fn sql_type(&self, field_type:&str) -> String{
-        self.get_field(field_type).sql_type.clone()
-    }
-    pub fn query_type(&self, field_type:&str) -> String{
-        let fld=self.get_field(field_type);
-        if fld.query_type.is_empty(){
-            if fld.java_type=="String"{
-                "String".to_string()
-            }else{
-                format!("**UNK({})**", field_type)
-            }
-        }else{
-            fld.query_type.clone()
-        }
-    }
-    pub fn insert_type(&self, field_type:&str) -> String{
-        let fld=self.get_field(field_type);
-        if fld.insert_type.is_empty(){
-            if !fld.query_type.is_empty(){
-                fld.query_type.clone()
-            }
-            else if fld.java_type=="String"{
-                "&'a str".to_string()
-            }else{
-                format!("**UNK({})**", field_type)
-            }
-        }else{
-            fld.insert_type.clone()
-        }
-    }
 }
 
 #[test]

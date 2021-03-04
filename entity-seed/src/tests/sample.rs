@@ -1,12 +1,13 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
-// #[macro_use]
-// extern crate lazy_static;
+#[macro_use]
+extern crate lazy_static;
 
 // use std::env;
 use structopt::StructOpt;
 use std::collections::HashMap;
-use entity_seed::tests::xml_tests::{FIELD_MAPPINGS, get_field_mappings, example_models, FieldTypes};
+use entity_seed::tests::app_context::{APP_CONTEXT};
 use std::path::PathBuf;
+use entity_seed::meta_model::ModelField;
 
 #[derive(StructOpt)]
 struct Args {
@@ -48,15 +49,19 @@ async fn main(args: Args) -> anyhow::Result<()> {
         }
         Some(Command::List {  }) => {
             println!("list all entities");
-            let model=example_models();
-            for ent in model.entities {
+            let model=&APP_CONTEXT.models;
+            for ent in &model.entities {
                 println!("{}", ent.entity_name);
             }
         }
         None => {
+            println!(".. model Example");
             entity_gen_works("Example", "ent");
-            println!(".. model");
             entity_gen_works("Example", "model");
+
+            println!(".. model ExampleItem");
+            entity_gen_works("ExampleItem", "ent");
+            entity_gen_works("ExampleItem", "model");
         }
     }
 
@@ -71,7 +76,7 @@ fn entity_gen_works(entity_name: &str, template_name: &str) {
     struct SqlType;
     impl Filter for SqlType {
         fn filter(&self, value: &Value, _args: &HashMap<String, Value>) -> Result<Value> {
-            let val=FIELD_MAPPINGS.sql_type(value.as_str().unwrap());
+            let val=APP_CONTEXT.field_mappings.sql_type(value.as_str().unwrap());
             Ok(Value::String(format!("{}", val)))
         }
 
@@ -84,27 +89,39 @@ fn entity_gen_works(entity_name: &str, template_name: &str) {
         Ok(Value::String(format!("{}", val)))
     }
     fn query_type(value: &Value, _args: &HashMap<String, Value>) -> Result<Value> {
-        let val=FIELD_MAPPINGS.query_type(value.as_str().unwrap());
+        let val=APP_CONTEXT.field_mappings.query_type(value.as_str().unwrap());
         Ok(Value::String(format!("{}", val)))
     }
     fn insert_type(value: &Value, _args: &HashMap<String, Value>) -> Result<Value> {
-        let val=FIELD_MAPPINGS.insert_type(value.as_str().unwrap());
+        let val=APP_CONTEXT.field_mappings.insert_type(value.as_str().unwrap());
         Ok(Value::String(format!("{}", val)))
     }
 
-    let model=example_models();
+    let model=&APP_CONTEXT.models;
     let ent=model.get_entity(entity_name);
     assert_eq!(entity_name, ent.entity_name);
+    // for f in &ent.fields {
+    //     println!("* {}: {}", f.field_name, f.is_primary);
+    // }
 
     let mut tera = Tera::default();
     tera.add_raw_template(
         "ent",
         r#"
 CREATE TABLE {{ent['entity-name'] | snake_case -}} (
-    id INTEGER PRIMARY KEY AUTO_INCREMENT,
 {%- for fld in flds %}
-    {{fld.name | snake_case}}: {{fld['type'] | sqltype}}{% if not loop.last %},{% endif %}
+    {{fld.name | snake_case}} {{fld['type'] | sqltype}},
 {%- endfor %}
+{% if ent.multiple_keys %}
+{%- for fld in keys %}
+    {{fld.name | snake_case}} {{fld['type'] | sqltype}},
+{%- endfor %}
+{%- endif %}
+{%- if not ent.multiple_keys %}
+    {{pks}} SERIAL PRIMARY KEY
+{%- else %}
+    PRIMARY KEY ({{pks}})
+{%- endif %}
 );
         "#,
     )
@@ -114,8 +131,14 @@ CREATE TABLE {{ent['entity-name'] | snake_case -}} (
         "model",
         r#"
 #[derive(Queryable)]
+#[primary_key({{pks}})]
+#[table_name = "{{ent['entity-name'] | snake_case}}"]
 pub struct {{ent['entity-name'] -}} {
-    pub id: i64,
+    // keys
+{%- for fld in keys %}
+    pub {{fld.name | snake_case}}: {{fld['type'] | query_type}},
+{%- endfor %}
+    // fields
 {%- for fld in flds %}
     pub {{fld.name | snake_case}}: {{fld['type'] | query_type}}{% if not loop.last %},{% endif %}
 {%- endfor %}
@@ -130,7 +153,11 @@ pub struct {{ent['entity-name'] -}} {
     tera.register_filter("insert_type", insert_type);
     tera.register_filter("snake_case", snake_case);
     context.insert("ent", &ent);
-    context.insert("flds", &ent.fields);
+    context.insert("flds", &ent.fields.iter().filter(|f| !f.is_primary).collect::<Vec<&ModelField>>());
+    context.insert("keys", &ent.fields.iter().filter(|f| f.is_primary).collect::<Vec<&ModelField>>());
+    context.insert("multi_pk", &ent.multiple_keys);
+    context.insert("pks", &ent.pks_str());
+
     let result = tera.render(template_name, &context);
     println!("{}", result.unwrap());
 }

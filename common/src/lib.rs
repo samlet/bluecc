@@ -1,6 +1,3 @@
-#[macro_use]
-extern crate bson;
-
 #[cfg(test)]
 mod tests;
 

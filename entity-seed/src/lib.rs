@@ -1,12 +1,14 @@
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
 #[macro_use]
 extern crate serde_derive;
 #[macro_use]
 extern crate lazy_static;
 
-// #[cfg(test)]
 pub mod tests;
 mod cases;
 mod blues;
+pub mod meta_model;
 
 #[cfg(test)]
 mod lib_tests {

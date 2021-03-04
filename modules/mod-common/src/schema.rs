@@ -169,6 +169,38 @@ table! {
     use diesel::sql_types::*;
     use diesel_full_text_search::{TsVector as Tsvector};
 
+    example (example_id) {
+        example_type_id -> Nullable<Varchar>,
+        status_id -> Nullable<Varchar>,
+        example_name -> Nullable<Varchar>,
+        description -> Nullable<Varchar>,
+        long_description -> Nullable<Text>,
+        comments -> Nullable<Varchar>,
+        example_size -> Nullable<Numeric>,
+        example_date -> Nullable<Timestamptz>,
+        another_date -> Nullable<Timestamptz>,
+        another_text -> Nullable<Varchar>,
+        example_id -> Int4,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+
+    example_item (example_id, example_item_seq_id) {
+        description -> Nullable<Varchar>,
+        amount -> Nullable<Float8>,
+        amount_uom_id -> Nullable<Varchar>,
+        example_id -> Varchar,
+        example_item_seq_id -> Varchar,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+
     follows (user_id, crate_id) {
         user_id -> Int4,
         crate_id -> Int4,
@@ -205,6 +237,17 @@ table! {
         title -> Varchar,
         body -> Text,
         published -> Bool,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+
+    products (product_no) {
+        product_no -> Int4,
+        description -> Nullable<Text>,
+        product_cost -> Nullable<Numeric>,
     }
 }
 
@@ -384,10 +427,13 @@ allow_tables_to_appear_in_same_query!(
     crates_keywords,
     dependencies,
     emails,
+    example,
+    example_item,
     follows,
     keywords,
     metadata,
     posts,
+    products,
     publish_limit_buckets,
     publish_rate_overrides,
     readme_renderings,

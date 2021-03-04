@@ -1,6 +1,5 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
-// #[cfg(test)]
 pub mod xml_tests;
 mod collection_tests;
 mod string_tests;
@@ -19,4 +18,6 @@ mod kvdb_tests;
 mod linq_tests;
 mod seed_gen;
 mod requests;
+
+pub mod app_context;
 

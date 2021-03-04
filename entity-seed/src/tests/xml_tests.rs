@@ -88,12 +88,6 @@ pub fn example_model() -> EntityModel{
     from_reader(s.as_bytes()).unwrap()
 }
 
-impl EntityModel {
-    pub fn get_entity(&self, name: &str) -> &Entity {
-        self.entities.iter().find(|n|n.entity_name==name).expect("find entity")
-    }
-}
-
 #[test]
 fn entity_model_works() {
     // let model: EntityModel = example_model();
@@ -107,6 +101,16 @@ fn entity_model_works() {
     let pks:Vec<String>=ent.primary_keys.iter().map(|x| x.field_name.clone()).collect();
     println!("primary key: {}", pks.iter().join(", ").to_string());
     assert_eq!(1, pks.len());
+}
+
+#[test]
+fn entity_relation_works() {
+    let model=&APP_CONTEXT.models.get_entity("Example");
+    let rels=model.relations
+        .iter().map(|x|
+        (&x.keymaps.get(0).unwrap().field_name,
+         &x.rel_entity_name)).collect::<Vec<_>>();
+    println!("{:?}", rels);
 }
 
 #[test]

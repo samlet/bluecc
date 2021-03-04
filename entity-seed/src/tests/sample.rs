@@ -130,8 +130,11 @@ CREATE TABLE {{ent['entity-name'] | snake_case -}} (
     tera.add_raw_template(
         "model",
         r#"
-#[derive(Queryable)]
+#[derive(Debug, Queryable, Identifiable, Associations)]
 #[primary_key({{pks}})]
+{%- for item in belongs %}
+#[belongs_to({{item.model_name}}, foreign_key = "{{item.field_name}}")]
+{%- endfor %}
 #[table_name = "{{ent['entity-name'] | snake_case}}"]
 pub struct {{ent['entity-name'] -}} {
     // keys
@@ -153,10 +156,11 @@ pub struct {{ent['entity-name'] -}} {
     tera.register_filter("insert_type", insert_type);
     tera.register_filter("snake_case", snake_case);
     context.insert("ent", &ent);
-    context.insert("flds", &ent.fields.iter().filter(|f| !f.is_primary).collect::<Vec<&ModelField>>());
-    context.insert("keys", &ent.fields.iter().filter(|f| f.is_primary).collect::<Vec<&ModelField>>());
+    context.insert("flds", &ent.fields.iter().filter(|f| !f.is_primary).collect::<Vec<_>>());
+    context.insert("keys", &ent.fields.iter().filter(|f| f.is_primary).collect::<Vec<_>>());
     context.insert("multi_pk", &ent.multiple_keys);
     context.insert("pks", &ent.pks_str());
+    context.insert("belongs", &ent.belongs());
 
     let result = tera.render(template_name, &context);
     println!("{}", result.unwrap());

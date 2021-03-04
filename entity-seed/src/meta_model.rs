@@ -3,6 +3,7 @@ use std::str;
 use itertools::Itertools;
 use phf::{phf_map};
 use std::collections::HashMap;
+use inflector::cases::snakecase::to_snake_case;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Entity{
@@ -24,6 +25,17 @@ impl Entity{
         let pks:Vec<String>=self.primary_keys.iter().map(|x|
             to_snake_case(&x.field_name.as_str())).collect();
         pks.iter().join(", ").to_string()
+    }
+
+    pub fn belongs(&self) -> Vec<BelongsTo>{
+        let rels=self.relations
+            .iter().map(|x|
+            BelongsTo{
+                field_name: to_snake_case(&x.keymaps.get(0).unwrap().field_name),
+                model_name:x.rel_entity_name.clone()
+            })
+            .collect::<Vec<_>>();
+        rels
     }
 }
 
@@ -58,12 +70,29 @@ pub struct ModelRelation{
     pub keymaps: Vec<KeyMap>
 }
 
+impl ModelRelation{
+    pub fn single_belongs(&self) -> bool{
+        self.rel_type.starts_with("one") &&
+            self.keymaps.len()==1
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct KeyMap{
     #[serde(rename = "field-name", default)]
     pub field_name: String,
     #[serde(rename = "rel-field-name", default)]
     pub rel_field_name: String,
+}
+
+impl KeyMap{
+    pub fn get_rel_field(&self) -> &str{
+        if self.rel_field_name.is_empty(){
+            self.field_name.as_str()
+        }else{
+            self.rel_field_name.as_str()
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -75,6 +104,17 @@ pub struct EntityModel{
     pub default_resource_name: String,
     #[serde(rename = "entity", default)]
     pub entities: Vec<Entity>
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct BelongsTo{
+    pub field_name: String,
+    pub model_name: String
+}
+impl EntityModel {
+    pub fn get_entity(&self, name: &str) -> &Entity {
+        self.entities.iter().find(|n|n.entity_name==name).expect("find entity")
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]

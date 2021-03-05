@@ -92,7 +92,8 @@ fn entity_model_works() {
     // let model: EntityModel = example_model();
     let model = &APP_CONTEXT.models;
         println!("{:#?}", model);
-    let ent=model.entities.iter().find(|n|n.entity_name=="Example").unwrap();
+    let ents=&model.entities;
+    let ent=ents.iter().find(|n|n.entity_name=="Example").unwrap();
     for f in &ent.fields{
         println!("{}: {}", f.field_name, f.is_primary);
     }
@@ -166,7 +167,8 @@ fn fields_works() {
     let model: EntityModel = from_str(
         str::from_utf8(include_bytes!("entitymodel_example.xml")).unwrap()).unwrap();
     println!("{:#?}", model.title);
-    let ent=model.entities.iter().find(|n|n.entity_name=="Example").unwrap();
+    let ents=&model.entities;
+    let ent=ents.iter().find(|n|n.entity_name=="Example").unwrap();
     let names:Vec<String>=ent.fields.iter().
         map(|n| n.field_name.clone()).collect();
     println!("{:?}", names.iter().join(", "));

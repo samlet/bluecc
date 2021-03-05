@@ -9,4 +9,6 @@ mod toml_tests;
 mod datetime_tests;
 mod closures_tests;
 mod data_format_tests;
+mod enum_tests;
+mod io_tests;
 

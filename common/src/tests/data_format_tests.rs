@@ -24,7 +24,7 @@ fn bson_works() {
     // Deserialize the Person struct from the BSON data, automatically
     // verifying that the necessary keys are present and that they are of
     // the correct types.
-    let mut person: Person = bson::from_bson(bson_data).unwrap();
+    let person: Person = bson::from_bson(bson_data).unwrap();
 
     // Do things just like with any other Rust data structure.
     println!("Redacting {}'s record.", person.name);

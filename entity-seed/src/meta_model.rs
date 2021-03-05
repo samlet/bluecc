@@ -9,6 +9,8 @@ use inflector::cases::snakecase::to_snake_case;
 pub struct Entity{
     #[serde(rename = "entity-name", default)]
     pub entity_name: String,
+    #[serde(default)]
+    pub title: String,
     #[serde(rename = "field", default)]
     pub fields: Vec<ModelField>,
     #[serde(rename = "prim-key", default)]
@@ -101,6 +103,14 @@ impl KeyMap{
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+pub struct ViewEntity{
+    #[serde(rename = "entity-name", default)]
+    pub entity_name: String,
+    #[serde(default)]
+    pub title: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct EntityModel{
     pub title: String,
     pub description: String,
@@ -108,7 +118,9 @@ pub struct EntityModel{
     #[serde(rename = "default-resource-name", default)]
     pub default_resource_name: String,
     #[serde(rename = "entity", default)]
-    pub entities: Vec<Entity>
+    pub entities: Vec<Entity>,
+    #[serde(rename = "view-entity", default)]
+    pub views: Vec<ViewEntity>
 }
 
 #[derive(Serialize, Deserialize)]

@@ -30,7 +30,9 @@ linked-hash-map = "0.5.2"
 
 common = { version = "0.1.0", path = "../common"}
 functor = { package="linq", version="0.0.1-release", path="../functor"}
-serde-xml-rs = "0.4.1"
+#serde-xml-rs = "0.4.1"
+serde-xml-rs = { git = "https://github.com/tobz1000/serde-xml-rs", branch = "out-of-order-elements", package = "serde-xml-rs" }
+
 serde_yaml = "0.8"
 log = "0.4"
 serde = "1.0"

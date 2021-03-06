@@ -25,17 +25,7 @@ pub struct AppContext{
 impl AppContext{
     pub fn new() -> Self {
         let mut models: EntityModel=example_models();
-        for mut ent in &mut models.entities {
-            for mut fld in &mut ent.fields {
-                let is_pk=match ent.primary_keys.iter().map(|x| x.field_name.clone())
-                    .find(|f|f==&fld.field_name) {
-                    Some(_f) => true,
-                    _ => false
-                };
-                fld.is_primary=is_pk;
-            }
-            ent.multiple_keys=ent.primary_keys.len()>1;
-        }
+        models.build();
         AppContext { models, field_mappings:get_field_mappings()  }
     }
 }

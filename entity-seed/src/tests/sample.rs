@@ -20,14 +20,14 @@ struct Args {
 
 #[derive(StructOpt)]
 enum Command {
-    Gen { entity: String },
+    Gen { entity: String, type_name:String },
     List { },
 }
 
 /**
 ```bash
-$ cargo run --bin sample gen Example
-$ cargo run --bin sample gen ExampleStatus
+$ cargo run --bin sample gen Example ent
+$ cargo run --bin sample gen ExampleStatus dto
 $ cargo run --bin sample list
 $ cargo run --bin sample -- -o out_file list
 ```
@@ -44,8 +44,8 @@ async fn main(args: Args) -> anyhow::Result<()> {
         .unwrap().display());
 
     match args.cmd {
-        Some(Command::Gen { entity }) => {
-            entity_gen_works(entity.as_str(), "ent");
+        Some(Command::Gen { entity, type_name }) => {
+            entity_gen_works(entity.as_str(), type_name.as_str());
         }
         Some(Command::List {  }) => {
             println!("list all entities");
@@ -58,10 +58,12 @@ async fn main(args: Args) -> anyhow::Result<()> {
             println!(".. model Example");
             entity_gen_works("Example", "ent");
             entity_gen_works("Example", "model");
+            entity_gen_works("Example", "dto");
 
             println!(".. model ExampleItem");
             entity_gen_works("ExampleItem", "ent");
             entity_gen_works("ExampleItem", "model");
+            entity_gen_works("ExampleItem", "dto");
         }
     }
 
@@ -149,6 +151,26 @@ pub struct {{ent['entity-name'] -}} {
     // fields
 {%- for fld in flds %}
     pub {{fld.name | snake_case}}: {{fld['type'] | query_type}}{% if not loop.last %},{% endif %}
+{%- endfor %}
+}
+        "#,
+    )
+        .unwrap();
+
+    tera.add_raw_template(
+        "dto",
+        r#"
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct {{ent['entity-name'] -}} {
+    // keys
+{%- for fld in keys %}
+    #[serde(rename = "{{fld.name}}"{% if fld.has_default %}, default{% endif %})]
+    pub {{fld.name | snake_case}}: {{fld['type'] | insert_type}},
+{%- endfor %}
+    // fields
+{%- for fld in flds %}
+    #[serde(rename = "{{fld.name}}"{% if fld.has_default %}, default{% endif %})]
+    pub {{fld.name | snake_case}}: {{fld['type'] | insert_type}}{% if not loop.last %},{% endif %}
 {%- endfor %}
 }
         "#,

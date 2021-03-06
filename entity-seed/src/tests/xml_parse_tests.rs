@@ -17,6 +17,8 @@ enum TestError {
     },
     #[error("unknown error")]
     Unknown,
+    #[error(transparent)]
+    Other(#[from] anyhow::Error),  // source and Display delegate to anyhow::Error
 }
 
 impl From<roxmltree::Error> for TestError {
@@ -68,4 +70,60 @@ fn reader_works() {
     }
 }
 
+use structmap::FromHashMap;
+use structmap_derive::FromHashMap;
+use std::collections::HashMap;
+use structmap::value::Value;
+
+#[test]
+fn struct_map_works() {
+    #[derive(FromHashMap)]
+    struct TestStruct {
+        name: String,
+        value: String,
+        age: i32,
+    }
+
+    impl Default for TestStruct {
+        fn default() -> Self {
+            Self {
+                name: String::new(),
+                value: String::new(),
+                age: 0,
+            }
+        }
+    }
+
+    // create a hashmap with key-value pairs
+    let mut hm = HashMap::new();
+
+    // `Value` is an enum wrapper to support genericized types, to support structs
+    // with varying types for their fields.
+    hm.insert(String::from("name"), Value::new(String::from("example")));
+    hm.insert(String::from("value"), Value::new(String::from("some_value")));
+    hm.insert(String::from("age"), Value::new(18));
+
+    // convert hashmap to struct, and check attributes
+    let test: TestStruct = TestStruct::from_hashmap(hm);
+    assert_eq!(test.name, "example");
+    assert_eq!(test.value, "some_value");
+    assert_eq!(test.age, 18);
+}
+
+/// Attempts to convert the given &str into a T, panicing if it's not successful
+fn parse_pair<T>(v: &str) -> T where T : ::std::str::FromStr {
+    let res = v.parse::<T>();
+    match res {
+        Ok(val) => val,
+        Err(_) => panic!(format!("Unable to convert given input into required type: {}", v)),
+    }
+}
+
+#[test]
+fn parse_works() {
+    let x:i32=parse_pair("18");
+    assert_eq!(18, x);
+    let f:f32=parse_pair("18.01");
+    assert_eq!(18.01, f);
+}
 

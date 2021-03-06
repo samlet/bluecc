@@ -1,9 +1,11 @@
-use serde_xml_rs::{from_reader, from_str};
+// use serde_xml_rs::{from_reader, from_str};
 use std::str;
 use std::io::prelude::*;
 use crate::meta_model::EntityModel;
 use serde::Deserialize;
 use std::io::{Read, BufReader};
+use std::collections::{HashMap, BTreeMap};
+use chrono::Utc;
 
 lazy_static_include_bytes! {
 // lazy_static_include_str! {
@@ -41,3 +43,116 @@ fn doc_works() -> anyhow::Result<()>{
              model.entities.len(), model.views.len());
     Ok(())
 }
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct ExampleStatusSeed{
+    // keys
+    #[serde(rename = "exampleId", default)]
+    pub example_id: String,
+    #[serde(rename = "statusDate")]
+    pub status_date: chrono::NaiveDateTime,
+    // fields
+    #[serde(rename = "statusEndDate")]
+    pub status_end_date: chrono::NaiveDateTime,
+    #[serde(rename = "changeByUserLoginId", default)]
+    pub change_by_user_login_id: i64,
+    #[serde(rename = "statusId", default)]
+    pub status_id: String
+}
+
+
+#[test]
+fn de_works() {
+    let _ = simple_logger::init();
+    let xml_str=r##"<ExampleStatusSeed exampleId="EX01" statusDate="2007-04-05T14:30:30"
+    statusEndDate="2007-04-05T14:30:30" statusId="EXST_IN_DESIGN"/>"##;
+    let data:ExampleStatusSeed=serde_xml_rs::from_str(xml_str).unwrap();
+    println!("{:?}", data);
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct ExampleStatus{
+    // keys
+    #[serde(rename = "exampleId", default)]
+    pub example_id: i32,
+    #[serde(rename = "statusDate")]
+    pub status_date: chrono::NaiveDateTime,
+    // fields
+    #[serde(rename = "statusEndDate")]
+    pub status_end_date: chrono::NaiveDateTime,
+    #[serde(rename = "changeByUserLoginId", default)]
+    pub change_by_user_login_id: i64,
+    #[serde(rename = "statusId", default)]
+    pub status_id: i32
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone, Ord, PartialOrd, Eq, PartialEq)]
+pub struct SerialKey{
+    pub entity_name: String,
+    pub field_name: String,
+    pub field_value: String
+}
+
+struct StringStore{
+    serial_id: i32,
+    pub string_store: BTreeMap<SerialKey, i32>
+}
+
+impl StringStore{
+    pub fn new() -> Self {
+        StringStore { serial_id: (1), string_store:BTreeMap::new() }
+    }
+    pub fn id(&mut self, key: SerialKey) -> i32{
+        let val= self.string_store.entry(key).or_insert(self.serial_id);
+        self.serial_id+=1;
+        *val
+    }
+}
+
+/// Strips ns precision from `Utc::now`. PostgreSQL only has microsecond
+    /// precision, but some platforms (notably Linux) provide nanosecond
+    /// precision, meaning that round tripping through the database would
+    /// change the value.
+fn now() -> chrono::NaiveDateTime {
+    let now = Utc::now().naive_utc();
+    let nanos = now.timestamp_subsec_nanos();
+    now - chrono::Duration::nanoseconds(nanos.into())
+}
+
+#[test]
+fn seed_works() -> anyhow::Result<()>{
+    use chrono::{NaiveDateTime, NaiveDate};
+    let parse_from_str = NaiveDateTime::parse_from_str;
+
+    let mut string_store=StringStore::new();
+
+    let seed=ExampleStatus{
+        example_id: string_store.id(SerialKey{
+            entity_name: "ExampleStatus".to_string(),
+            field_name: "exampleId".to_string(),
+            field_value: "EX01".to_string()
+        }),
+        status_date: now(),
+        status_end_date: parse_from_str("2022-09-05 23:56:04", "%Y-%m-%d %H:%M:%S")?,
+        change_by_user_login_id: 0,
+        status_id: string_store.id(SerialKey{
+            entity_name: "ExampleStatus".to_string(),
+            field_name: "statusId".to_string(),
+            field_value: "EXST_IN_DESIGN".to_string()
+        })
+    };
+    println!("{:?}", seed);
+    for (k,v) in &string_store.string_store{
+        if *v==2{
+            println!("{:?}", k);
+        }
+    }
+    assert_eq!(2, string_store.id(SerialKey{
+            entity_name: "ExampleStatus".to_string(),
+            field_name: "statusId".to_string(),
+            field_value: "EXST_IN_DESIGN".to_string()
+        }));
+
+    Ok(())
+}
+

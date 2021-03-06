@@ -12,4 +12,5 @@ mod data_format_tests;
 mod enum_tests;
 mod io_tests;
 mod err_tests;
+mod function_map_tests;
 

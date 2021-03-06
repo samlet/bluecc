@@ -59,7 +59,9 @@ pub struct ModelField{
     #[serde(rename = "type", default)]
     pub field_type: String,
     #[serde(skip_deserializing)]
-    pub is_primary: bool
+    pub is_primary: bool,
+    #[serde(skip_deserializing)]
+    pub has_default: bool
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -134,6 +136,28 @@ pub struct BelongsTo{
 impl EntityModel {
     pub fn get_entity(&self, name: &str) -> &Entity {
         self.entities.iter().find(|n|n.entity_name==name).expect("find entity")
+    }
+
+    pub fn build(&mut self){
+        use std::collections::HashSet;
+        let dt_types: HashSet<&'static str> =
+            [ "date-time", "date", "time" ].iter().cloned().collect();
+        for mut ent in &mut self.entities {
+            for mut fld in &mut ent.fields {
+                let is_pk=match ent.primary_keys.iter().map(|x| x.field_name.clone())
+                    .find(|f|f==&fld.field_name) {
+                    Some(_f) => true,
+                    _ => false
+                };
+                fld.is_primary=is_pk;
+                if dt_types.contains(fld.field_type.as_str()){
+                    fld.has_default=false;
+                }else{
+                    fld.has_default=true;
+                }
+            }
+            ent.multiple_keys=ent.primary_keys.len()>1;
+        }
     }
 }
 

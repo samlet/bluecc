@@ -1,4 +1,29 @@
 use std::str;
+use roxmltree::Node;
+use thiserror::Error;
+
+#[derive(Error, Debug)]
+enum TestError {
+    #[error("io error")]
+    Io(#[from] std::io::Error),
+    #[error("parse error")]
+    Parse(std::num::ParseIntError),
+    #[error("xml parse fail")]
+    ParseXml(roxmltree::Error),
+    #[error("invalid header (expected {expected:?}, found {found:?})")]
+    InvalidHeader {
+        expected: String,
+        found: String,
+    },
+    #[error("unknown error")]
+    Unknown,
+}
+
+impl From<roxmltree::Error> for TestError {
+    fn from(err: roxmltree::Error) -> TestError {
+        TestError::ParseXml(err)
+    }
+}
 
 /// ref: https://github.com/RazrFalcon/roxmltree/blob/master/tests/dom-api.rs
 #[test]
@@ -14,6 +39,22 @@ fn seed_works(){
     for n in iter{
         println!("{}", n.tag_name().name());
     }
+}
+
+#[test]
+fn seed_file_works() -> Result<(), TestError>{
+    use std::fs;
+    let cnt=fs::read_to_string("data/example/ExampleDemoData.xml")?;
+    let doc = roxmltree::Document::parse(cnt.as_str())?;
+        // .map_err(TestError::ParseXml)?;
+
+    doc.descendants().find(|n|
+        n.attribute("statusTypeId") == Some("EXAMPLE_STATUS")).and_then(|n|{
+        assert!(n.has_tag_name("StatusType"));
+        Some(n)
+    });
+
+    Ok(())
 }
 
 #[test]

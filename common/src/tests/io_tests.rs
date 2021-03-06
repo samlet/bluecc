@@ -2,6 +2,7 @@ use std::io;
 use std::fs;
 use std::fs::File;
 use std::error::Error;
+use std::env;
 
 fn read_username_from_file() -> Result<String, io::Error> {
     fs::read_to_string("Cargo.toml")
@@ -19,3 +20,9 @@ fn file_read_works() {
     assert!(r.is_ok());
 }
 
+#[test]
+fn current_dir_works() -> std::io::Result<()> {
+    let path = env::current_dir()?;
+    println!("The current directory is {}", path.display());
+    Ok(())
+}

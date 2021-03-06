@@ -22,4 +22,5 @@ mod requests;
 pub mod app_context;
 mod service_models;
 mod resource_loader;
+mod askama_tests;
 

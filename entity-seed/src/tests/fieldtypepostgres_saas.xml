@@ -17,10 +17,10 @@
     <field-type-def type="floating-point" sql-type="FLOAT8" java-type="Double" query-type="f32"/>
     <field-type-def type="integer" sql-type="INTEGER" java-type="Integer" query-type="i32"/>
     <field-type-def type="numeric" sql-type="NUMERIC(20,0)" java-type="Long" query-type="i64" insert-type="i64"/>
-
-    <field-type-def type="id" sql-type="VARCHAR(20)" java-type="String"/>
-    <field-type-def type="id-long" sql-type="VARCHAR(60)" java-type="String"/>
-    <field-type-def type="id-vlong" sql-type="VARCHAR(255)" java-type="String"/>
+    
+    <field-type-def type="id" sql-type="INTEGER NOT NULL" java-type="Integer" query-type="i32"/>
+    <field-type-def type="id-long" sql-type="INTEGER NOT NULL" java-type="Long" query-type="i64"/>
+    <field-type-def type="id-vlong" sql-type="INTEGER NOT NULL" java-type="Long" query-type="i64"/>
     
     <field-type-def type="indicator" sql-type="CHAR(1)" sql-type-alias="BPCHAR" java-type="String" query-type="bool"/>
     <field-type-def type="very-short" sql-type="VARCHAR(10)" java-type="String" query-type="Option&lt;String&gt;" insert-type="Option&lt;&amp;'a str&gt;"/>

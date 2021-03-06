@@ -10,7 +10,7 @@ lazy_static! {
 
 fn get_field_mappings() -> FieldTypes{
     // from_str(str::from_utf8(include_bytes!("fieldtypemysql.xml")).unwrap()).unwrap()
-    from_str(str::from_utf8(include_bytes!("fieldtypepostgres.xml")).unwrap()).unwrap()
+    from_str(str::from_utf8(include_bytes!("fieldtypepostgres_saas.xml")).unwrap()).unwrap()
 }
 fn example_models() -> EntityModel{
     // from_reader(include_bytes!("entitymodel_example.xml").unwrap()).unwrap()

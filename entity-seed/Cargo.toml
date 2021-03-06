@@ -32,6 +32,8 @@ common = { version = "0.1.0", path = "../common"}
 functor = { package="linq", version="0.0.1-release", path="../functor"}
 #serde-xml-rs = "0.4.1"
 serde-xml-rs = { git = "https://github.com/tobz1000/serde-xml-rs", branch = "out-of-order-elements", package = "serde-xml-rs" }
+#askama = { version = "0.10", default-features = false, features = ["with-warp", "mime", "mime_guess"] }
+askama = "0.10"
 
 serde_yaml = "0.8"
 log = "0.4"

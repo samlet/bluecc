@@ -11,4 +11,5 @@ mod closures_tests;
 mod data_format_tests;
 mod enum_tests;
 mod io_tests;
+mod err_tests;
 

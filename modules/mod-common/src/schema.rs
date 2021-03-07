@@ -232,6 +232,19 @@ table! {
     use diesel::sql_types::*;
     use diesel_full_text_search::{TsVector as Tsvector};
 
+    mnemonics (id) {
+        id -> Int4,
+        path -> Varchar,
+        num_value -> Int4,
+        string_value -> Varchar,
+        description -> Nullable<Text>,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+
     posts (id) {
         id -> Int4,
         title -> Varchar,
@@ -432,6 +445,7 @@ allow_tables_to_appear_in_same_query!(
     follows,
     keywords,
     metadata,
+    mnemonics,
     posts,
     products,
     publish_limit_buckets,

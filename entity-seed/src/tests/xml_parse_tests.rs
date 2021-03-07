@@ -74,6 +74,7 @@ use structmap::FromHashMap;
 use structmap_derive::FromHashMap;
 use std::collections::HashMap;
 use structmap::value::Value;
+use crate::util::parse_pair;
 
 #[test]
 fn struct_map_works() {
@@ -110,20 +111,16 @@ fn struct_map_works() {
     assert_eq!(test.age, 18);
 }
 
-/// Attempts to convert the given &str into a T, panicing if it's not successful
-fn parse_pair<T>(v: &str) -> T where T : ::std::str::FromStr {
-    let res = v.parse::<T>();
-    match res {
-        Ok(val) => val,
-        Err(_) => panic!(format!("Unable to convert given input into required type: {}", v)),
-    }
-}
-
 #[test]
 fn parse_works() {
-    let x:i32=parse_pair("18");
+    use decimal::prelude::*;
+
+    let x=parse_pair::<i32>("18");
     assert_eq!(18, x);
-    let f:f32=parse_pair("18.01");
+    let f=parse_pair::<f32>("18.01");
     assert_eq!(18.01, f);
+    let d=parse_pair::<Decimal>("18.01");
+    assert_eq!(Decimal::new(1801,2), d);
+
 }
 

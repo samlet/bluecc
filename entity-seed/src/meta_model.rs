@@ -4,6 +4,32 @@ use itertools::Itertools;
 use phf::{phf_map};
 use std::collections::HashMap;
 use inflector::cases::snakecase::to_snake_case;
+use thiserror::Error;
+
+#[derive(Error, Debug)]
+enum GenericError {
+    #[error("io error")]
+    Io(#[from] std::io::Error),
+    #[error("parse error")]
+    Parse(std::num::ParseIntError),
+    #[error("xml parse fail")]
+    ParseXml(roxmltree::Error),
+    #[error("invalid header (expected {expected:?}, found {found:?})")]
+    InvalidHeader {
+        expected: String,
+        found: String,
+    },
+    #[error("unknown error")]
+    Unknown,
+    #[error(transparent)]
+    Other(#[from] anyhow::Error),  // source and Display delegate to anyhow::Error
+}
+
+impl From<roxmltree::Error> for GenericError {
+    fn from(err: roxmltree::Error) -> GenericError {
+        GenericError::ParseXml(err)
+    }
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Entity{

@@ -11,6 +11,7 @@ pub mod tests;
 mod cases;
 mod blues;
 pub mod meta_model;
+pub mod util;
 
 #[cfg(test)]
 mod lib_tests {

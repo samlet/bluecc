@@ -6,11 +6,20 @@ use serde::Deserialize;
 use std::io::{Read, BufReader};
 use std::collections::{HashMap, BTreeMap};
 use chrono::Utc;
+use serde_json::{Value, Error};
+use crate::util::parse_pair;
 
 lazy_static_include_bytes! {
 // lazy_static_include_str! {
     EXAMPLE_DOC => "entitydef/example-entitymodel.xml",
     ACCOUNTING_DOC => "entitydef/accounting-entitymodel.xml",
+}
+
+lazy_static! {
+    pub static ref ENTITY_FACTORY: HashMap<u32, &'static str> = {
+        let mut m = HashMap::new();
+        m
+    };
 }
 
 fn deserialize_branch_without_contiguous_check<'de, T: Deserialize<'de>>(reader: impl Read) -> T {
@@ -154,5 +163,35 @@ fn seed_works() -> anyhow::Result<()>{
         }));
 
     Ok(())
+}
+
+// use decimal::prelude::*;
+use serde::de::DeserializeOwned;
+
+#[derive(Deserialize, Debug)]
+struct User {
+    pub fingerprint: String,
+    pub location: String,
+    pub money: f32,
+    pub age: i32,
+}
+
+fn create_entity<T>(map:&BTreeMap<&str, Value>) -> Result<T, Error>
+    where T:DeserializeOwned {
+    let val:Value=serde_json::to_value(map).unwrap();
+    serde_json::from_value::<T>(val)
+}
+
+#[test]
+fn as_string_map_works() {
+    let mut map = BTreeMap::new();
+    map.insert("fingerprint", Value::from("XXXXX"));
+    map.insert("location", Value::from("Menlo Park, CA"));
+    map.insert("age", Value::from(parse_pair::<i32>("18")));
+    map.insert("money", Value::from(parse_pair::<f32>("18.01")));
+    let val=create_entity::<User>(&map);
+    println!("{:?}", val.unwrap());
+    let f = create_entity::<User>;
+    println!("{:?}", f(&map).unwrap())
 }
 

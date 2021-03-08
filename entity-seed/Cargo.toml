@@ -58,17 +58,36 @@ phf = { version = "0.8", features = ["macros"] }
 
 zip = { version = "0.5.10", default-features = false }
 walkdir = "2.3.1"
-quaint = {version="0.2.0-alpha.13", features=["serde-support", "full-sqlite", "full-mysql", "pooled"]}
+#quaint = {version="0.2.0-alpha.13", features=["serde-support", "full-mysql", "pooled"]}
+#quaint = {version="0.2.0-alpha.13", features=["serde-support", "single-postgresql", "full-mysql", "pooled"]}
+#quaint = {version="0.1", features=["full-postgresql", "full-mysql", "pooled"]}
+
 tokio = { version = "0.2.25", features = ["macros", "time"] }
-tempfile = "3.1.0"
+#tokio = { version = "1", features = ["macros", "net", "signal", "io-std", "io-util", "rt-multi-thread", "fs", "sync", "time"]}
+#tokio = { version = "1", features = ["macros", "time"] }
+#tempfile = "3.1.0"
 
 reqwest = { version = "0.10", features = ["json"] }
+diesel = { version = "1.4", features = ["postgres", "serde_json", "chrono", "r2d2"] }
+diesel_full_text_search = "1.0.0"
+dotenv = "0.10.0"
+bcrypt = "0.2.0"
+#byteorder = "1.4.2"
+tempfile = "3.1.0"
+
+[dependencies.quaint]
+git = "https://github.com/prisma/quaint"
+branch = "master"
+features=["serde-support", "postgresql", "mysql", "pooled"]
 
 [dev-dependencies]
 simple_logger = "1.0.1"
 docmatic = "0.1.2"
 tempfile = "3.1.0"
 ethereum-types = "*"
+assert_matches = "1.1"
+diesel_migrations = { version = "1.4", features = ["postgres"] }
+lazy_static = "1.0"
 
 [[bin]]
 name = "meta-cli"
@@ -79,5 +98,5 @@ name = "git"
 path = "src/cli/git.rs"
 
 [[bin]]
-name = "sample"
-path = "src/tests/sample.rs"
+name = "seed"
+path = "src/tests/seed.rs"

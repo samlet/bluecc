@@ -23,4 +23,7 @@ mod service_models;
 mod resource_loader;
 mod askama_tests;
 mod form_parsers;
+mod basic_models;
+#[cfg(test)]
+mod test_helpers;
 

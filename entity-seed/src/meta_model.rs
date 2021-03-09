@@ -161,7 +161,8 @@ pub struct BelongsTo{
 
 impl EntityModel {
     pub fn get_entity(&self, name: &str) -> &Entity {
-        self.entities.iter().find(|n|n.entity_name==name).expect("find entity")
+        self.entities.iter().find(|n|n.entity_name==name)
+            .expect(format!("find entity {}", name).as_str())
     }
 
     pub fn build(&mut self){

@@ -1,4 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports, unused_mut, deprecated))]
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports, unused_mut, unused_must_use, deprecated))]
 
 pub mod xml_tests;
 mod collection_tests;

@@ -38,8 +38,15 @@ fn seed_works(){
 
     let root_elem=doc.root().first_element_child();
     let iter=root_elem.unwrap().children();
+    let skip_nodes=vec!["create", "create-replace", "create-update", "delete"];
     for n in iter{
+        if !n.is_element() || skip_nodes.contains(&n.tag_name().name()){
+            continue;
+        }
         println!("{}", n.tag_name().name());
+        for attr in n.attributes(){
+            println!("\t{} = {}", attr.name(), attr.value());
+        }
     }
 }
 

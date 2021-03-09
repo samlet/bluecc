@@ -51,6 +51,7 @@ lazy_static = "1.4.0"
 #sqlx = { version = "0.5.1", features = [ "runtime-tokio-rustls","mysql" ] }
 redis = { version = "0.20.0", features = ["tls"] }
 rand = "0.8.1"
+hex = "0.4.2"
 tera = "1.6.1"
 # doesn't require singularize, pluralize, class, table, demodulize, deconstantize.
 Inflector = {version="*", default-features=false}

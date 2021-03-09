@@ -7,7 +7,8 @@ use std::io::{Read, BufReader};
 use std::collections::{HashMap, BTreeMap};
 use chrono::Utc;
 use serde_json::{Value, Error};
-use crate::util::parse_pair;
+use crate::util::{parse_pair};
+use std::fs;
 
 lazy_static_include_bytes! {
 // lazy_static_include_str! {
@@ -22,25 +23,12 @@ lazy_static! {
     };
 }
 
-fn deserialize_branch_without_contiguous_check<'de, T: Deserialize<'de>>(reader: impl Read) -> T {
-    let mut de = serde_xml_rs::Deserializer::new_from_reader(BufReader::new(reader));
-    T::deserialize(&mut de).unwrap()
-}
-
-/// https://gist.github.com/tobz1000/dd2d91c1e8c63171a21ec2d51dc726c7
-fn deserialize_branch_with_contiguous_check<'de, T: Deserialize<'de>>(reader: impl Read) -> T {
-    let mut de = serde_xml_rs::Deserializer::new_from_reader(BufReader::new(reader))
-        .non_contiguous_seq_elements(true);
-    T::deserialize(&mut de).unwrap()
-}
-
-
 #[test]
 fn doc_works() -> anyhow::Result<()>{
     // let _ = simple_logger::init();
     // let model:EntityModel=from_str(str::from_utf8(&EXAMPLE_DOC).unwrap())?;
     // let model:EntityModel=from_str(str::from_utf8(&ACCOUNTING_DOC).unwrap())?;
-    let model:EntityModel=deserialize_branch_with_contiguous_check(&**ACCOUNTING_DOC);
+    let model:EntityModel=load_xml(&**ACCOUNTING_DOC);
     // let model:EntityModel= match from_str(str::from_utf8(&ACCOUNTING_DOC).unwrap()) {
     //     Ok(doc) => doc,
     //     Err(e) => {
@@ -83,7 +71,7 @@ fn de_works() {
 pub struct ExampleStatus{
     // keys
     #[serde(rename = "exampleId", default)]
-    pub example_id: i32,
+    pub example_id: i64,
     #[serde(rename = "statusDate")]
     pub status_date: chrono::NaiveDateTime,
     // fields
@@ -92,7 +80,7 @@ pub struct ExampleStatus{
     #[serde(rename = "changeByUserLoginId", default)]
     pub change_by_user_login_id: i64,
     #[serde(rename = "statusId", default)]
-    pub status_id: i32
+    pub status_id: i64
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone, Ord, PartialOrd, Eq, PartialEq)]
@@ -102,19 +90,71 @@ pub struct SerialKey{
     pub field_value: String
 }
 
-struct StringStore{
-    serial_id: i32,
-    pub string_store: BTreeMap<SerialKey, i32>
+impl SerialKey {
+    pub fn new(ent: &str, fld: &str, val: &str) -> Self{
+        Self{
+            entity_name: ent.to_string(),
+            field_name: fld.to_string(),
+            field_value: val.to_string()
+        }
+    }
 }
 
-impl StringStore{
+pub struct StringStore{
+    pub string_store: BTreeMap<SerialKey, i64>
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+struct StoreItem{
+    pub key: SerialKey,
+    pub id: i64
+}
+#[derive(Debug, Deserialize, Serialize, Clone)]
+struct StoreItems{
+    pub items: Vec<StoreItem>,
+}
+
+const STORE_FILE: &str =".store/id_store.json";
+impl<'a> StringStore{
     pub fn new() -> Self {
-        StringStore { serial_id: (1), string_store:BTreeMap::new() }
+        StringStore { string_store:BTreeMap::new() }
     }
-    pub fn id(&mut self, key: SerialKey) -> i32{
-        let val= self.string_store.entry(key).or_insert(self.serial_id);
-        self.serial_id+=1;
+    pub fn load() -> std::io::Result<Self>{
+        use std::path::Path;
+        if !Path::new(STORE_FILE).exists(){
+            return Ok(Self::new())
+        }
+
+        let mut map=BTreeMap::new();
+        let mut store:StoreItems=serde_json::from_reader(fs::File::open(STORE_FILE)?)?;
+        for item in store.items{
+            map.insert(item.key, item.id);
+        }
+        Ok(StringStore { string_store: map })
+    }
+
+    pub fn id(&mut self, key: SerialKey) -> i64{
+        let serial_id=new_snowflake_id();
+        let val= self.string_store.entry(key).or_insert(serial_id);
         *val
+    }
+
+    pub fn save(&self, file_name: &str) -> std::io::Result<()>{
+        use std::fs::File;
+
+        let mut serials=StoreItems{items:Vec::new()};
+        for (entry,val) in &self.string_store {
+            serials.items.push(StoreItem{ key: entry.clone(), id: *val });
+        }
+        let json_str=serde_json::to_string_pretty(&serials)?;
+        let mut file = File::create(file_name)?;
+        file.write_all(json_str.as_bytes())?;
+        Ok(())
+    }
+
+    pub fn store(&self) -> std::io::Result<()>{
+        fs::create_dir_all(".store")?;
+        self.save(STORE_FILE)
     }
 }
 
@@ -128,45 +168,109 @@ fn now() -> chrono::NaiveDateTime {
     now - chrono::Duration::nanoseconds(nanos.into())
 }
 
+use chrono::{NaiveDateTime, NaiveDate};
 #[test]
 fn seed_works() -> anyhow::Result<()>{
-    use chrono::{NaiveDateTime, NaiveDate};
-    let parse_from_str = NaiveDateTime::parse_from_str;
-
+    let parse_dt=NaiveDateTime::parse_from_str;
     let mut string_store=StringStore::new();
 
     let seed=ExampleStatus{
-        example_id: string_store.id(SerialKey{
-            entity_name: "ExampleStatus".to_string(),
-            field_name: "exampleId".to_string(),
-            field_value: "EX01".to_string()
-        }),
+        example_id: string_store.id(SerialKey::new(
+             "ExampleStatus",
+             "exampleId",
+            "EX01"
+        )),
         status_date: now(),
-        status_end_date: parse_from_str("2022-09-05 23:56:04", "%Y-%m-%d %H:%M:%S")?,
+        status_end_date: parse_dt("2022-09-05 23:56:04", "%Y-%m-%d %H:%M:%S")?,
         change_by_user_login_id: 0,
-        status_id: string_store.id(SerialKey{
-            entity_name: "ExampleStatus".to_string(),
-            field_name: "statusId".to_string(),
-            field_value: "EXST_IN_DESIGN".to_string()
-        })
+        status_id: string_store.id(SerialKey::new(
+            "ExampleStatus",
+            "statusId",
+            "EXST_IN_DESIGN"
+        ))
     };
     println!("{:?}", seed);
     for (k,v) in &string_store.string_store{
-        if *v==2{
-            println!("{:?}", k);
-        }
+            println!("{:?}, {}", k, v);
     }
-    assert_eq!(2, string_store.id(SerialKey{
-            entity_name: "ExampleStatus".to_string(),
-            field_name: "statusId".to_string(),
-            field_value: "EXST_IN_DESIGN".to_string()
-        }));
+    // assert_eq!(1, string_store.id(SerialKey{
+    //         entity_name: "ExampleStatus",
+    //         field_name: "statusId",
+    //         field_value: "EXST_IN_DESIGN"
+    //     }) - string_store.id(SerialKey{
+    //         entity_name: "ExampleStatus",
+    //         field_name: "exampleId",
+    //         field_value: "EX01"
+    //     })
+    // );
 
+    let mut serials=Vec::new();
+    for (entry,val) in &string_store.string_store {
+        serials.push((val, entry));
+    }
+    let json_str=serde_json::to_string_pretty(&serials)?;
+    println!("{}", json_str);
+
+    string_store.store();
     Ok(())
+}
+
+#[test]
+fn load_works()  -> anyhow::Result<()>{
+    let string_store=StringStore::load()?;
+    for (k,v) in &string_store.string_store{
+        println!("{:?}, {}", k, v);
+    }
+    Ok(())
+}
+
+#[test]
+fn transform_works() {
+    use chrono::format::strftime::StrftimeItems;
+
+    let parse_dt=NaiveDateTime::parse_from_str;
+    let fmt = StrftimeItems::new("%Y-%m-%dT%H:%M:%S");
+    let mut store=StringStore::load().unwrap();
+
+    // let _ = simple_logger::init();
+    let xml_str=r##"<ExampleStatusSeed exampleId="EX01" statusDate="2007-04-05T14:30:30"
+    statusEndDate="2007-04-05T14:30:30" statusId="EXST_IN_DESIGN"/>"##;
+    let data:ExampleStatusSeed=serde_xml_rs::from_str(xml_str).unwrap();
+    println!("{:?}", data);
+
+    let xml_str=r##"<ExampleStatus exampleId="EX01" statusDate="2010-01-02 00:00:00"
+    statusEndDate="2011-01-02 00:00:00" statusId="EXST_IN_DESIGN"/>"##;
+    let doc = roxmltree::Document::parse(xml_str).unwrap();
+    let node=doc.root_element();
+    let status_dt=node.attribute("statusDate").unwrap();
+    println!("{} -> {} {}", node.tag_name().name(),
+             status_dt,
+             parse_dt(status_dt, "%Y-%m-%d %H:%M:%S").unwrap()
+                 .format_with_items(fmt.clone()).to_string()
+    );
+    let flds:Vec<String>=node.attributes().iter().map(|f| {
+        let mut fld_val:String=f.value().to_string();
+        if f.name().ends_with("Date"){
+            fld_val=parse_dt(f.value(), "%Y-%m-%d %H:%M:%S").unwrap()
+                .format_with_items(fmt.clone()).to_string();
+
+        } else if f.name().ends_with("Id") {
+            let val=store.id(SerialKey::new("ExampleStatus", f.name(), f.value()));
+            fld_val=val.to_string();
+        }
+        format!(" {}=\"{}\"", f.name(), fld_val)
+    }).collect();
+    let node_str=format!("<{} {}/>", node.tag_name().name(), flds.join(" "));
+    println!("{}", node_str);
+
+    let data:ExampleStatus=serde_xml_rs::from_str(node_str.as_str()).unwrap();
+    println!("{:?}", data);
 }
 
 // use decimal::prelude::*;
 use serde::de::DeserializeOwned;
+use crate::snowflake::new_snowflake_id;
+use crate::load_xml;
 
 #[derive(Deserialize, Debug)]
 struct User {

@@ -18,6 +18,14 @@ mod blues;
 pub mod meta_model;
 pub mod util;
 pub mod schema;
+pub mod models;
+pub mod database;
+pub mod errors;
+pub mod snowflake;
+mod object_id;
+
+pub use self::database::establish_connection;
+pub use self::util::deserialize_branch_with_contiguous_check as load_xml;
 
 #[cfg(test)]
 mod lib_tests {

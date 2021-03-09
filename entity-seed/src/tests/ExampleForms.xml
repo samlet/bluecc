@@ -18,13 +18,20 @@ specific language governing permissions and limitations
 under the License.
 -->
 
-<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-        xmlns="http://ofbiz.apache.org/Widget-Form" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Form http://ofbiz.apache.org/dtds/widget-form.xsd">
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns="http://ofbiz.apache.org/Widget-Form" xsi:schemaLocation="http://ofbiz.apache.org/Widget-Form http://ofbiz.apache.org/dtds/widget-form.xsd
+http://ofbiz.apache.org/Widget-Form ">
 
     <form name="FindExamples" type="single" target="FindExample" default-entity-name="Example">
-        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
-        <field name="exampleId" title="${uiLabelMap.ExampleExampleId}"><text-find/></field>
-        <field name="exampleName" title="${uiLabelMap.CommonName}"><text-find/></field>
+        <field name="noConditionFind">
+            <hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done -->
+        </field>
+        <field name="exampleId" title="${uiLabelMap.ExampleExampleId}">
+            <text-find/>
+        </field>
+        <field name="exampleName" title="${uiLabelMap.CommonName}">
+            <text-find/>
+        </field>
         <field name="exampleTypeId" title="${uiLabelMap.CommonType}">
             <drop-down allow-empty="true" current-description="">
                 <entity-options key-field-name="exampleTypeId" entity-name="ExampleType">
@@ -44,15 +51,18 @@ under the License.
                 <option key="status"/>
             </radio>
         </field>
-        <field name="searchButton"><submit/></field>
+        <field name="searchButton">
+            <submit/>
+        </field>
         <field name="exportButton" position="2" widget-style="smallSubmit" title=" ">
             <hyperlink also-hidden="false" target-type="plain" description="${uiLabelMap.CommonExport}"
                        target="javascript: document.FindExamples.action='ListExampleExport'; document.FindExamples.submit();"/>
         </field>
     </form>
 
-    <grid name="ListExamples" list-name="listIt" paginate-target="FindExample" default-entity-name="Example" separate-columns="true"
-        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
+    <grid name="ListExamples" list-name="listIt" paginate-target="FindExample" default-entity-name="Example"
+          separate-columns="true"
+          odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="basic-table hover-bar">
         <actions>
             <service service-name="performFind" result-map="result" result-map-list="listIt">
                 <field-map field-name="inputFields" from-field="exampleCtx"/>
@@ -70,21 +80,35 @@ under the License.
                 <parameter param-name="exampleId"/>
             </hyperlink>
         </field>
-        <field name="exampleName" title="${uiLabelMap.CommonName}" sort-field="true"><display/></field>
-        <field name="exampleTypeId" title="${uiLabelMap.CommonType}"><display-entity entity-name="ExampleType"/></field>
-        <field name="statusId" title="${uiLabelMap.CommonStatus}"><display-entity entity-name="StatusItem"/></field>
-        <field name="description" title="${uiLabelMap.CommonDescription}" sort-field="true"><display/></field>
-        <field name="conditionalDesc" ignore-when="&quot;exampleName&quot;.equals(sortField)" title="my desc"><display description="${description}"/></field>
+        <field name="exampleName" title="${uiLabelMap.CommonName}" sort-field="true">
+            <display/>
+        </field>
+        <field name="exampleTypeId" title="${uiLabelMap.CommonType}">
+            <display-entity entity-name="ExampleType"/>
+        </field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}">
+            <display-entity entity-name="StatusItem"/>
+        </field>
+        <field name="description" title="${uiLabelMap.CommonDescription}" sort-field="true">
+            <display/>
+        </field>
+        <field name="conditionalDesc" ignore-when="&quot;exampleName&quot;.equals(sortField)" title="my desc">
+            <display description="${description}"/>
+        </field>
     </grid>
 
     <!--example form with include an other form -->
-    <grid name="ListExamplesWithFeatures" extends="ListExamples" extends-resource="component://example/widget/example/ExampleForms.xml">
+    <grid name="ListExamplesWithFeatures" extends="ListExamples"
+          extends-resource="component://example/widget/example/ExampleForms.xml">
         <actions>
             <call-parent-actions/>
         </actions>
-        <field name="features"><include-form name="ExampleFeaturesInLine" location="component://example/widget/example/ExampleForms.xml"/></field>
+        <field name="features">
+            <include-form name="ExampleFeaturesInLine" location="component://example/widget/example/ExampleForms.xml"/>
+        </field>
     </grid>
-    <form name="ExampleFeaturesInLine" type="list" default-table-style="basic-table light-grid" default-entity-name="ExampleFeatureAppl">
+    <form name="ExampleFeaturesInLine" type="list" default-table-style="basic-table light-grid"
+          default-entity-name="ExampleFeatureAppl">
         <actions>
             <entity-condition entity-name="ExampleFeatureAppl">
                 <condition-expr field-name="exampleId" from-field="exampleId"/>
@@ -92,15 +116,20 @@ under the License.
             </entity-condition>
         </actions>
         <auto-fields-entity entity-name="ExampleFeatureAppl" default-field-type="display"/>
-        <field name="exampleId"><ignored/></field>
+        <field name="exampleId">
+            <ignored/>
+        </field>
     </form>
 
     <!--example form with include a screen -->
-    <grid name="ListExamplesWithItems" extends="ListExamples" extends-resource="component://example/widget/example/ExampleForms.xml">
+    <grid name="ListExamplesWithItems" extends="ListExamples"
+          extends-resource="component://example/widget/example/ExampleForms.xml">
         <actions>
             <call-parent-actions/>
         </actions>
-        <field name="items"><include-screen name="ExampleItemsInLine" location="component://example/widget/example/ExampleScreens.xml"/></field>
+        <field name="items">
+            <include-screen name="ExampleItemsInLine" location="component://example/widget/example/ExampleScreens.xml"/>
+        </field>
     </grid>
 
     <grid name="ListExampleItemsInLine" default-table-style="basic-table light-grid">
@@ -110,15 +139,20 @@ under the License.
             </entity-condition>
         </actions>
         <auto-fields-entity entity-name="ExampleItem" default-field-type="display"/>
-        <field name="exampleId"><ignored/></field>
+        <field name="exampleId">
+            <ignored/>
+        </field>
     </grid>
 
     <!--example form with include a grid -->
-    <grid name="ListExamplesWithStatus" extends="ListExamples" extends-resource="component://example/widget/example/ExampleForms.xml">
+    <grid name="ListExamplesWithStatus" extends="ListExamples"
+          extends-resource="component://example/widget/example/ExampleForms.xml">
         <actions>
             <call-parent-actions/>
         </actions>
-        <field name="status"><include-grid name="ExampleStatusInLine" location="component://example/widget/example/ExampleForms.xml"/></field>
+        <field name="status">
+            <include-grid name="ExampleStatusInLine" location="component://example/widget/example/ExampleForms.xml"/>
+        </field>
     </grid>
 
     <grid name="ExampleStatusInLine" default-table-style="basic-table light-grid" default-entity-name="ExampleStatus">
@@ -129,10 +163,13 @@ under the License.
             </entity-condition>
         </actions>
         <auto-fields-entity entity-name="ExampleStatus" default-field-type="display"/>
-        <field name="exampleId"><ignored/></field>
+        <field name="exampleId">
+            <ignored/>
+        </field>
     </grid>
 
-    <grid name="ListExampleExport" extends="ListExamples" extends-resource="component://example/widget/example/ExampleForms.xml" paginate="false">
+    <grid name="ListExampleExport" extends="ListExamples"
+          extends-resource="component://example/widget/example/ExampleForms.xml" paginate="false">
         <actions>
             <call-parent-actions/>
         </actions>
@@ -144,35 +181,41 @@ under the License.
          instead of the performFind service. -->
     <grid name="ListExamplesAjax" extends="ListExamples" paginate-target="authview/findExampleAjax">
         <actions>
-            <entity-condition entity-name="Example"><order-by field-name="exampleName"/></entity-condition>
+            <entity-condition entity-name="Example">
+                <order-by field-name="exampleName"/>
+            </entity-condition>
         </actions>
         <field name="exampleId" title="${uiLabelMap.ExampleExampleId}" widget-style="buttontext">
-            <hyperlink description="${exampleId}" target="EditExampleLayer" also-hidden="false" link-type="layered-modal">
+            <hyperlink description="${exampleId}" target="EditExampleLayer" also-hidden="false"
+                       link-type="layered-modal">
                 <parameter param-name="exampleId"/>
             </hyperlink>
         </field>
         <field name="exampleName" title="${uiLabelMap.CommonName}" id-name="exampleName">
             <display>
-                <in-place-editor url="/example/control/updateExample" cancel-control="button" saving-text="Updating..." text-between-controls=" ">
+                <in-place-editor url="/example/control/updateExample" cancel-control="button" saving-text="Updating..."
+                                 text-between-controls=" ">
                     <simple-editor/>
                     <field-map field-name="exampleId" from-field="exampleId"/>
-                    <field-map field-name="statusId"  from-field="statusId"/>
+                    <field-map field-name="statusId" from-field="statusId"/>
                 </in-place-editor>
             </display>
         </field>
         <field name="description" title="${uiLabelMap.CommonDescription}" id-name="description">
             <display>
-                <in-place-editor url="/example/control/updateExample" cancel-control="button" saving-text="Updating..." text-between-controls=" ">
+                <in-place-editor url="/example/control/updateExample" cancel-control="button" saving-text="Updating..."
+                                 text-between-controls=" ">
                     <simple-editor/>
                     <field-map field-name="exampleId" from-field="exampleId"/>
-                    <field-map field-name="statusId"  from-field="statusId"/>
+                    <field-map field-name="statusId" from-field="statusId"/>
                 </in-place-editor>
             </display>
         </field>
         <on-event-update-area event-type="paginate" area-id="ListExamplesAjax" area-target="ListExampleFormOnly"/>
     </grid>
 
-    <form name="EditExample" type="single" target="updateExample" title="" default-map-name="example" default-entity-name="Example">
+    <form name="EditExample" type="single" target="updateExample" title="" default-map-name="example"
+          default-entity-name="Example">
         <actions>
             <entity-one entity-name="StatusItem" value-field="currentStatus" auto-field-map="false">
                 <field-map field-name="statusId" from-field="example.statusId"/>
@@ -181,9 +224,15 @@ under the License.
         </actions>
         <alt-target use-when="example==null" target="createExample"/>
         <auto-fields-service service-name="updateExample"/>
-        <field use-when="example!=null" name="exampleId" title="${uiLabelMap.ExampleExampleId}"><display/></field>
-        <field use-when="example==null @and exampleId==null" name="exampleId" title="${uiLabelMap.ExampleExampleId}"><ignored/></field>
-        <field use-when="example==null @and exampleId!=null" name="exampleId" title="${uiLabelMap.ExampleExampleId}"><display description="${uiLabelMap.CommonCannotBeFound}: [${exampleId}]" also-hidden="false"/></field>
+        <field use-when="example!=null" name="exampleId" title="${uiLabelMap.ExampleExampleId}">
+            <display/>
+        </field>
+        <field use-when="example==null @and exampleId==null" name="exampleId" title="${uiLabelMap.ExampleExampleId}">
+            <ignored/>
+        </field>
+        <field use-when="example==null @and exampleId!=null" name="exampleId" title="${uiLabelMap.ExampleExampleId}">
+            <display description="${uiLabelMap.CommonCannotBeFound}: [${exampleId}]" also-hidden="false"/>
+        </field>
         <field name="exampleTypeId" title="${uiLabelMap.CommonType}" id-name="exampleTypeId" required-field="true">
             <drop-down allow-empty="false">
                 <!-- this is a neat feature, but not good for the type because the user would have to know the possible types in order to enter at least the first letter, so leaving it out by default; just uncomment to enable: <auto-complete/> -->
@@ -192,7 +241,7 @@ under the License.
                 </entity-options>
             </drop-down>
         </field>
-        <field name="statusId"  use-when="example==null" title="${uiLabelMap.CommonStatus}" required-field="true">
+        <field name="statusId" use-when="example==null" title="${uiLabelMap.CommonStatus}" required-field="true">
             <drop-down allow-empty="false">
                 <entity-options entity-name="ExampleStatusItem"/>
             </drop-down>
@@ -200,12 +249,15 @@ under the License.
         <field name="statusId" use-when="example!=null" title="${uiLabelMap.CommonStatus}" required-field="true">
             <drop-down allow-empty="false" current="first-in-list" current-description="${currentStatus.description}">
                 <option key="${currentStatus.statusId}" description="${currentStatus.description}"/>
-                <entity-options entity-name="StatusValidChangeToDetail" key-field-name="statusIdTo" description="${transitionName} (${description})">
+                <entity-options entity-name="StatusValidChangeToDetail" key-field-name="statusIdTo"
+                                description="${transitionName} (${description})">
                     <entity-constraint name="statusId" env-name="example.statusId"/>
                 </entity-options>
             </drop-down>
         </field>
-        <field name="exampleName" title="${uiLabelMap.FormFieldTitle_exampleName}" required-field="true"><text /></field>
+        <field name="exampleName" title="${uiLabelMap.FormFieldTitle_exampleName}" required-field="true">
+            <text/>
+        </field>
         <field name="description" title="${uiLabelMap.CommonDescription}"/>
         <field name="longDescription" title="${uiLabelMap.ExampleLongDescription}"/>
         <field name="anotherText">
@@ -219,8 +271,12 @@ under the License.
         <field name="displayAnotherText" use-when="anotherText!=null">
             <display description="${example.anotherText}"/>
         </field>
-        <field name="submitButton" use-when="example==null" title="${uiLabelMap.CommonCreate}"><submit button-type="button"/></field>
-        <field name="submitButton" use-when="example!=null" title="${uiLabelMap.CommonUpdate}"><submit button-type="button"/></field>
+        <field name="submitButton" use-when="example==null" title="${uiLabelMap.CommonCreate}">
+            <submit button-type="button"/>
+        </field>
+        <field name="submitButton" use-when="example!=null" title="${uiLabelMap.CommonUpdate}">
+            <submit button-type="button"/>
+        </field>
     </form>
 
     <!-- Typically, this extended form wouldn't be necessary. The parent form (EditExample) would
@@ -237,7 +293,7 @@ under the License.
     </form>
 
     <!-- ExampleItem -->
-    <grid name="ListExampleItems"  list-name="exampleItems"  target="updateExampleItem">
+    <grid name="ListExampleItems" list-name="exampleItems" target="updateExampleItem">
         <actions>
             <entity-condition entity-name="ExampleItem">
                 <condition-expr field-name="exampleId" from-field="exampleId"/>
@@ -245,43 +301,61 @@ under the License.
             </entity-condition>
         </actions>
         <auto-fields-service service-name="updateExampleItem"/>
-        <field name="exampleId"><hidden/></field>
-        <field name="exampleItemSeqId" title="${uiLabelMap.CommonItem}"><display/></field>
-        <field name="description"><text size="30"/></field>
+        <field name="exampleId">
+            <hidden/>
+        </field>
+        <field name="exampleItemSeqId" title="${uiLabelMap.CommonItem}">
+            <display/>
+        </field>
+        <field name="description">
+            <text size="30"/>
+        </field>
         <field name="amountUomId" title="${uiLabelMap.CommonUom}">
             <drop-down allow-empty="true">
-                <entity-options entity-name="UomAndType" key-field-name="uomId" description="${typeDescription}: ${description} (${abbreviation})">
+                <entity-options entity-name="UomAndType" key-field-name="uomId"
+                                description="${typeDescription}: ${description} (${abbreviation})">
                     <entity-order-by field-name="typeDescription"/>
                     <entity-order-by field-name="description"/>
                 </entity-options>
             </drop-down>
         </field>
         <field name="deleteLink" title=" " widget-style="buttontext">
-            <hyperlink description="${uiLabelMap.CommonDelete}" target="deleteExampleItem" also-hidden="false" confirmation-message="${uiLabelMap.CommonConfirmDelete}" image-location="${iconsLocation}/delete.png">
+            <hyperlink description="${uiLabelMap.CommonDelete}" target="deleteExampleItem" also-hidden="false"
+                       confirmation-message="${uiLabelMap.CommonConfirmDelete}"
+                       image-location="${iconsLocation}/delete.png">
                 <parameter param-name="exampleId"/>
                 <parameter param-name="exampleItemSeqId"/>
             </hyperlink>
         </field>
-        <field name="submitButton" title="${uiLabelMap.CommonUpdate}"><submit button-type="button"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}">
+            <submit button-type="button"/>
+        </field>
     </grid>
 
     <form name="AddExampleItem" type="single" target="createExampleItem" title="">
         <auto-fields-service service-name="createExampleItem"/>
-        <field name="exampleId"><hidden/></field>
-        <field name="exampleItemSeqId"><ignored/><!-- this will be auto-sequenced --></field>
+        <field name="exampleId">
+            <hidden/>
+        </field>
+        <field name="exampleItemSeqId">
+            <ignored/><!-- this will be auto-sequenced -->
+        </field>
         <field name="amountUomId" title="${uiLabelMap.CommonUom}">
             <drop-down allow-empty="true">
-                <entity-options entity-name="UomAndType" key-field-name="uomId" description="${typeDescription}: ${description} (${abbreviation})">
+                <entity-options entity-name="UomAndType" key-field-name="uomId"
+                                description="${typeDescription}: ${description} (${abbreviation})">
                     <entity-order-by field-name="typeDescription"/>
                     <entity-order-by field-name="description"/>
                 </entity-options>
             </drop-down>
         </field>
-        <field name="submitButton" title="${uiLabelMap.CommonAdd}"><submit button-type="button" request-confirmation="true"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonAdd}">
+            <submit button-type="button" request-confirmation="true"/>
+        </field>
     </form>
 
     <!-- ExampleFeatureAppl -->
-    <grid name="ListExampleFeatureAppls"  list-name="exampleFeatureAppls"  target="example_updateExampleFeatureAppl">
+    <grid name="ListExampleFeatureAppls" list-name="exampleFeatureAppls" target="example_updateExampleFeatureAppl">
         <actions>
             <entity-condition entity-name="ExampleFeatureAppl">
                 <condition-expr field-name="exampleId" from-field="exampleId"/>
@@ -289,7 +363,9 @@ under the License.
             </entity-condition>
         </actions>
         <auto-fields-service service-name="updateExampleFeatureAppl"/>
-        <field name="exampleId"><hidden/></field>
+        <field name="exampleId">
+            <hidden/>
+        </field>
         <field name="exampleFeatureId" title="${uiLabelMap.ExampleFeature}">
             <display-entity entity-name="ExampleFeature">
                 <sub-hyperlink target="EditExampleFeature" description="${exampleFeatureId}" link-style="buttontext">
@@ -297,7 +373,9 @@ under the License.
                 </sub-hyperlink>
             </display-entity>
         </field>
-        <field name="fromDate"><display/></field>
+        <field name="fromDate">
+            <display/>
+        </field>
         <field name="exampleFeatureApplTypeId" title="${uiLabelMap.CommonType}">
             <drop-down allow-empty="false">
                 <entity-options entity-name="ExampleFeatureApplType">
@@ -305,9 +383,12 @@ under the License.
                 </entity-options>
             </drop-down>
         </field>
-        <field name="submitButton" title="${uiLabelMap.CommonUpdate}"><submit button-type="button"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}">
+            <submit button-type="button"/>
+        </field>
         <field name="deleteLink" title=" " widget-style="buttontext">
-            <hyperlink description="${uiLabelMap.CommonDelete}" target="example_deleteExampleFeatureAppl" also-hidden="false" image-location="${iconsLocation}/delete.png">
+            <hyperlink description="${uiLabelMap.CommonDelete}" target="example_deleteExampleFeatureAppl"
+                       also-hidden="false" image-location="${iconsLocation}/delete.png">
                 <parameter param-name="exampleId"/>
                 <parameter param-name="exampleFeatureId"/>
                 <parameter param-name="fromDate"/>
@@ -317,7 +398,9 @@ under the License.
 
     <form name="AddExampleFeatureAppl" type="single" target="example_createExampleFeatureAppl" title="">
         <auto-fields-service service-name="createExampleFeatureAppl"/>
-        <field name="exampleId"><hidden/></field>
+        <field name="exampleId">
+            <hidden/>
+        </field>
         <field name="exampleFeatureId" title="${uiLabelMap.ExampleFeature}">
             <lookup target-form-name="LookupExampleFeature"/>
         </field>
@@ -328,13 +411,21 @@ under the License.
                 </entity-options>
             </drop-down>
         </field>
-        <field name="submitButton" title="${uiLabelMap.CommonAdd}"><submit button-type="button"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonAdd}">
+            <submit button-type="button"/>
+        </field>
     </form>
 
     <form name="SetExamplePdfPassword" type="single" target="ExampleReportPdf" title="">
-        <field name="exampleId"><hidden/></field>
-        <field name="ownerPassword" title="${uiLabelMap.PDFOwnerPassword}"><text size="15" maxlength="250"/></field>
-        <field name="userPassword" title="${uiLabelMap.PDFUserPassword}"><text size="15" maxlength="250"/></field>
+        <field name="exampleId">
+            <hidden/>
+        </field>
+        <field name="ownerPassword" title="${uiLabelMap.PDFOwnerPassword}">
+            <text size="15" maxlength="250"/>
+        </field>
+        <field name="userPassword" title="${uiLabelMap.PDFUserPassword}">
+            <text size="15" maxlength="250"/>
+        </field>
         <field name="allowPrint" title="${uiLabelMap.PDFAllowPrint}">
             <drop-down>
                 <option key="true" description="${uiLabelMap.CommonTrue}"/>
@@ -389,7 +480,11 @@ under the License.
                 <option key="false" description="${uiLabelMap.CommonFalse}"/>
             </drop-down>
         </field>
-        <field name="encryption-length" title="${uiLabelMap.PDFEncryptionLength}"><text size="15"/></field>
-        <field name="submitButton" title="${uiLabelMap.ExampleGeneratePDF}"><submit button-type="button"/></field>
+        <field name="encryption-length" title="${uiLabelMap.PDFEncryptionLength}">
+            <text size="15"/>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.ExampleGeneratePDF}">
+            <submit button-type="button"/>
+        </field>
     </form>
 </forms>

@@ -19,6 +19,16 @@ table! {
 }
 
 table! {
+    mnemonics (id) {
+        id -> Int4,
+        path -> Varchar,
+        num_value -> Int4,
+        string_value -> Varchar,
+        description -> Nullable<Text>,
+    }
+}
+
+table! {
     posts (id) {
         id -> Int4,
         user_id -> Int4,
@@ -47,6 +57,7 @@ joinable!(posts -> users (user_id));
 allow_tables_to_appear_in_same_query!(
     books,
     comments,
+    mnemonics,
     posts,
     users,
 );

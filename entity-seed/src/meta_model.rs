@@ -7,7 +7,7 @@ use inflector::cases::snakecase::to_snake_case;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
-enum GenericError {
+pub enum GenericError {
     #[error("io error")]
     Io(#[from] std::io::Error),
     #[error("parse error")]

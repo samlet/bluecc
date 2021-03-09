@@ -26,6 +26,7 @@ mod object_id;
 
 pub use self::database::establish_connection;
 pub use self::util::deserialize_branch_with_contiguous_check as load_xml;
+pub use self::meta_model::GenericError;
 
 #[cfg(test)]
 mod lib_tests {

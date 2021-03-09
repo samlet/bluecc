@@ -265,6 +265,8 @@ fn transform_works() {
 
     let data:ExampleStatus=serde_xml_rs::from_str(node_str.as_str()).unwrap();
     println!("{:?}", data);
+
+    store.store().unwrap();
 }
 
 // use decimal::prelude::*;

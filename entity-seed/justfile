@@ -2,6 +2,8 @@ meta:
     cargo run --bin meta-cli
 seed:
     cargo run --bin seed
+srv:
+    cargo run --bin meta_srv
 
 mig:
 	diesel migration run

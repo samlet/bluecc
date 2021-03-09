@@ -63,12 +63,15 @@ walkdir = "2.3.1"
 #quaint = {version="0.2.0-alpha.13", features=["serde-support", "single-postgresql", "full-mysql", "pooled"]}
 #quaint = {version="0.1", features=["full-postgresql", "full-mysql", "pooled"]}
 
-tokio = { version = "0.2.25", features = ["macros", "time"] }
+#tokio = { version = "0.2.25", features = ["macros", "time"] }
 #tokio = { version = "1", features = ["macros", "net", "signal", "io-std", "io-util", "rt-multi-thread", "fs", "sync", "time"]}
-#tokio = { version = "1", features = ["macros", "time"] }
+tokio = { version = "1", features = ["macros", "time"] }
 #tempfile = "3.1.0"
+warp = "0.3"
+pretty_env_logger = "0.4"
 
-reqwest = { version = "0.10", features = ["json"] }
+#reqwest = { version = "0.10", features = ["json"] }
+reqwest = { version = "0.11", features = ["json"] }
 diesel = { version = "1.4", features = ["postgres", "serde_json", "chrono", "r2d2"] }
 diesel_full_text_search = "1.0.0"
 dotenv = "0.10.0"

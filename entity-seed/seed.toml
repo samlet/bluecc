@@ -1,10 +1,21 @@
 version="0.1"
-
-[generate]
-sql="migrations/2021-03-09-083808_example/up.sql"
-model="src/models/example.rs"
 header='''use serde_derive::{Deserialize, Serialize};
-use crate::schema::{{table}};
+// use crate::schema::{{table}};
+use crate::schema::*;
 use diesel::prelude::*;
 '''
 
+[security]
+up_sql="migrations/2021-03-09-120106_security/up.sql"
+down_sql="migrations/2021-03-09-120106_security/down.sql"
+model="src/models/security.rs"
+
+[common]
+up_sql="migrations/2021-03-09-104216_common/up.sql"
+down_sql="migrations/2021-03-09-104216_common/down.sql"
+model="src/models/common.rs"
+
+[example]
+up_sql="migrations/2021-03-09-083808_example/up.sql"
+down_sql="migrations/2021-03-09-083808_example/down.sql"
+model="src/models/example.rs"

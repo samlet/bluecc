@@ -2,16 +2,19 @@ use serde_derive::Deserialize;
 use tera::{Tera, Context};
 
 #[derive(Deserialize)]
-struct SeedConfig {
-    version: String,
-    generate: Generate,
+pub struct SeedConfig {
+    pub version: String,
+    header: Option<String>,
+    security: Generate,
+    common: Generate,
+    example: Generate,
 }
 
 #[derive(Deserialize)]
-struct Generate {
-    sql: String,
-    model: String,
-    header: Option<String>,
+pub struct Generate {
+    pub up_sql: String,
+    pub down_sql: String,
+    pub model: String,
 }
 
 impl SeedConfig{
@@ -21,16 +24,21 @@ impl SeedConfig{
         Ok(config)
     }
 
-    pub fn init(table: &str) -> anyhow::Result<Self> {
+    pub fn module_conf(&self, table: &str) -> Option<&Generate> {
+        match table {
+            "security" => Some(&self.security),
+            "common" => Some(&self.common),
+            "example" => Some(&self.example),
+            _ => None
+        }
+    }
+
+    pub fn get_header(&self, table: &str) -> String {
         let mut tera = Tera::default();
         let mut context = Context::new();
         context.insert("table", table);
 
-        let mut cf=Self::load()?;
-        let header=cf.generate.header.unwrap();
-        let result = tera.render_str(header.as_str(), &context)?;
-        cf.generate.header=Some(result);
-        Ok(cf)
+        tera.render_str(self.header.as_ref().unwrap().as_str(), &context).unwrap()
     }
 }
 
@@ -39,7 +47,7 @@ fn toml_works() {
     let config: SeedConfig = toml::from_str(r#"
         version="0.1"
 
-        [generate]
+        [example]
         sql="migrations/2021-03-09-083808_example/up.sql"
         model="src/models/example.rs"
         header='''use serde_derive::{Deserialize, Serialize};
@@ -60,7 +68,7 @@ fn load_works() -> anyhow::Result<()> {
     let cf=SeedConfig::load()?;
     assert_eq!(cf.version, "0.1");
 
-    let header=cf.generate.header.unwrap();
+    let header=cf.example.header.unwrap();
     println!("{}", header);
 
     let mut tera = Tera::default();

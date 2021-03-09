@@ -31,7 +31,7 @@ impl From<roxmltree::Error> for GenericError {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Entity{
     #[serde(rename = "entity-name", default)]
     pub entity_name: String,
@@ -57,7 +57,9 @@ impl Entity{
 
     pub fn belongs(&self) -> Vec<BelongsTo> {
         let rels = self.relations
-            .iter().filter(|x| x.single_belongs())
+            .iter()
+            .unique_by(|x| &x.rel_entity_name)
+            .filter(|x| x.single_belongs())
             .map(|x| {
             let key = &x.keymaps.get(0).unwrap();
             BelongsTo {
@@ -72,13 +74,13 @@ impl Entity{
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct PrimKey{
     #[serde(rename = "field", default)]
     pub field_name: String
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ModelField{
     #[serde(rename = "name", default)]
     pub field_name: String,
@@ -90,7 +92,7 @@ pub struct ModelField{
     pub has_default: bool
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ModelRelation{
     // one of: one, many, one-nofk
     #[serde(rename = "type", default)]
@@ -112,7 +114,7 @@ impl ModelRelation{
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct KeyMap{
     #[serde(rename = "field-name", default)]
     pub field_name: String,
@@ -130,7 +132,7 @@ impl KeyMap{
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ViewEntity{
     #[serde(rename = "entity-name", default)]
     pub entity_name: String,
@@ -138,7 +140,7 @@ pub struct ViewEntity{
     pub title: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct EntityModel{
     pub title: String,
     pub description: String,

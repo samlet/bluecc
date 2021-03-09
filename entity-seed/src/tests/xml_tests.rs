@@ -90,7 +90,7 @@ pub fn example_model() -> EntityModel{
 #[test]
 fn entity_model_works() {
     // let model: EntityModel = example_model();
-    let model = &APP_CONTEXT.models;
+    let model = &APP_CONTEXT.get_model("example");
         println!("{:#?}", model);
     let ents=&model.entities;
     let ent=ents.iter().find(|n|n.entity_name=="Example").unwrap();
@@ -105,7 +105,7 @@ fn entity_model_works() {
 
 #[test]
 fn entity_relation_works() {
-    let model=&APP_CONTEXT.models.get_entity("Example");
+    let model=&APP_CONTEXT.get_model("example").get_entity("Example");
     let rels=model.relations
         .iter().map(|x|
         (&x.keymaps.get(0).unwrap().field_name,

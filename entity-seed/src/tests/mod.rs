@@ -26,4 +26,5 @@ mod form_parsers;
 mod basic_models;
 #[cfg(test)]
 mod test_helpers;
+mod seed_conf;
 

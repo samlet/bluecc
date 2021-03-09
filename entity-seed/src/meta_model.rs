@@ -5,6 +5,7 @@ use phf::{phf_map};
 use std::collections::HashMap;
 use inflector::cases::snakecase::to_snake_case;
 use thiserror::Error;
+use crate::topo::TopologicalSort;
 
 #[derive(Error, Debug)]
 pub enum GenericError {
@@ -187,6 +188,33 @@ impl EntityModel {
             }
             ent.multiple_keys=ent.primary_keys.len()>1;
         }
+    }
+
+    pub fn topo(&self) -> Vec<String>{
+        let mut ts = TopologicalSort::<String>::new();
+        for ent in &self.entities{
+            let deps:Vec<String>=ent.belongs().iter().map(|e|e.model_name.clone()).collect();
+            for belong in deps {
+                ts.add_dependency(belong, &ent.entity_name);
+            }
+        }
+        let mut topo_stack:Vec<String>=Vec::new();
+        while !ts.is_empty() {
+            let mut result = ts.pop_all();
+            result.sort();
+            topo_stack.append(&mut result);
+        }
+
+        let mut difference: Vec<_> = self.entity_names().into_iter()
+            .filter(|item| !topo_stack.contains(item)).collect();
+        topo_stack.append(&mut difference);
+
+        topo_stack.reverse();
+        topo_stack
+    }
+
+    pub fn entity_names(&self) -> Vec<String>{
+        self.entities.iter().map(|e|e.entity_name.clone()).collect()
     }
 }
 

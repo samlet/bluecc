@@ -68,7 +68,7 @@ fn load_works() -> anyhow::Result<()> {
     let cf=SeedConfig::load()?;
     assert_eq!(cf.version, "0.1");
 
-    let header=cf.example.header.unwrap();
+    let header=cf.header.unwrap();
     println!("{}", header);
 
     let mut tera = Tera::default();
@@ -79,4 +79,3 @@ fn load_works() -> anyhow::Result<()> {
 
     Ok(())
 }
-

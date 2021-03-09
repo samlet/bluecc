@@ -75,10 +75,16 @@ async fn main(args: Args) -> anyhow::Result<()> {
                     output.push_str(header.as_str());
                 }
                 for typ in typs {
-                    for ent in &model.entities {
-                        println!("generate {} for {}", ent.entity_name, typ);
+                    let mut ents:Vec<String>= model.entities.iter()
+                        .map(|x|x.entity_name.clone()).collect::<Vec<String>>();
+                    if typ=="ent_drop"{
+                        // ents.reverse();
+                        ents=model.topo();
+                    }
+                    for ent in &ents {
+                        println!("generate {} for {}", ent, typ);
 
-                        let cnt: String = entity_gen_works(module.as_str(), ent.entity_name.as_str(), typ).unwrap();
+                        let cnt: String = entity_gen_works(module.as_str(), ent.as_str(), typ).unwrap();
                         output.push_str(cnt.as_str());
                     }
                 }

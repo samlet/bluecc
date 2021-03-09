@@ -114,6 +114,36 @@ fn entity_relation_works() {
 }
 
 #[test]
+fn topo_works() -> anyhow::Result<()> {
+    let mut ts = TopologicalSort::<String>::new();
+    let model=&APP_CONTEXT.get_model("security");
+    for ent in &model.entities{
+        let deps:Vec<String>=ent.belongs().iter().map(|e|e.model_name.clone()).collect();
+        println!("{} -> {:?}", ent.entity_name, deps);
+        for belong in deps {
+            println!("\t {}:{}", belong, ent.entity_name);
+            ts.add_dependency(belong, &ent.entity_name);
+        }
+    }
+
+    while !ts.is_empty() {
+        let mut result = ts.pop_all();
+        result.sort();
+        println!("{} ==> {:?}", result.len(), result);
+    }
+    Ok(())
+}
+
+#[test]
+fn model_topo_works() -> anyhow::Result<()> {
+    let model=&APP_CONTEXT.get_model("security");
+    let topo=model.topo();
+    println!("{}, {}", model.entities.len(), topo.len());
+    println!("{:?}", topo);
+    Ok(())
+}
+
+#[test]
 fn entity_gen_works() {
     use tera::{Result, Context, Filter, Function};
     use tera::Tera;
@@ -190,6 +220,8 @@ fn field_mapping_works() {
 }
 
 use phf::{phf_map};
+use crate::topo::TopologicalSort;
+
 static COUNTRIES: phf::Map<&'static str, &'static str> = phf_map! {
     "US" => "United States",
     "UK" => "United Kingdom",

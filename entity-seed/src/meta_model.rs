@@ -11,12 +11,20 @@ use crate::topo::TopologicalSort;
 pub enum GenericError {
     #[error("io error")]
     Io(#[from] std::io::Error),
+    // #[error("dotenv error")]
+    // DotEnv(#[from] dotenv::Error),
+    // #[error("env error")]
+    // Env(#[from] std::env::VarError),
     #[error("parse error")]
     Parse(std::num::ParseIntError),
     #[error("xml parse fail")]
     ParseXml(roxmltree::Error),
     #[error("json parse fail")]
     ParseJson(#[from] serde_json::Error),
+    #[error("database error")]
+    DatabaseErr(#[from] quaint::error::Error),
+    #[error("config error")]
+    ConfigErr,
     #[error("invalid header (expected {expected:?}, found {found:?})")]
     InvalidHeader {
         expected: String,

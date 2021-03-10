@@ -84,7 +84,7 @@ bigdecimal = "0.2.0"
 [dependencies.quaint]
 git = "https://github.com/prisma/quaint"
 branch = "master"
-features=["serde-support", "postgresql", "mysql", "pooled"]
+features=["serde-support", "postgresql", "mysql", "pooled", "bigdecimal", "json"]
 
 [dev-dependencies]
 simple_logger = "1.0.1"

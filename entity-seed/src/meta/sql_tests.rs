@@ -63,9 +63,9 @@ async fn insert_works() -> anyhow::Result<()> {
 // async fn select_works() -> Result<(), quaint::error::Error> {
 async fn select_works() -> anyhow::Result<()> {
     // let conn = Quaint::new("sqlite:///tmp/example.db").await?;
-    // let url="mysql://root:root@localhost:3306/ofbiz";
-    // let conn = Quaint::new(url).await?;
-    let conn=quaint_conn().await?;  // 切换至函数形式, 会导致测试变慢
+    let url="mysql://root:root@localhost:3306/ofbiz";
+    let conn = Quaint::new(url).await?;
+    // let conn=quaint_conn().await?;  // 切换至函数形式, 会导致测试变慢
 
     let conditions = "product_id"
         .equals("WG-1111")
@@ -73,6 +73,9 @@ async fn select_works() -> anyhow::Result<()> {
     let query = Select::from_table("order_item").so_that(conditions);
     // let result = conn.select(Select::default().value(1)).await?;
     let result = conn.select(query).await?;
+
+    let cols=result.columns();
+    println!("cols (total {}) {:?}", cols.len(), cols);
     // println!("{:#?}", result);
     for row in result {
         let desc=row.get("STATUS_ID").unwrap();

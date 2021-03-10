@@ -23,6 +23,7 @@ pub mod errors;
 pub mod snowflake;
 mod object_id;
 mod topo;
+mod delegators;
 
 pub use self::database::establish_connection;
 pub use self::util::deserialize_branch_with_contiguous_check as load_xml;

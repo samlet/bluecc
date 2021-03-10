@@ -15,6 +15,8 @@ pub enum GenericError {
     Parse(std::num::ParseIntError),
     #[error("xml parse fail")]
     ParseXml(roxmltree::Error),
+    #[error("json parse fail")]
+    ParseJson(#[from] serde_json::Error),
     #[error("invalid header (expected {expected:?}, found {found:?})")]
     InvalidHeader {
         expected: String,
@@ -73,6 +75,22 @@ impl Entity{
             .collect::<Vec<_>>();
         rels
     }
+
+    pub fn get_id_fields(&self) -> Vec<&String>{
+        self.fields.iter().filter(|f| f.is_id_type())
+            .map(|f| &f.field_name).collect()
+    }
+
+    pub fn get_field(&self, fld:&str) -> Option<&ModelField>{
+        self.fields.iter().find(|f| f.field_name==fld)
+    }
+
+    pub fn get_relation_entity(&self, fld:&str) -> Option<String> {
+        self.relations.iter().filter(|r|
+            r.keymaps.iter().any(|key|key.field_name==fld))
+            .map(|r| r.rel_entity_name.clone())
+            .nth(0)
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -93,9 +111,14 @@ pub struct ModelField{
     pub has_default: bool
 }
 
+const DT_FIELD: [&'static str; 3] = ["date-time", "date", "time"];
 impl ModelField{
     pub fn is_id_type(&self) -> bool{
         self.field_type.starts_with("id")
+    }
+
+    pub fn is_dt_type(&self) -> bool{
+        DT_FIELD.contains(&self.field_type.as_str())
     }
 }
 

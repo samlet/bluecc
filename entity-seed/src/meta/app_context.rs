@@ -49,4 +49,33 @@ impl AppContext{
     }
 }
 
+pub fn get_entity_model(name: &str) ->  &'static EntityModel{
+    APP_CONTEXT.get_model(name)
+}
 
+pub fn get_entity_by_name(entity_name: &str) -> Option<&Entity> {
+    APP_CONTEXT.models.values().into_iter()
+        .flat_map(|e|&e.entities)
+        .filter(|e| e.entity_name==entity_name)
+        .nth(0)
+}
+
+pub fn security_model() ->  &'static EntityModel{
+    get_entity_model("security")
+}
+
+pub fn example_model() ->  &'static EntityModel{
+    get_entity_model("example")
+}
+
+#[cfg(test)]
+mod lib_tests {
+    use super::*;
+
+    #[test]
+    fn get_ent_meta_works() -> anyhow::Result<()> {
+        let ent=get_entity_by_name("UserLogin");
+        assert_eq!("UserLogin", ent.unwrap().entity_name);
+        Ok(())
+    }
+}

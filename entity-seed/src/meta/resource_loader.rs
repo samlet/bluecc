@@ -139,7 +139,7 @@ impl<'a> StringStore{
         *val
     }
 
-    pub fn save(&self, file_name: &str) -> std::io::Result<()>{
+    pub fn save(&self, file_name: &str) -> Result<(), GenericError>{
         use std::fs::File;
 
         let mut serials=StoreItems{items:Vec::new()};
@@ -152,7 +152,7 @@ impl<'a> StringStore{
         Ok(())
     }
 
-    pub fn store(&self) -> std::io::Result<()>{
+    pub fn store(&self) -> Result<(), GenericError>{
         fs::create_dir_all(".store")?;
         self.save(STORE_FILE)
     }
@@ -269,6 +269,67 @@ fn transform_works() {
     store.store().unwrap();
 }
 
+fn process_seed(xml_str: &str) -> Result<Vec<EntityTypes>, GenericError>{
+    use chrono::format::strftime::StrftimeItems;
+
+    let parse_dt=NaiveDateTime::parse_from_str;
+    let fmt = StrftimeItems::new("%Y-%m-%dT%H:%M:%S");
+    let mut store=StringStore::load().unwrap();
+
+    let doc = roxmltree::Document::parse(xml_str).unwrap();
+    let root=doc.root_element();
+    let nodes=root.children()
+        .filter(|n| n.is_element()).collect::<Vec<Node<'_,'_>>>();
+    // let model=get_entity_model("security");
+
+    let mut result_set=Vec::new();
+    for node in nodes{
+        let node_name=node.tag_name().name();
+        let mod_ent=get_entity_by_name(node_name).expect("entity");
+        let flds:Vec<String>=node.attributes().iter().map(|f| {
+            let fld_name=f.name();
+            let mut fld_val:String=f.value().to_string();
+            let mod_fld=mod_ent.get_field(fld_name).expect("field");
+            if mod_fld.is_dt_type() {
+                fld_val=parse_dt(f.value(), "%Y-%m-%d %H:%M:%S%.f").unwrap()
+                    .format_with_items(fmt.clone()).to_string();
+
+            } else if mod_fld.is_id_type() {
+                let mut rel_ent=node_name.to_string();
+                match mod_ent.get_relation_entity(fld_name) {
+                    Some(r) => rel_ent=r,
+                    _ => ()
+                }
+                let val=store.id(SerialKey::new(rel_ent.as_str(), f.name(), f.value()));
+                fld_val=val.to_string();
+            } else if mod_fld.field_type=="indicator" {
+                fld_val= match fld_val.as_str() {
+                    "Y" => "true".to_string(),
+                    "N" => "false".to_string(),
+                    _ => "false".to_string()
+                };
+            }
+            format!(" {}=\"{}\"", f.name(), fld_val)
+        }).collect();
+
+        let node_str=format!("<{} {}/>", node.tag_name().name(), flds.join(" "));
+        let data:EntityTypes=serde_xml_rs::from_str(node_str.as_str()).unwrap();
+        println!("{} ->\n  {:?}", node_str, data);
+        result_set.push(data);
+    }
+
+    store.store()?;
+    Ok(result_set)
+}
+
+#[test]
+fn process_seed_works() -> anyhow::Result<()> {
+    let cnt=read_to_string("data/security/SecurityGroupDemoData.xml")?;
+    let rs=process_seed(cnt.as_str())?;
+    println!("total {}", rs.len());
+    Ok(())
+}
+
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
 pub enum TestSeed {
     #[serde(rename_all = "camelCase")]
@@ -300,10 +361,34 @@ fn security_entity_works() -> anyhow::Result<()> {
     Ok(())
 }
 
+#[test]
+fn entity_types_works() -> anyhow::Result<()> {
+    // use crate::models::security::UserLogin;
+    let node_str=r##"<UserLogin userLoginId="188" enabled="true"/>"##;
+    let data:EntityTypes=serde_xml_rs::from_str(node_str).unwrap();
+    match data {
+        EntityTypes::UserLogin {enabled, .. } => {assert!(enabled.unwrap())}
+        _ => ()
+    }
+    println!("{:?}", data);
+
+    let json_str=r#"{"UserLogin":{"userLoginId":0,"enabled":false, "other":0}}"#;
+    let data:EntityTypes=serde_json::from_str(json_str)?;
+    match data {
+        EntityTypes::UserLogin {enabled, .. } => {assert!(!enabled.unwrap())}
+        _ => ()
+    }
+    println!("{:?}", data);
+    Ok(())
+}
+
 // use decimal::prelude::*;
 use serde::de::DeserializeOwned;
 use crate::snowflake::new_snowflake_id;
-use crate::load_xml;
+use crate::{load_xml, get_entity_model, GenericError, get_entity_by_name};
+use roxmltree::Node;
+use std::fs::read_to_string;
+use crate::models::model_types::EntityTypes;
 
 #[derive(Deserialize, Debug)]
 struct User {

@@ -41,6 +41,7 @@ $ cargo run --bin seed all security
 #[async_std::main]
 #[paw::main]
 async fn main(args: Args) -> anyhow::Result<()> {
+
     // use tempfile::Builder as TempfileBuilder;
     // let tempfile = TempfileBuilder::new().tempfile_in("./")?;
     //
@@ -63,13 +64,18 @@ async fn main(args: Args) -> anyhow::Result<()> {
         Some(Command::All { module }) => {
             let model=&APP_CONTEXT.get_model(module.as_str());
             let conf=SeedConfig::load()?;
-            let module_conf=conf.module_conf(module.as_str()).unwrap();
-            let model_file=&module_conf.model;
-            let up_sql_file=&module_conf.up_sql;
-            let down_sql_file=&module_conf.down_sql;
+            let module_conf=&conf.module_conf(module.as_str()).unwrap();
+            let model_file=&module_conf.model.to_owned();
+            let up_sql_file=module_conf.up_sql.to_owned();
+            let down_sql_file=module_conf.down_sql.to_owned();
+
             println!("generate all entities to {} ..", model_file);
 
-            let header=conf.get_header(module.as_str());
+            let header=&conf.get_header(module.as_str());
+            let enum_header=&conf.get_enum_header(module.as_str());
+            let enum_footer=&conf.enum_footer.unwrap().to_owned();
+            let enum_output=&conf.enum_output.unwrap().to_owned();
+
             let gen = |typs:Vec<&str>, write_header:bool|  {
                 let mut output=String::new();
                 if write_header {
@@ -81,12 +87,18 @@ async fn main(args: Args) -> anyhow::Result<()> {
                     if typ=="ent_drop"{
                         // ents.reverse();
                         ents=model.topo();
+                    }else if typ=="enum"{
+                        output.push_str(enum_header.as_str());
                     }
                     for ent in &ents {
                         println!("generate {} for {}", ent, typ);
 
                         let cnt: String = entity_gen_works(module.as_str(), ent.as_str(), typ).unwrap();
                         output.push_str(cnt.as_str());
+                    }
+
+                    if typ=="enum"{
+                        output.push_str(enum_footer);
                     }
                 }
                 output
@@ -95,6 +107,7 @@ async fn main(args: Args) -> anyhow::Result<()> {
             std::fs::write(model_file, gen(vec!["model"], true))?;
             std::fs::write(up_sql_file, gen(vec!["ent", "ent_rel"], false))?;
             std::fs::write(down_sql_file, gen(vec!["ent_drop"], false))?;
+            std::fs::write(enum_output, gen(vec!["enum"], false))?;
             println!("done.");
         }
 

@@ -182,7 +182,8 @@ mod tests {
             Some(u) => println!("user exists: {:?}", u),
             None => {
                 let expected_user = register_user(&conn, "sgrif", "hunter2").unwrap();
-                assert_eq!(Some(expected_user), user);
+                println!("{:?}", expected_user);
+                assert_eq!(expected_user.username, user.unwrap().username);
             }
         }
     }

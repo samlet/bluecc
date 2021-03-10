@@ -6,9 +6,10 @@ use diesel::prelude::*;
 '''
 
 enum_header='''#[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
-pub enum {{module}} {
+pub enum EntityTypes {
 '''
 enum_footer="}"
+enum_output="src/models/model_types.rs"
 
 [security]
 up_sql="migrations/2021-03-09-120106_security/up.sql"

@@ -27,12 +27,18 @@ mod topo;
 pub use self::database::establish_connection;
 pub use self::util::deserialize_branch_with_contiguous_check as load_xml;
 pub use self::meta_model::GenericError;
+pub use self::meta::app_context::{get_entity_by_name, get_entity_model,
+                                  security_model, example_model};
 
 #[cfg(test)]
 mod lib_tests {
+    use crate::security_model;
+
     #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
+    fn entity_meta_works() {
+        let model=security_model();
+        assert!(model.get_entity("UserLogin")
+            .get_field("userLoginId").unwrap().is_id_type());
     }
 }
 

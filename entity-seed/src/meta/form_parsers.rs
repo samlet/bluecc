@@ -5,7 +5,7 @@ use decimal::prelude::*;
 use crate::meta_model::*;
 
 lazy_static_include_bytes! {
-    EXAMPLE_DOC => "src/tests/ExampleForms.xml",
+    EXAMPLE_DOC => "src/meta/ExampleForms.xml",
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]

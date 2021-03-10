@@ -5,10 +5,10 @@ extern crate lazy_static;
 // use std::env;
 use structopt::StructOpt;
 use std::collections::HashMap;
-use entity_seed::tests::app_context::{APP_CONTEXT};
+use entity_seed::meta::app_context::{APP_CONTEXT};
 use std::path::PathBuf;
 use entity_seed::meta_model::{ModelField, EntityModel};
-use entity_seed::tests::seed_conf::SeedConfig;
+use entity_seed::meta::seed_conf::SeedConfig;
 use entity_seed::snowflake::new_snowflake_id;
 
 #[derive(StructOpt)]

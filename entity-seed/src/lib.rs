@@ -12,8 +12,7 @@ extern crate diesel;
 #[macro_use]
 extern crate assert_matches;
 
-pub mod tests;
-mod cases;
+pub mod meta;
 mod blues;
 pub mod meta_model;
 pub mod util;

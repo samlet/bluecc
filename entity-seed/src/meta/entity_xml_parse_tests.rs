@@ -17,6 +17,8 @@ enum TestError {
     },
     #[error("unknown error")]
     Unknown,
+    #[error("not found error")]
+    NotFound,
     #[error(transparent)]
     Other(#[from] anyhow::Error),  // source and Display delegate to anyhow::Error
 }
@@ -25,6 +27,25 @@ impl From<roxmltree::Error> for TestError {
     fn from(err: roxmltree::Error) -> TestError {
         TestError::ParseXml(err)
     }
+}
+
+fn find_by_attr<'input>(doc:&mut roxmltree::Document<'input>,
+                    attr_name: &str, attr_val:&str) -> Result<String, TestError> {
+    let found = doc.descendants().find(|n|
+        n.attribute(attr_name) == Some(attr_val));
+    match found {
+        Some(n) => Ok(n.tag_name().name().to_string()),
+        _ => Err(TestError::NotFound)
+    }
+}
+
+#[test]
+fn custom_err_works() -> anyhow::Result<()> {
+    let xml_str=str::from_utf8(include_bytes!("ExampleDemoData.xml"))?;
+    let mut doc = roxmltree::Document::parse(xml_str).unwrap();
+    let node_name= find_by_attr(&mut doc, "statusTypeId", "EXAMPLE_STATUS")?;
+    assert_eq!("StatusType", node_name);
+    Ok(())
 }
 
 /// ref: https://github.com/RazrFalcon/roxmltree/blob/master/tests/dom-api.rs

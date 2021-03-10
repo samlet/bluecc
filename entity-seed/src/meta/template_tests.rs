@@ -8,7 +8,7 @@ use lazy_static::lazy_static;
 use serde_json::{json, Value};
 use tera::{Result, Context, Filter, Function};
 use tera::Tera;
-// use crate::tests::xml_tests::FieldTypeDef;
+// use crate::meta::xml_tests::FieldTypeDef;
 
 fn render_template(content: &str, context: &Context) -> Result<String> {
     let mut tera = Tera::default();

@@ -1,4 +1,4 @@
-use crate::tests::globals::HASHMAP;
+use crate::meta::globals::HASHMAP;
 
 #[test]
 fn global_works() {

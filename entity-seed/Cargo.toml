@@ -104,4 +104,4 @@ path = "src/cli/git.rs"
 
 [[bin]]
 name = "seed"
-path = "src/tests/seed.rs"
+path = "src/meta/seed.rs"

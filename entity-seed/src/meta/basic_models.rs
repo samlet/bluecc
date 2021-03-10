@@ -133,7 +133,7 @@ fn if_not_present<T>(
 mod tests {
     use super::*;
     use std::env;
-    use crate::tests::test_helpers::{this_test_modifies_env, test_connection, establish_connection_with_pool};
+    use crate::meta::test_helpers::{this_test_modifies_env, test_connection, establish_connection_with_pool};
 
     #[test]
     fn current_user_from_env_fails_when_no_username_set() {

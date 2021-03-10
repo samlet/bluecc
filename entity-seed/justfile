@@ -22,3 +22,6 @@ resetdb:
     dropdb seed
     createdb seed
     diesel migration run
+
+security:
+    cargo run --bin seed all security

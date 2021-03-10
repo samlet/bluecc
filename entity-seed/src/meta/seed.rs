@@ -177,7 +177,7 @@ CREATE TABLE {{ent['entity-name'] | snake_case -}} (
 {%- endfor %}
 {%- endif %}
 {%- if not ent.multiple_keys %}
-    {{pks}} SERIAL PRIMARY KEY
+    {{pks}} BIGSERIAL PRIMARY KEY
 {%- else %}
     PRIMARY KEY ({{pks}})
 {%- endif %}

@@ -8,7 +8,7 @@ use diesel::prelude::*;
 #[table_name = "x509_issuer_provision"]
 pub struct X509IssuerProvision{
     // keys
-    pub cert_provision_id: i32,
+    pub cert_provision_id: i64,
     // fields
     pub common_name: Option<String>,
     pub organizational_unit: Option<String>,
@@ -32,7 +32,7 @@ pub struct UserLogin{
     pub enabled: bool,
     pub has_logged_out: bool,
     pub require_password_change: bool,
-    pub last_currency_uom: i32,
+    pub last_currency_uom: i64,
     pub last_locale: Option<String>,
     pub last_time_zone: i64,
     pub disabled_date_time: chrono::NaiveDateTime,
@@ -64,7 +64,7 @@ pub struct UserLoginHistory{
     pub user_login_id: i64,
     pub from_date: chrono::NaiveDateTime,
     // fields
-    pub visit_id: i32,
+    pub visit_id: i64,
     pub thru_date: chrono::NaiveDateTime,
     pub password_used: Option<String>,
     pub successful_login: bool,
@@ -88,7 +88,7 @@ pub struct UserLoginSession{
 #[table_name = "security_group"]
 pub struct SecurityGroup{
     // keys
-    pub group_id: i32,
+    pub group_id: i64,
     // fields
     pub group_name: Option<String>,
     pub description: Option<String>
@@ -101,7 +101,7 @@ pub struct SecurityGroup{
 #[table_name = "security_group_permission"]
 pub struct SecurityGroupPermission{
     // keys
-    pub group_id: i32,
+    pub group_id: i64,
     pub permission_id: i64,
     pub from_date: chrono::NaiveDateTime,
     // fields
@@ -126,7 +126,7 @@ pub struct SecurityPermission{
 pub struct UserLoginSecurityGroup{
     // keys
     pub user_login_id: i64,
-    pub group_id: i32,
+    pub group_id: i64,
     pub from_date: chrono::NaiveDateTime,
     // fields
     pub thru_date: chrono::NaiveDateTime
@@ -138,7 +138,7 @@ pub struct UserLoginSecurityGroup{
 #[table_name = "protected_view"]
 pub struct ProtectedView{
     // keys
-    pub group_id: i32,
+    pub group_id: i64,
     pub view_name_id: i64,
     // fields
     pub max_hits: i64,

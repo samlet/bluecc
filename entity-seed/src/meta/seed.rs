@@ -30,7 +30,8 @@ enum Command {
 /**
 ```bash
 $ cargo run --bin seed gen Example ent
-$ cargo run --bin seed gen ExampleStatus dto
+$ cargo run --bin seed gen example ExampleStatus dto
+$ cargo run --bin seed gen security UserLogin dto
 $ cargo run --bin seed list security
 $ cargo run --bin seed all security
 # $ cargo run --bin seed -- -o out_file list
@@ -144,6 +145,14 @@ fn entity_gen_works(module:&str, entity_name: &str, template_name: &str) -> tera
         let val=APP_CONTEXT.field_mappings.query_type(value.as_str().unwrap());
         Ok(Value::String(format!("{}", val)))
     }
+    fn opt_query_type(value: &Value, _args: &HashMap<String, Value>) -> Result<Value> {
+        let val=APP_CONTEXT.field_mappings.query_type(value.as_str().unwrap());
+        if val.starts_with("Option") {
+            Ok(Value::String(format!("{}", val)))
+        }else{
+            Ok(Value::String(format!("Option<{}>", val)))
+        }
+    }
     fn insert_type(value: &Value, _args: &HashMap<String, Value>) -> Result<Value> {
         let val=APP_CONTEXT.field_mappings.insert_type(value.as_str().unwrap());
         Ok(Value::String(format!("{}", val)))
@@ -246,9 +255,36 @@ pub struct {{ent['entity-name'] -}}<'a> {
     )
         .unwrap();
 
+    /*
+    #[serde(rename_all = "camelCase")]
+    UserLogin {
+        user_login_id: String,
+        enabled: Option<String>,
+        nick_name: Option<String>,
+    },
+     */
+    tera.add_raw_template(
+        "enum",
+        r#"
+#[serde(rename_all = "camelCase")]
+{{ent['entity-name'] -}} {
+    // keys
+{%- for fld in keys %}
+    {{fld.name | snake_case}}: {{fld['type'] | opt_query_type}},
+{%- endfor %}
+    // fields
+{%- for fld in flds %}
+    {{fld.name | snake_case}}: {{fld['type'] | opt_query_type}}{% if not loop.last %},{% endif %}
+{%- endfor %}
+},
+        "#,
+    )
+        .unwrap();
+
     let mut context = Context::new();
     tera.register_filter("sqltype", SqlType);
     tera.register_filter("query_type", query_type);
+    tera.register_filter("opt_query_type", opt_query_type);
     tera.register_filter("insert_type", insert_type);
     tera.register_filter("snake_case", snake_case);
     tera.register_filter("fk", fk_name);

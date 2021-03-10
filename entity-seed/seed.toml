@@ -5,6 +5,11 @@ use crate::schema::*;
 use diesel::prelude::*;
 '''
 
+enum_header='''#[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
+pub enum {{module}} {
+'''
+enum_footer="}"
+
 [security]
 up_sql="migrations/2021-03-09-120106_security/up.sql"
 down_sql="migrations/2021-03-09-120106_security/down.sql"

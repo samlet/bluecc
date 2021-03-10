@@ -1,3 +1,3 @@
 pub mod mnemonic;
-mod security;
+pub mod security;
 // mod example;

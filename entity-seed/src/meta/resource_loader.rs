@@ -269,6 +269,37 @@ fn transform_works() {
     store.store().unwrap();
 }
 
+#[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
+pub enum TestSeed {
+    #[serde(rename_all = "camelCase")]
+    UserLogin {
+        user_login_id: String,
+        enabled: Option<String>,
+        nick_name: Option<String>,
+    },
+    #[serde(rename_all = "camelCase")]
+    Appveyor {
+        repository: String,
+        id: Option<String>,
+        branch: Option<String>,
+        project_name: Option<String>,
+        service: Option<String>,
+    },
+}
+
+#[test]
+fn security_entity_works() -> anyhow::Result<()> {
+    // use crate::models::security::UserLogin;
+    let node_str=r##"<UserLogin userLoginId="188" enabled="N"/>"##;
+    let data:TestSeed=serde_xml_rs::from_str(node_str).unwrap();
+    println!("{:?}", data);
+
+    let json_str=r#"{"UserLogin":{"userLoginId":"0","enabled":"N", "other":0}}"#;
+    let data:TestSeed=serde_json::from_str(json_str)?;
+    println!("{:?}", data);
+    Ok(())
+}
+
 // use decimal::prelude::*;
 use serde::de::DeserializeOwned;
 use crate::snowflake::new_snowflake_id;

@@ -1,10 +1,13 @@
 use serde_derive::Deserialize;
 use tera::{Tera, Context};
+use inflector::Inflector;
 
 #[derive(Deserialize)]
 pub struct SeedConfig {
     pub version: String,
     header: Option<String>,
+    enum_header: Option<String>,
+    enum_footer: Option<String>,
     security: Generate,
     common: Generate,
     example: Generate,
@@ -36,9 +39,17 @@ impl SeedConfig{
     pub fn get_header(&self, table: &str) -> String {
         let mut tera = Tera::default();
         let mut context = Context::new();
-        context.insert("table", table);
 
+        context.insert("table", table);
         tera.render_str(self.header.as_ref().unwrap().as_str(), &context).unwrap()
+    }
+
+    pub fn get_enum_header(&self, module: &str) -> String {
+        use inflector::cases::camelcase::to_camel_case;
+        let mut tera = Tera::default();
+        let mut context = Context::new();
+        context.insert("module", module.to_camel_case().as_str());
+        tera.render_str(self.enum_header.as_ref().unwrap().as_str(), &context).unwrap()
     }
 }
 

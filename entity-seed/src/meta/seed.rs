@@ -270,11 +270,11 @@ pub struct {{ent['entity-name'] -}}<'a> {
 {{ent['entity-name'] -}} {
     // keys
 {%- for fld in keys %}
-    {{fld.name | snake_case}}: {{fld['type'] | opt_query_type}},
+    {{fld.name | snake_case}}: {{fld['type'] | opt_query_type}}, // {{ fld['type'] }}
 {%- endfor %}
     // fields
 {%- for fld in flds %}
-    {{fld.name | snake_case}}: {{fld['type'] | opt_query_type}}{% if not loop.last %},{% endif %}
+    {{fld.name | snake_case}}: {{fld['type'] | opt_query_type}}{% if not loop.last %},{% endif %} // {{ fld['type'] }}
 {%- endfor %}
 },
         "#,

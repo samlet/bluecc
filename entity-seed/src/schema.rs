@@ -1,4 +1,8 @@
 table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
     books (id) {
         id -> Int4,
         title -> Nullable<Varchar>,
@@ -8,6 +12,10 @@ table! {
 }
 
 table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
     comments (id) {
         id -> Int4,
         user_id -> Int4,
@@ -19,6 +27,10 @@ table! {
 }
 
 table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
     mnemonics (id) {
         id -> Int4,
         path -> Varchar,
@@ -29,6 +41,10 @@ table! {
 }
 
 table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
     posts (id) {
         id -> Int4,
         user_id -> Int4,
@@ -41,6 +57,10 @@ table! {
 }
 
 table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
     protected_view (group_id, view_name_id) {
         max_hits -> Nullable<Numeric>,
         max_hits_duration -> Nullable<Numeric>,
@@ -51,6 +71,10 @@ table! {
 }
 
 table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
     security_group (group_id) {
         group_name -> Nullable<Varchar>,
         description -> Nullable<Varchar>,
@@ -59,6 +83,10 @@ table! {
 }
 
 table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
     security_group_permission (group_id, permission_id, from_date) {
         thru_date -> Nullable<Timestamptz>,
         group_id -> Int8,
@@ -68,6 +96,10 @@ table! {
 }
 
 table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
     security_permission (permission_id) {
         description -> Nullable<Varchar>,
         permission_id -> Int8,
@@ -75,6 +107,10 @@ table! {
 }
 
 table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
     tarpitted_login_view (view_name_id, user_login_id) {
         tarpit_release_date_time -> Nullable<Numeric>,
         view_name_id -> Int8,
@@ -83,6 +119,10 @@ table! {
 }
 
 table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
     user_login (user_login_id) {
         current_password -> Nullable<Varchar>,
         password_hint -> Nullable<Varchar>,
@@ -103,6 +143,10 @@ table! {
 }
 
 table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
     user_login_history (user_login_id, from_date) {
         visit_id -> Int8,
         thru_date -> Nullable<Timestamptz>,
@@ -115,6 +159,10 @@ table! {
 }
 
 table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
     user_login_password_history (user_login_id, from_date) {
         thru_date -> Nullable<Timestamptz>,
         current_password -> Nullable<Varchar>,
@@ -124,6 +172,10 @@ table! {
 }
 
 table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
     user_login_security_group (user_login_id, group_id, from_date) {
         thru_date -> Nullable<Timestamptz>,
         user_login_id -> Int8,
@@ -133,6 +185,10 @@ table! {
 }
 
 table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
     user_login_session (user_login_id) {
         saved_date -> Nullable<Timestamptz>,
         session_data -> Nullable<Text>,
@@ -141,6 +197,10 @@ table! {
 }
 
 table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
     users (id) {
         id -> Int4,
         username -> Text,
@@ -151,6 +211,10 @@ table! {
 }
 
 table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
     x509_issuer_provision (cert_provision_id) {
         common_name -> Nullable<Varchar>,
         organizational_unit -> Nullable<Varchar>,

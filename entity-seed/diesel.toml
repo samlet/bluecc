@@ -3,3 +3,5 @@
 
 [print_schema]
 file = "src/schema.rs"
+import_types = ["diesel::sql_types::*", "diesel_full_text_search::{TsVector as Tsvector}", "bigdecimal::BigDecimal"]
+# import_types = ["bigdecimal::BigDecimal"]

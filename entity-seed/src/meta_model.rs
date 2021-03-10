@@ -93,6 +93,12 @@ pub struct ModelField{
     pub has_default: bool
 }
 
+impl ModelField{
+    pub fn is_id_type(&self) -> bool{
+        self.field_type.starts_with("id")
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ModelRelation{
     // one of: one, many, one-nofk
@@ -273,5 +279,6 @@ impl FieldTypes{
             fld.insert_type.clone()
         }
     }
+
 }
 

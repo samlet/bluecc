@@ -10,6 +10,7 @@ use std::path::PathBuf;
 use entity_seed::meta_model::{ModelField, EntityModel};
 use entity_seed::meta::seed_conf::SeedConfig;
 use entity_seed::snowflake::new_snowflake_id;
+use entity_seed::GenericError;
 
 #[derive(StructOpt)]
 struct Args {
@@ -134,7 +135,7 @@ async fn main(args: Args) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn entity_gen_works(module:&str, entity_name: &str, template_name: &str) -> tera::Result<String> {
+fn entity_gen_works(module:&str, entity_name: &str, template_name: &str) -> Result<String, GenericError> {
     use tera::{Result, Context, Filter, Function};
     use tera::Tera;
     use serde_json::{json, Value};
@@ -186,87 +187,11 @@ fn entity_gen_works(module:&str, entity_name: &str, template_name: &str) -> tera
     // }
 
     let mut tera = Tera::default();
-    tera.add_raw_template(
-        "ent",
-        r#"
-CREATE TABLE {{ent['entity-name'] | snake_case -}} (
-{%- for fld in flds %}
-    {{fld.name | snake_case}} {{fld['type'] | sqltype}},
-{%- endfor %}
-{% if ent.multiple_keys %}
-{%- for fld in keys %}
-    {{fld.name | snake_case}} {{fld['type'] | sqltype}},
-{%- endfor %}
-{%- endif %}
-{%- if not ent.multiple_keys %}
-    {{pks}} BIGSERIAL PRIMARY KEY
-{%- else %}
-    PRIMARY KEY ({{pks}})
-{%- endif %}
-);
-        "#,
-    )
-        .unwrap();
-
-    tera.add_raw_template(
-        "ent_rel",
-        r#"
-{% for item in belongs %}
-ALTER TABLE {{ent['entity-name'] | snake_case }} ADD CONSTRAINT {{item.fk_name | fk}}
-    FOREIGN KEY ({{item.field_name}}) REFERENCES {{item.model_name | snake_case -}} ({{item.rel_field_name}});
-{%- endfor %}
-        "#,
-    )
-        .unwrap();
-    tera.add_raw_template(
-        "ent_drop",
-        r#"
-DROP TABLE {{ent['entity-name'] | snake_case }};
-        "#,
-    )
-        .unwrap();
-    tera.add_raw_template(
-        "model",
-        r#"
-#[derive(Debug, Queryable, Identifiable{% if has_rels %}, Associations{% endif %})]
-#[primary_key({{pks}})]
-{%- for item in belongs %}
-#[belongs_to({{item.model_name}}, foreign_key = "{{item.field_name}}")]
-{%- endfor %}
-#[table_name = "{{ent['entity-name'] | snake_case}}"]
-pub struct {{ent['entity-name'] -}} {
-    // keys
-{%- for fld in keys %}
-    pub {{fld.name | snake_case}}: {{fld['type'] | query_type}},
-{%- endfor %}
-    // fields
-{%- for fld in flds %}
-    pub {{fld.name | snake_case}}: {{fld['type'] | query_type}}{% if not loop.last %},{% endif %}
-{%- endfor %}
-}
-        "#,
-    )
-        .unwrap();
-
-    tera.add_raw_template(
-        "dto",
-        r#"
-#[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct {{ent['entity-name'] -}}<'a> {
-    // keys
-{%- for fld in keys %}
-    #[serde(rename = "{{fld.name}}"{% if fld.has_default %}, default{% endif %})]
-    pub {{fld.name | snake_case}}: {{fld['type'] | insert_type}},
-{%- endfor %}
-    // fields
-{%- for fld in flds %}
-    #[serde(rename = "{{fld.name}}"{% if fld.has_default %}, default{% endif %})]
-    pub {{fld.name | snake_case}}: {{fld['type'] | insert_type}}{% if not loop.last %},{% endif %}
-{%- endfor %}
-}
-        "#,
-    )
-        .unwrap();
+    tera.add_raw_template("ent", include_str!("incls/ent.j2"))?;
+    tera.add_raw_template("ent_rel", include_str!("incls/ent_rel.j2"))?;
+    tera.add_raw_template("ent_drop", include_str!("incls/ent_drop.j2"))?;
+    tera.add_raw_template("model", include_str!("incls/model.j2"))?;
+    tera.add_raw_template("dto", include_str!("incls/dto.j2"))?;
 
     /*
     #[serde(rename_all = "camelCase")]
@@ -291,8 +216,7 @@ pub struct {{ent['entity-name'] -}}<'a> {
 {%- endfor %}
 },
         "#,
-    )
-        .unwrap();
+    )?;
 
     let mut context = Context::new();
     tera.register_filter("sqltype", SqlType);
@@ -313,8 +237,7 @@ pub struct {{ent['entity-name'] -}}<'a> {
     let has_rels=belongs.len()>0;
     context.insert("has_rels", &has_rels);
 
-    let result = tera.render(template_name, &context);
-    // println!("{}", result.unwrap());
-    result
+    let result = tera.render(template_name, &context)?;
+    Ok(result)
 }
 

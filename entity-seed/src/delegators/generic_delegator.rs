@@ -21,6 +21,12 @@ impl Delegator{
         let result = self.conn.select(query).await?;
         Ok(result)
     }
+
+    pub async fn find_all(&self, entity_name: &str) -> Result<ResultSet, GenericError> {
+        let query = Select::from_table(entity_name);
+        let result = self.conn.select(query).await?;
+        Ok(result)
+    }
 }
 
 pub async fn result_str(rs: ResultSet) -> String {
@@ -79,6 +85,32 @@ mod lib_tests {
             let desc = row.get("STATUS_ID").unwrap();
             println!("{:?}, {:?}", row.get("ORDER_ID").unwrap().as_str(), desc.as_str());
         }
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn visit_works() -> anyhow::Result<()> {
+        use quaint::{visitor::{Visitor, Postgres}};
+        let query = Select::from_table(("crm", "users"));
+        let (sql, _) = Postgres::build(query)?;
+        assert_eq!("SELECT `crm`.`users`.* FROM `crm`.`users`".replace("`","\""), sql);
+
+        //
+
+        let join = "dogs".on(("dogs", "slave_id").equals(Column::from(("cats", "master_id"))));
+        let query = Select::from_table("cats")
+            .value(Table::from("cats").asterisk())
+            .value(col!("dogs", "age") - val!(4))
+            .inner_join(join);
+
+        let (sql, params) = Postgres::build(query)?;
+
+        assert_eq!(
+            "SELECT `cats`.*, (`dogs`.`age` - $1) FROM `cats` INNER JOIN `dogs` ON `dogs`.`slave_id` = `cats`.`master_id`".replace("`","\""),
+            sql
+        );
+        assert_eq!(vec![Value::from(4)], params);
 
         Ok(())
     }

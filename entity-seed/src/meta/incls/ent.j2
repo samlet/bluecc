@@ -1,0 +1,15 @@
+CREATE TABLE {{ent['entity-name'] | snake_case -}} (
+{%- for fld in flds %}
+    {{fld.name | snake_case}} {{fld['type'] | sqltype}},
+{%- endfor %}
+{% if ent.multiple_keys %}
+{%- for fld in keys %}
+    {{fld.name | snake_case}} {{fld['type'] | sqltype}},
+{%- endfor %}
+{%- endif %}
+{%- if not ent.multiple_keys %}
+    {{pks}} BIGSERIAL PRIMARY KEY
+{%- else %}
+    PRIMARY KEY ({{pks}})
+{%- endif %}
+);

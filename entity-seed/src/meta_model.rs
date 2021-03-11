@@ -4,43 +4,7 @@ use itertools::Itertools;
 use phf::{phf_map};
 use std::collections::HashMap;
 use inflector::cases::snakecase::to_snake_case;
-use thiserror::Error;
 use crate::topo::TopologicalSort;
-
-#[derive(Error, Debug)]
-pub enum GenericError {
-    #[error("io error")]
-    Io(#[from] std::io::Error),
-    // #[error("dotenv error")]
-    // DotEnv(#[from] dotenv::Error),
-    // #[error("env error")]
-    // Env(#[from] std::env::VarError),
-    #[error("parse error")]
-    Parse(std::num::ParseIntError),
-    #[error("xml parse fail")]
-    ParseXml(roxmltree::Error),
-    #[error("json parse fail")]
-    ParseJson(#[from] serde_json::Error),
-    #[error("database error")]
-    DatabaseErr(#[from] quaint::error::Error),
-    #[error("config error")]
-    ConfigErr,
-    #[error("invalid header (expected {expected:?}, found {found:?})")]
-    InvalidHeader {
-        expected: String,
-        found: String,
-    },
-    #[error("unknown error")]
-    Unknown,
-    #[error(transparent)]
-    Other(#[from] anyhow::Error),  // source and Display delegate to anyhow::Error
-}
-
-impl From<roxmltree::Error> for GenericError {
-    fn from(err: roxmltree::Error) -> GenericError {
-        GenericError::ParseXml(err)
-    }
-}
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Entity{
@@ -99,6 +63,11 @@ impl Entity{
             .map(|r| r.rel_entity_name.clone())
             .nth(0)
     }
+
+    pub fn get_relation(&self, rel_name:&str) -> Option<&ModelRelation>{
+        self.relations.iter().filter(|r|rel_name==r.relation_name())
+            .nth(0)
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -149,6 +118,10 @@ impl ModelRelation{
     pub fn single_belongs(&self) -> bool{
         self.rel_type.starts_with("one") &&
             self.keymaps.len()==1
+    }
+
+    pub fn relation_name(&self) -> String{
+        format!("{}{}", self.title, self.rel_entity_name)
     }
 }
 

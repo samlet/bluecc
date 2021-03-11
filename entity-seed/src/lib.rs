@@ -27,7 +27,7 @@ mod delegators;
 
 pub use self::database::establish_connection;
 pub use self::util::deserialize_branch_with_contiguous_check as load_xml;
-pub use self::meta_model::GenericError;
+pub use self::errors::GenericError;
 pub use self::meta::app_context::{get_entity_by_name, get_entity_model,
                                   security_model, example_model};
 

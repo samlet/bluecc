@@ -1,0 +1,16 @@
+#[derive(Debug, Queryable, Identifiable{% if has_rels %}, Associations{% endif %})]
+#[primary_key({{pks}})]
+{%- for item in belongs %}
+#[belongs_to({{item.model_name}}, foreign_key = "{{item.field_name}}")]
+{%- endfor %}
+#[table_name = "{{ent['entity-name'] | snake_case}}"]
+pub struct {{ent['entity-name'] -}} {
+    // keys
+{%- for fld in keys %}
+    pub {{fld.name | snake_case}}: {{fld['type'] | query_type}},
+{%- endfor %}
+    // fields
+{%- for fld in flds %}
+    pub {{fld.name | snake_case}}: {{fld['type'] | query_type}}{% if not loop.last %},{% endif %}
+{%- endfor %}
+}

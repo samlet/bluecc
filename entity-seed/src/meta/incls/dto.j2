@@ -1,0 +1,13 @@
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct {{ent['entity-name'] -}}<'a> {
+    // keys
+{%- for fld in keys %}
+    #[serde(rename = "{{fld.name}}"{% if fld.has_default %}, default{% endif %})]
+    pub {{fld.name | snake_case}}: {{fld['type'] | insert_type}},
+{%- endfor %}
+    // fields
+{%- for fld in flds %}
+    #[serde(rename = "{{fld.name}}"{% if fld.has_default %}, default{% endif %})]
+    pub {{fld.name | snake_case}}: {{fld['type'] | insert_type}}{% if not loop.last %},{% endif %}
+{%- endfor %}
+}

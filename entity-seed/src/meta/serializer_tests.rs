@@ -86,3 +86,24 @@ fn bigdecimal_works() -> anyhow::Result<()> {
 
     Ok(())
 }
+
+#[test]
+fn rename_all_works() -> anyhow::Result<()> {
+    #[derive(Serialize, Deserialize, Debug)]
+    #[serde(rename_all(serialize = "SCREAMING_SNAKE_CASE", deserialize = "SCREAMING_SNAKE_CASE"))]
+    struct Point {
+        x_point: i32,
+        y_point: i32,
+        #[serde(default)]
+        user_comment: Option<String>,
+    }
+    let point = Point { x_point: 1, y_point: 2, user_comment: None };
+
+    let serialized = serde_json::to_string(&point).unwrap();
+    println!("serialized = {}", serialized);
+
+    let deserialized: Point = serde_json::from_str(&serialized).unwrap();
+    println!("deserialized = {:?}", deserialized);
+
+    Ok(())
+}

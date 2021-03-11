@@ -21,6 +21,6 @@ serde_derive = "1.0"
 serde_json = "1.0"
 # doesn't require singularize, pluralize, class, table, demodulize, deconstantize.
 Inflector = {version="*", default-features=false}
-toml = "*"
+toml = "0.5.8"
 chrono = "0.4"
 

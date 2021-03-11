@@ -11,7 +11,8 @@ members = [
     "modules/sample-books",
     "modules/sample-posts",
     "modules/all-about-inserts",
-    "modules/advanced-blog-cli"
+    "modules/advanced-blog-cli",
+    "contracts/cc_common",
 ]
 
 [profile.release]

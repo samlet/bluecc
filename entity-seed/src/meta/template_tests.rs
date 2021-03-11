@@ -128,7 +128,7 @@ fn object_works() {
     #[derive(Debug, Serialize)]
     struct Author {
         id: u8,
-    };
+    }
 
     let mut context = Context::new();
     context.insert("authors", &vec![Author { id: 1 }, Author { id: 2 }, Author { id: 3 }]);

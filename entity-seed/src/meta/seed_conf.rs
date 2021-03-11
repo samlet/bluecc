@@ -9,9 +9,15 @@ pub struct SeedConfig {
     enum_header: Option<String>,
     pub enum_footer: Option<String>,
     pub enum_output: Option<String>,
+    api: ApiGenConf,
     security: Generate,
     common: Generate,
     example: Generate,
+}
+
+#[derive(Clone, Deserialize)]
+pub struct ApiGenConf {
+    pub gen_root: String,
 }
 
 #[derive(Clone, Deserialize)]

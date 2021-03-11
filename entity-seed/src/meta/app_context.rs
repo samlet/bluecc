@@ -12,7 +12,7 @@ lazy_static! {
 
 lazy_static_include_bytes! {
     SECURITY_DOC => "entitydef/security-entitymodel.xml",
-    COMMON_DOC => "entitydef/entitymodel.xml",
+    COMMON_DOC => "entitydef/common-entitymodel.xml",
     EXAMPLE_DOC => "entitydef/example-entitymodel.xml",
     ACCOUNTING_DOC => "entitydef/accounting-entitymodel.xml",
 }

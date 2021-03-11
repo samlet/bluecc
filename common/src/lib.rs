@@ -5,6 +5,7 @@ extern crate bson;
 
 #[cfg(test)]
 mod tests;
+pub mod api;
 
 #[cfg(test)]
 mod common_tests {

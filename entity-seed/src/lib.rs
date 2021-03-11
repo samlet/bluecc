@@ -11,6 +11,9 @@ extern crate diesel;
 #[cfg(test)]
 #[macro_use]
 extern crate assert_matches;
+#[macro_use] extern crate log;
+// #[macro_use]
+// extern crate error_chain;
 
 pub mod meta;
 mod blues;
@@ -24,6 +27,7 @@ pub mod snowflake;
 mod object_id;
 mod topo;
 mod delegators;
+mod kube;
 
 pub use self::database::establish_connection;
 pub use self::util::deserialize_branch_with_contiguous_check as load_xml;

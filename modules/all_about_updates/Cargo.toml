@@ -1,0 +1,10 @@
+[package]
+name = "all_about_updates"
+version = "0.1.0"
+authors = ["Sean Griffin <sean@seantheprogrammer.com>"]
+
+[dependencies]
+diesel = { version = "1.4.0", features = ["postgres"] }
+
+[lib]
+doc = false

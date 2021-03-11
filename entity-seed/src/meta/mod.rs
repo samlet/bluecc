@@ -34,4 +34,5 @@ mod test_helpers;
 pub mod seed_conf;
 #[cfg(test)]
 mod serializer_tests;
+mod cc_conf;
 

@@ -89,6 +89,7 @@ fn ex_service_models() -> ServiceModel{
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::meta::cc_conf::CcConfig;
 
     /// https://github.com/paupino/rust-decimal/blob/master/tests/decimal_tests.rs
     #[test]
@@ -144,4 +145,34 @@ mod tests {
                      srv.description);
         }
     }
+
+    use glob::{glob_with, MatchOptions};
+
+    // error_chain! {
+    //     foreign_links {
+    //         Glob(glob::GlobError);
+    //         Pattern(glob::PatternError);
+    //     }
+    // }
+
+    // ref: https://rust-lang-nursery.github.io/rust-cookbook/file/dir.html
+    #[test]
+    fn list_service_conf_works() -> anyhow::Result<()> {
+        let cnt=std::fs::read_to_string("cc.toml")?;
+        let config: CcConfig = toml::from_str(cnt.as_str())?;
+        println!("ofbiz location: {}", config.ofbiz_loc);
+
+        let options = MatchOptions {
+            case_sensitive: false,
+            ..Default::default()
+        };
+
+        for entry in glob_with(
+            format!("{}/**/servicedef/services*.xml", config.ofbiz_loc).as_str(), options)? {
+            println!("{}", entry?.display());
+        }
+
+        Ok(())
+    }
 }
+

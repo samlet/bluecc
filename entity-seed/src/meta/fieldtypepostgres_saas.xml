@@ -7,7 +7,7 @@
     <field-type-def type="byte-array" sql-type="BYTEA" java-type="byte[]" query-type="Vec&lt;u8&gt;"/>
     <field-type-def type="object" sql-type="BYTEA" java-type="Object" query-type="Vec&lt;u8&gt;"/>
 
-    <field-type-def type="date-time" sql-type="TIMESTAMPTZ" java-type="java.sql.Timestamp" query-type="chrono::NaiveDateTime"/>
+    <field-type-def type="date-time" sql-type="TIMESTAMPTZ" java-type="java.sql.Timestamp" query-type="chrono::NaiveDateTime" orig-type="DateTime&lt;Utc&gt;"/>
     <field-type-def type="date" sql-type="DATE" java-type="java.sql.Date" query-type="chrono::NaiveDate"/>
     <field-type-def type="time" sql-type="TIME" java-type="java.sql.Time" query-type="chrono::NaiveTime"/>
 
@@ -18,11 +18,11 @@
     <field-type-def type="integer" sql-type="INTEGER" java-type="Integer" query-type="i32"/>
     <field-type-def type="numeric" sql-type="NUMERIC(20,0)" java-type="Long" query-type="i64" insert-type="i64"/>
     
-    <field-type-def type="id" sql-type="BIGINT NOT NULL" java-type="Integer" query-type="i64"/>
-    <field-type-def type="id-long" sql-type="BIGINT NOT NULL" java-type="Long" query-type="i64"/>
-    <field-type-def type="id-vlong" sql-type="BIGINT NOT NULL" java-type="Long" query-type="i64"/>
+    <field-type-def type="id" sql-type="BIGINT NOT NULL" java-type="Integer" query-type="i64" orig-type="String"/>
+    <field-type-def type="id-long" sql-type="BIGINT NOT NULL" java-type="Long" query-type="i64" orig-type="String"/>
+    <field-type-def type="id-vlong" sql-type="BIGINT NOT NULL" java-type="Long" query-type="i64" orig-type="String"/>
     
-    <field-type-def type="indicator" sql-type="CHAR(1)" sql-type-alias="BPCHAR" java-type="String" query-type="bool"/>
+    <field-type-def type="indicator" sql-type="CHAR(1)" sql-type-alias="BPCHAR" java-type="String" query-type="bool" orig-type="String"/>
     <field-type-def type="very-short" sql-type="VARCHAR(10)" java-type="String" query-type="Option&lt;String&gt;" insert-type="Option&lt;&amp;'a str&gt;"/>
     <field-type-def type="short-varchar" sql-type="VARCHAR(60)" java-type="String" query-type="Option&lt;String&gt;" insert-type="Option&lt;&amp;'a str&gt;"/>
     <field-type-def type="long-varchar" sql-type="VARCHAR(255)" java-type="String" query-type="Option&lt;String&gt;" insert-type="Option&lt;&amp;'a str&gt;"/>

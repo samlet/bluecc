@@ -159,6 +159,16 @@ fn entity_gen_works(module:&str, entity_name: &str, template_name: &str) -> Resu
         let val=APP_CONTEXT.field_mappings.query_type(value.as_str().unwrap());
         Ok(Value::String(format!("{}", val)))
     }
+
+    fn orig_type(value: &Value, _args: &HashMap<String, Value>) -> Result<Value> {
+        let val=APP_CONTEXT.field_mappings.orig_type(value.as_str().unwrap());
+        if val.starts_with("Option") {
+            Ok(Value::String(format!("{}", val)))
+        }else{
+            Ok(Value::String(format!("Option<{}>", val)))
+        }
+    }
+
     fn opt_query_type(value: &Value, _args: &HashMap<String, Value>) -> Result<Value> {
         let val=APP_CONTEXT.field_mappings.query_type(value.as_str().unwrap());
         if val.starts_with("Option") {
@@ -192,6 +202,7 @@ fn entity_gen_works(module:&str, entity_name: &str, template_name: &str) -> Resu
     tera.add_raw_template("ent_drop", include_str!("incls/ent_drop.j2"))?;
     tera.add_raw_template("model", include_str!("incls/model.j2"))?;
     tera.add_raw_template("dto", include_str!("incls/dto.j2"))?;
+    tera.add_raw_template("dto_orig", include_str!("incls/dto_orig.j2"))?;
 
     /*
     #[serde(rename_all = "camelCase")]
@@ -201,27 +212,13 @@ fn entity_gen_works(module:&str, entity_name: &str, template_name: &str) -> Resu
         nick_name: Option<String>,
     },
      */
-    tera.add_raw_template(
-        "enum",
-        r#"
-#[serde(rename_all = "camelCase")]
-{{ent['entity-name'] -}} {
-    // keys
-{%- for fld in keys %}
-    {{fld.name | snake_case}}: {{fld['type'] | opt_query_type}}, // {{ fld['type'] }}
-{%- endfor %}
-    // fields
-{%- for fld in flds %}
-    {{fld.name | snake_case}}: {{fld['type'] | opt_query_type}}{% if not loop.last %},{% endif %} // {{ fld['type'] }}
-{%- endfor %}
-},
-        "#,
-    )?;
+    tera.add_raw_template("enum", include_str!("incls/enum.j2"))?;
 
     let mut context = Context::new();
     tera.register_filter("sqltype", SqlType);
     tera.register_filter("query_type", query_type);
     tera.register_filter("opt_query_type", opt_query_type);
+    tera.register_filter("orig_type", orig_type);
     tera.register_filter("insert_type", insert_type);
     tera.register_filter("snake_case", snake_case);
     tera.register_filter("fk", fk_name);

@@ -239,7 +239,9 @@ pub struct FieldTypeDef{
     #[serde(rename = "query-type", default)]
     pub query_type: String,
     #[serde(rename = "insert-type", default)]
-    pub insert_type: String
+    pub insert_type: String,
+    #[serde(rename = "orig-type", default)]
+    pub orig_type: String
 }
 
 #[derive(Debug, Deserialize)]
@@ -253,7 +255,7 @@ impl FieldTypes{
         self.field_types.iter()
             .find(|x| x.field_type==field_type).unwrap()
     }
-    pub fn sql_type(&self, field_type:&str) -> String{
+    pub fn sql_type(&self, field_type: &str) -> String{
         self.get_field(field_type).sql_type.clone()
     }
     pub fn query_type(&self, field_type:&str) -> String{
@@ -268,6 +270,15 @@ impl FieldTypes{
             fld.query_type.clone()
         }
     }
+    pub fn orig_type(&self, field_type: &str) -> String{
+        let typ=&self.get_field(field_type).orig_type;
+        if typ.is_empty(){
+            self.query_type(field_type)
+        }else{
+            typ.to_owned()
+        }
+    }
+
     pub fn insert_type(&self, field_type:&str) -> String{
         let fld=self.get_field(field_type);
         if fld.insert_type.is_empty(){

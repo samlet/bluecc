@@ -60,7 +60,6 @@ async fn insert_works() -> anyhow::Result<()> {
 }
 
 #[tokio::test]
-// async fn select_works() -> Result<(), quaint::error::Error> {
 async fn select_works() -> anyhow::Result<()> {
     // let conn = Quaint::new("sqlite:///tmp/example.db").await?;
     let url="mysql://root:root@localhost:3306/ofbiz";

@@ -1,0 +1,12 @@
+#[derive(Debug, Deserialize, Serialize, Clone)]
+#[serde(rename_all(serialize = "SCREAMING_SNAKE_CASE", deserialize = "SCREAMING_SNAKE_CASE"))]
+pub struct {{ent['entity-name'] -}} {
+    // keys
+{%- for fld in keys %}
+    pub {{fld.name | snake_case}}: {{fld['type'] | orig_type}},
+{%- endfor %}
+    // fields
+{%- for fld in flds %}
+    pub {{fld.name | snake_case}}: {{fld['type'] | orig_type}}{% if not loop.last %},{% endif %}
+{%- endfor %}
+}

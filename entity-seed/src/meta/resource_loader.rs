@@ -4,7 +4,7 @@ use std::io::prelude::*;
 use crate::meta_model::EntityModel;
 use serde::Deserialize;
 use std::io::{Read, BufReader};
-use std::collections::{HashMap, BTreeMap};
+use std::collections::{HashMap, BTreeMap, HashSet};
 use chrono::Utc;
 use serde_json::{Value, Error};
 use crate::util::{parse_pair};
@@ -19,6 +19,8 @@ use std::fs::read_to_string;
 use crate::models::enum_types::EntityTypes;
 use chrono::{NaiveDateTime, NaiveDate};
 use crate::models::model_types::SeedTypes;
+use crate::meta::cc_conf::CcConfig;
+use glob::{MatchOptions, glob_with};
 
 lazy_static_include_bytes! {
 // lazy_static_include_str! {
@@ -31,6 +33,18 @@ lazy_static! {
         let mut m = HashMap::new();
         m
     };
+}
+
+pub fn get_entities_in_file(xml_file: &str) -> Result<HashSet<String>, GenericError> {
+    let xml_str=std::fs::read_to_string(xml_file)?;
+    let mut doc = roxmltree::Document::parse(xml_str.as_str()).unwrap();
+    let root = doc.root_element();
+    let excepts=vec!["create", "create-replace", "create-update", "delete"];
+    let ents=root.children().into_iter()
+        .filter(|e| e.is_element() && !excepts.contains(&e.tag_name().name()))
+        .map(|e| e.tag_name().name().to_string())
+        .collect::<HashSet<String>>();
+    Ok(ents)
 }
 
 #[test]
@@ -449,3 +463,29 @@ fn as_string_map_works() {
     println!("{:?}", f(&map).unwrap())
 }
 
+pub fn list_data_files() -> anyhow::Result<()> {
+    let cnt=std::fs::read_to_string("cc.toml")?;
+    let config: CcConfig = toml::from_str(cnt.as_str())?;
+    println!("ofbiz location: {}", config.ofbiz_loc);
+
+    let options = MatchOptions {
+        case_sensitive: false,
+        ..Default::default()
+    };
+
+    for entry in glob_with(
+        format!("{}/**/data/*.xml", config.ofbiz_loc).as_str(), options)? {
+        let path=entry?;
+        println!("{}", path.display());
+        let ents=get_entities_in_file(path.to_str().unwrap())?;
+        let r=serde_json::to_string_pretty(&ents)?;
+        println!("{}", r)
+    }
+
+    Ok(())
+}
+
+#[test]
+fn list_data_files_works() -> anyhow::Result<()> {
+    list_data_files()
+}

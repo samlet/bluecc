@@ -25,7 +25,7 @@ mod requests;
 
 pub mod app_context;
 mod service_models;
-mod resource_loader;
+pub mod resource_loader;
 mod askama_tests;
 mod form_parsers;
 mod basic_models;

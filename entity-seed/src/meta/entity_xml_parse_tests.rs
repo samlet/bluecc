@@ -48,6 +48,24 @@ fn custom_err_works() -> anyhow::Result<()> {
     Ok(())
 }
 
+#[test]
+fn get_entities_test() -> anyhow::Result<()> {
+    let xml_str=str::from_utf8(include_bytes!("ExampleDemoData.xml"))?;
+    let mut doc = roxmltree::Document::parse(xml_str).unwrap();
+    let root = doc.root_element();
+    // for node in root.children(){
+    //     println!("{}", node.tag_name().name());
+    // }
+    let excepts=vec!["create", "create-replace", "create-update", "delete"];
+    let ents=root.children().into_iter()
+        .filter(|e| e.is_element() && !excepts.contains(&e.tag_name().name()))
+        .map(|e| e.tag_name().name().to_string())
+        .collect::<HashSet<String>>();
+    let r=serde_json::to_string_pretty(&ents)?;
+    println!("{}", r);
+    Ok(())
+}
+
 /// ref: https://github.com/RazrFalcon/roxmltree/blob/master/tests/dom-api.rs
 #[test]
 fn seed_works(){
@@ -100,7 +118,7 @@ fn reader_works() {
 
 use structmap::FromHashMap;
 use structmap_derive::FromHashMap;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use structmap::value::Value;
 use crate::util::parse_pair;
 

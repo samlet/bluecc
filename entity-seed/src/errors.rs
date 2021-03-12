@@ -19,6 +19,10 @@ pub enum GenericError {
     TeraTemplateErr(#[from] tera::Error),
     #[error("database error")]
     DatabaseErr(#[from] quaint::error::Error),
+    #[error("config toml error")]
+    ConfigTomlErr(#[from] toml::de::Error),
+    #[error("glob pattern error")]
+    PatternErr(#[from] glob::PatternError),
     #[error("config error")]
     ConfigErr,
     #[error("invalid header (expected {expected:?}, found {found:?})")]

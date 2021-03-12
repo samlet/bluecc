@@ -12,6 +12,7 @@ use entity_seed::meta::seed_conf::SeedConfig;
 use entity_seed::snowflake::new_snowflake_id;
 use entity_seed::{GenericError, get_entities_by_module_names};
 use tera::{Context, Tera};
+use entity_seed::meta::resource_loader::list_data_files;
 
 #[derive(StructOpt)]
 struct Args {
@@ -28,6 +29,7 @@ enum Command {
     All { module: String},
     List { module: String},
     Wrapper,
+    DataFiles,
 }
 
 /**
@@ -133,6 +135,10 @@ async fn main(args: Args) -> anyhow::Result<()> {
             let result=Tera::one_off(include_str!("incls/seed_wrapper.j2"), &context, true)?;
             println!("{}", result);
             std::fs::write(conf.seed_wrapper, result)?;
+        }
+
+        Some(Command::DataFiles {  }) => {
+            list_data_files()?;
         }
 
         None => {

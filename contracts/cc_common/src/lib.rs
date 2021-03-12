@@ -1,24 +1,46 @@
 #![cfg_attr(not(feature = "std"), no_std)]
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
+mod models;
 
 use ink_lang as ink;
 
 #[ink::contract]
 mod cc_common {
+    use ink_storage::{
+        collections::{
+            HashMap as StorageHashMap,
+            Stash as StorageStash,
+            Vec as StorageVec,
+        },
+        traits::{
+            PackedLayout,
+            SpreadLayout,
+        },
+        Lazy,
+    };
+    use scale::Output;
+
+    use crate::models::Transaction;
 
     /// Defines the storage of your contract.
-    /// Add new fields to the below struct in order
-    /// to add new static storage fields to your contract.
+        /// Add new fields to the below struct in order
+        /// to add new static storage fields to your contract.
     #[ink(storage)]
     pub struct CcCommon {
         /// Stores a single `bool` value on the storage.
         value: bool,
+        transactions: StorageStash<Transaction>,
     }
 
     impl CcCommon {
         /// Constructor that initializes the `bool` value to the given `init_value`.
         #[ink(constructor)]
         pub fn new(init_value: bool) -> Self {
-            Self { value: init_value }
+            Self {
+                value: init_value,
+                transactions: StorageStash::default(),
+            }
         }
 
         /// Constructor that initializes the `bool` value to `false`.

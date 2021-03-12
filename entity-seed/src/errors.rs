@@ -23,6 +23,8 @@ pub enum GenericError {
     ConfigTomlErr(#[from] toml::de::Error),
     #[error("glob pattern error")]
     PatternErr(#[from] glob::PatternError),
+    #[error("glob error")]
+    GlobErr(#[from] glob::GlobError),
     #[error("config error")]
     ConfigErr,
     #[error("invalid header (expected {expected:?}, found {found:?})")]

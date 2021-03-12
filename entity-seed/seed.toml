@@ -9,10 +9,12 @@ enum_header='''#[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
 pub enum EntityTypes {
 '''
 enum_footer="}"
-enum_output="src/models/model_types.rs"
+enum_output="src/models/enum_types.rs"
+seed_types="../cc-types/src/models/{{module}}_types.rs"
+seed_wrapper="../cc-types/src/models/model_types.rs"
 
 [api]
-gen_root="../common/src/api"
+gen_root="../cc-types/src"
 
 [security]
 up_sql="migrations/2021-03-09-120106_security/up.sql"

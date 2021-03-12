@@ -9,6 +9,8 @@ pub struct SeedConfig {
     enum_header: Option<String>,
     pub enum_footer: Option<String>,
     pub enum_output: Option<String>,
+    pub seed_types: Option<String>,
+    pub seed_wrapper: String,
     api: ApiGenConf,
     security: Generate,
     common: Generate,

@@ -1,0 +1,16 @@
+{%- for mod in modules -%}
+use crate::models::{{mod-}}_types::*;
+{%- endfor %}
+
+#[derive(Deserialize, Debug)]
+pub struct SeedRecords {
+    pub items: Vec<SeedTypes>
+}
+
+#[derive(Deserialize, Debug)]
+pub enum SeedTypes {
+{%- for ent in ents %}
+    {{ent}}({{ent}}),
+{%- endfor %}
+}
+

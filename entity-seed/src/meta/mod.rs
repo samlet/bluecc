@@ -35,4 +35,5 @@ pub mod seed_conf;
 #[cfg(test)]
 mod serializer_tests;
 mod cc_conf;
+mod security_procs;
 

@@ -1,0 +1,14 @@
+#[derive(Debug, Insertable, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+#[table_name = "{{ent['entity-name'] | snake_case}}"]
+pub struct {{ent['entity-name'] -}} {
+    // keys
+{%- for fld in keys %}
+    pub {{fld.name | snake_case}}: {{fld['type'] | opt_query_type}}, // {{ fld['type'] }}
+{%- endfor %}
+    // fields
+{%- for fld in flds %}
+    pub {{fld.name | snake_case}}: {{fld['type'] | opt_query_type}}{% if not loop.last %},{% endif %} // {{ fld['type'] }}
+{%- endfor %}
+}
+

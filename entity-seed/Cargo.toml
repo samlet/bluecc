@@ -104,13 +104,5 @@ diesel_migrations = { version = "1.4", features = ["postgres"] }
 lazy_static = "1.0"
 
 [[bin]]
-name = "meta-cli"
-path = "src/cli/meta_cli.rs"
-
-[[bin]]
-name = "git"
-path = "src/cli/git.rs"
-
-[[bin]]
 name = "seed"
 path = "src/meta/seed.rs"

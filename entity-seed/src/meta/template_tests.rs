@@ -296,3 +296,12 @@ fn var_access_by_square_brackets() {
         assert_eq!(Tera::one_off(input, &context, true).unwrap(), expected);
     }
 }
+
+#[test]
+fn one_off_works() -> anyhow::Result<()> {
+    let mut context = Context::new();
+    context.insert("greeting", &"hello");
+    let r=Tera::one_off("{{ greeting }} world", &context, true)?;
+    println!("{}", r);
+    Ok(())
+}

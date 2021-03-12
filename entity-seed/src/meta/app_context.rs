@@ -59,6 +59,12 @@ pub fn get_entity_by_name(entity_name: &str) -> Option<&Entity> {
         .filter(|e| e.entity_name==entity_name)
         .nth(0)
 }
+pub fn get_entities_by_module_names(mods:&Vec<String>) -> Vec<String> {
+    APP_CONTEXT.models.iter()
+        .filter(|(k,_)|mods.contains(k))
+        .flat_map(|(_, e)|e.entity_names())
+        .collect()
+}
 
 pub fn security_model() ->  &'static EntityModel{
     get_entity_model("security")

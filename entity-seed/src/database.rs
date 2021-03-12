@@ -25,7 +25,7 @@ fn pg_pool(db_url: &str) -> PgPool {
     Pool::new(manager).expect("Postgres connection pool could not be created")
 }
 
-fn establish_connection_with_pool() -> PooledPg {
+pub fn establish_connection_with_pool() -> PooledPg {
     dotenv().ok();
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL env not set");
     pg_pool(database_url.as_str()).get().unwrap()

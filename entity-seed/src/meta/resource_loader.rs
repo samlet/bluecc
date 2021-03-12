@@ -10,6 +10,16 @@ use serde_json::{Value, Error};
 use crate::util::{parse_pair};
 use std::fs;
 
+// use decimal::prelude::*;
+use serde::de::DeserializeOwned;
+use crate::snowflake::new_snowflake_id;
+use crate::{load_xml, get_entity_model, GenericError, get_entity_by_name};
+use roxmltree::Node;
+use std::fs::read_to_string;
+use crate::models::enum_types::EntityTypes;
+use chrono::{NaiveDateTime, NaiveDate};
+use crate::models::model_types::SeedTypes;
+
 lazy_static_include_bytes! {
 // lazy_static_include_str! {
     EXAMPLE_DOC => "entitydef/example-entitymodel.xml",
@@ -168,7 +178,6 @@ fn now() -> chrono::NaiveDateTime {
     now - chrono::Duration::nanoseconds(nanos.into())
 }
 
-use chrono::{NaiveDateTime, NaiveDate};
 #[test]
 fn seed_works() -> anyhow::Result<()>{
     let parse_dt=NaiveDateTime::parse_from_str;
@@ -269,7 +278,7 @@ fn transform_works() {
     store.store().unwrap();
 }
 
-fn process_seed(xml_str: &str) -> Result<Vec<EntityTypes>, GenericError>{
+fn process_seed(xml_str: &str) -> Result<Vec<SeedTypes>, GenericError>{
     use chrono::format::strftime::StrftimeItems;
 
     let parse_dt=NaiveDateTime::parse_from_str;
@@ -313,7 +322,7 @@ fn process_seed(xml_str: &str) -> Result<Vec<EntityTypes>, GenericError>{
         }).collect();
 
         let node_str=format!("<{} {}/>", node.tag_name().name(), flds.join(" "));
-        let data:EntityTypes=serde_xml_rs::from_str(node_str.as_str()).unwrap();
+        let data:SeedTypes=serde_xml_rs::from_str(node_str.as_str()).unwrap();
         println!("{} ->\n  {:?}", node_str, data);
         result_set.push(data);
     }
@@ -327,6 +336,13 @@ fn process_seed_works() -> anyhow::Result<()> {
     let cnt=read_to_string("data/security/SecurityGroupDemoData.xml")?;
     let rs=process_seed(cnt.as_str())?;
     println!("total {}", rs.len());
+    match rs.get(0) {
+        Some(SeedTypes::SecurityGroup(e))=> {
+            println!("group id {:?}\n{}", e.group_id, serde_json::to_string_pretty(e)?);
+            // store it to db
+        }
+        _ => ()
+    }
     Ok(())
 }
 
@@ -382,13 +398,29 @@ fn entity_types_works() -> anyhow::Result<()> {
     Ok(())
 }
 
-// use decimal::prelude::*;
-use serde::de::DeserializeOwned;
-use crate::snowflake::new_snowflake_id;
-use crate::{load_xml, get_entity_model, GenericError, get_entity_by_name};
-use roxmltree::Node;
-use std::fs::read_to_string;
-use crate::models::model_types::EntityTypes;
+#[test]
+fn seed_types_works() -> anyhow::Result<()> {
+    use crate::models::security_types::{UserLogin, UserLoginPasswordHistory};
+    #[derive(Deserialize, Debug)]
+    struct Seeds {
+        items: Vec<Types>
+    }
+    #[derive(Deserialize, Debug)]
+    enum Types {
+        UserLogin(UserLogin),
+        UserLoginPasswordHistory(UserLoginPasswordHistory)
+    }
+
+    let node_str = r##"<UserLogin userLoginId="188" enabled="true"/>"##;
+    let data: Types = serde_xml_rs::from_str(node_str).unwrap();
+    match data {
+        Types::UserLogin(ref rec) => { assert!(rec.enabled.unwrap()) }
+        _ => ()
+    }
+    println!("{:?}", data);
+    Ok(())
+}
+
 
 #[derive(Deserialize, Debug)]
 struct User {

@@ -10,7 +10,8 @@ use std::path::PathBuf;
 use entity_seed::meta_model::{ModelField, EntityModel};
 use entity_seed::meta::seed_conf::SeedConfig;
 use entity_seed::snowflake::new_snowflake_id;
-use entity_seed::GenericError;
+use entity_seed::{GenericError, get_entities_by_module_names};
+use tera::{Context, Tera};
 
 #[derive(StructOpt)]
 struct Args {
@@ -26,6 +27,7 @@ enum Command {
     Gen { module: String, entity: String, type_name:String },
     All { module: String},
     List { module: String},
+    Wrapper,
 }
 
 /**
@@ -35,6 +37,7 @@ $ cargo run --bin seed gen example ExampleStatus dto
 $ cargo run --bin seed gen security UserLogin dto
 $ cargo run --bin seed list security
 $ cargo run --bin seed all security
+$ cargo run --bin seed wrapper
 # $ cargo run --bin seed -- -o out_file list
 ```
 */
@@ -63,6 +66,9 @@ async fn main(args: Args) -> anyhow::Result<()> {
             }
         }
         Some(Command::All { module }) => {
+            let mut context = Context::new();
+            context.insert("module", &module);
+
             let model=&APP_CONTEXT.get_model(module.as_str());
             let conf=SeedConfig::load()?;
             let module_conf=&conf.module_conf(module.as_str()).unwrap();
@@ -76,6 +82,7 @@ async fn main(args: Args) -> anyhow::Result<()> {
             let enum_header=&conf.get_enum_header(module.as_str());
             let enum_footer=&conf.enum_footer.unwrap().to_owned();
             let enum_output=&conf.enum_output.unwrap().to_owned();
+            let seed_output=&conf.seed_types.unwrap().to_owned();
 
             let gen = |typs:Vec<&str>, write_header:bool|  {
                 let mut output=String::new();
@@ -109,7 +116,23 @@ async fn main(args: Args) -> anyhow::Result<()> {
             std::fs::write(up_sql_file, gen(vec!["ent", "ent_rel"], false))?;
             std::fs::write(down_sql_file, gen(vec!["ent_drop"], false))?;
             std::fs::write(enum_output, gen(vec!["enum"], false))?;
+            std::fs::write(Tera::one_off(seed_output, &context, true)?,
+                           gen(vec!["dto_seed"], true))?;
             println!("done.");
+        }
+
+        Some(Command::Wrapper {  }) => {
+            let conf=SeedConfig::load()?;
+
+            let mut context = Context::new();
+            let mods=vec!["security".into()];
+            let ents=get_entities_by_module_names(&mods);
+            // let names=ents.iter().map(|e|e.entity_name).collect();
+            context.insert("ents", &ents);
+            context.insert("modules", &mods);
+            let result=Tera::one_off(include_str!("incls/seed_wrapper.j2"), &context, true)?;
+            println!("{}", result);
+            std::fs::write(conf.seed_wrapper, result)?;
         }
 
         None => {
@@ -202,6 +225,7 @@ fn entity_gen_works(module:&str, entity_name: &str, template_name: &str) -> Resu
     tera.add_raw_template("ent_drop", include_str!("incls/ent_drop.j2"))?;
     tera.add_raw_template("model", include_str!("incls/model.j2"))?;
     tera.add_raw_template("dto", include_str!("incls/dto.j2"))?;
+    tera.add_raw_template("dto_seed", include_str!("incls/dto_seed.j2"))?;
     tera.add_raw_template("dto_orig", include_str!("incls/dto_orig.j2"))?;
 
     /*

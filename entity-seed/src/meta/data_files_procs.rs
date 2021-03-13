@@ -6,15 +6,19 @@ use std::path::PathBuf;
 use thiserror::private::PathAsDisplay;
 use std::str::FromStr;
 use std::str;
+use super::*;
+use serde::{Serialize, de};
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
-struct DataFile{
+pub struct DataFile{
     pub uri: String,
     pub path: String,
     pub content: String,
+    #[serde(default)]
+    pub entities: Vec<String>,
 }
 #[derive(Debug, Deserialize, Serialize, Clone)]
-struct DataFiles{
+pub struct DataFiles{
     pub files: Vec<DataFile>,
 }
 
@@ -62,49 +66,91 @@ fn list_files_works() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[test]
-fn merge_files_works() -> anyhow::Result<()> {
+pub fn merge_files(dir: &str, filter: &str, json_output: &str)
+    -> Result<String,GenericError>{
+
     use std::io::prelude::*;
-    use flate2::Compression;
-    use flate2::write::ZlibEncoder;
 
     let mut data_files=DataFiles{ files: vec![] };
-    let files=list_files("./data", "**/*.xml")?;
+    let files=list_files(dir, filter)?;
     for f in &files{
         println!(".. read {} start", f.as_display());
         let cnt=std::fs::read_to_string(f)?;
         // println!(".. read {} end", f.as_display());
+        let path=f.to_str().unwrap().to_owned();
         data_files.files.push(DataFile{
             uri: f.file_name().unwrap().to_str().unwrap().to_string(),
-            path: f.to_str().unwrap().to_string(),
+            path: path.to_owned(),
             content: cnt,
+            entities: get_entities_in_file(path.as_str())?.iter()
+                .map(|e|e.clone())
+                .collect::<Vec<String>>(),
         });
     }
 
+    let zout=store_z(&data_files, json_output)?;
+    Ok(zout)
+}
+
+pub fn store_z<T>(data_files:&T, json_output: &str) -> Result<String,GenericError>
+where
+    T: ?Sized + Serialize,{
+    use std::io::prelude::*;
+    use flate2::Compression;
+    use flate2::write::ZlibEncoder;
+
     let val=serde_json::to_string_pretty(&data_files)?;
-    std::fs::write("./.store/data_files.json", &val)?;
+    std::fs::write(json_output, &val)?;
 
     let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
     e.write_all(&val.as_bytes());
     let compressed_bytes = e.finish()?;
-    std::fs::write("./.store/data_files.z", compressed_bytes)?;
+    let zout=format!("{}z", json_output);
+    std::fs::write(&zout, compressed_bytes)?;
+    Ok(zout)
+}
 
+#[test]
+fn merge_files_works() -> anyhow::Result<()> {
+    let zout=merge_files("./data", "**/*.xml",
+                "./.store/data_files.json")?;
+    println!("save to {}", zout);
     Ok(())
+}
+
+pub fn load_z<T>(bytes:&[u8]) -> Result<T, GenericError>
+where
+    T: de::DeserializeOwned,{
+    use std::io::prelude::*;
+    use flate2::read::ZlibDecoder;
+
+    let mut d = ZlibDecoder::new(bytes);
+    let mut s = String::new();
+    d.read_to_string(&mut s).unwrap();
+    info!("size {}", &s.len());
+    let data_files:T=serde_json::from_str(&s)?;
+
+    Ok(data_files)
 }
 
 #[test]
 fn load_z_works() -> anyhow::Result<()> {
-    use std::io::prelude::*;
-    use flate2::read::ZlibDecoder;
     let bytes:&[u8] =include_bytes!("data_files.z");
-    let mut d = ZlibDecoder::new(bytes);
-    let mut s = String::new();
-    d.read_to_string(&mut s).unwrap();
-    println!("size {}", s.len());
-
-    let data_files:DataFiles=serde_json::from_str(&s)?;
+    let data_files=load_z::<DataFiles>(bytes)?;
     for f in &data_files.files{
         println!("{}: {}", f.uri, f.path);
     }
     Ok(())
 }
+
+#[test]
+fn load_z_file_works() -> anyhow::Result<()> {
+    let bytes =std::fs::read("./.store/data_files.jsonz")?;
+    let data_files=load_z::<DataFiles>(&bytes)?;
+    for f in &data_files.files{
+        println!("{}: {}", f.uri, f.path);
+        println!("\t{:?}", f.entities);
+    }
+    Ok(())
+}
+

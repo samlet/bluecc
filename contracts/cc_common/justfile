@@ -1,4 +1,8 @@
 canvas:
 	canvas --dev --tmp
+expand:
+	cargo expand --no-default-features --target=wasm32-unknown-unknown --color never
+
+
 
 

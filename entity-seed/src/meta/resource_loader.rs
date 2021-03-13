@@ -22,6 +22,8 @@ use crate::models::model_types::SeedTypes;
 use crate::meta::cc_conf::CcConfig;
 use glob::{MatchOptions, glob_with};
 
+use super::*;
+
 lazy_static_include_bytes! {
 // lazy_static_include_str! {
     EXAMPLE_DOC => "entitydef/example-entitymodel.xml",
@@ -464,8 +466,7 @@ fn as_string_map_works() {
 }
 
 pub fn list_data_files() -> anyhow::Result<()> {
-    let cnt=std::fs::read_to_string("cc.toml")?;
-    let config: CcConfig = toml::from_str(cnt.as_str())?;
+    let config=cc_conf()?;
     println!("ofbiz location: {}", config.ofbiz_loc);
 
     let options = MatchOptions {

@@ -38,3 +38,5 @@ mod cc_conf;
 mod security_procs;
 mod data_files_procs;
 
+pub use resource_loader::{get_entities_in_file};
+pub use cc_conf::{cc_conf};

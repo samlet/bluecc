@@ -13,7 +13,7 @@ use entity_seed::snowflake::new_snowflake_id;
 use entity_seed::{GenericError, get_entities_by_module_names};
 use tera::{Context, Tera};
 use entity_seed::meta::resource_loader::list_data_files;
-use entity_seed::meta::{FileTypes, merge_files, cc_conf};
+use entity_seed::meta::*;
 
 #[derive(StructOpt)]
 struct Args {
@@ -24,15 +24,6 @@ struct Args {
     output: Option<PathBuf>,
 }
 
-#[derive(StructOpt)]
-enum Command {
-    Gen { module: String, entity: String, type_name:String },
-    All { module: String},
-    List { module: String},
-    Wrapper,
-    DataFiles,
-    ModelFiles,
-}
 
 /**
 ```bash
@@ -44,8 +35,23 @@ $ cargo run --bin seed all security
 $ cargo run --bin seed wrapper
 # $ cargo run --bin seed -- -o out_file list
 $ bluecc model-files  # 合并压缩所有的模型定义和数据文件
+$ bluecc entity StatusItem
+$ bluecc seed Person
 ```
 */
+
+
+#[derive(StructOpt)]
+enum Command {
+    Gen { module: String, entity: String, type_name:String },
+    All { module: String},
+    List { module: String},
+    Wrapper,
+    DataFiles,
+    ModelFiles,
+    Entity {name: String},
+    Seed {name: String},
+}
 
 #[async_std::main]
 #[paw::main]
@@ -156,6 +162,29 @@ async fn main(args: Args) -> anyhow::Result<()> {
             let zout=merge_files(dir, "**/servicedef/*.xml",
                 "./.store/service_model_files.json", &FileTypes::ServiceModel)?;
             println!("save service models to {}", zout);
+        }
+
+        Some(Command::Entity { name  }) => {
+            let reader=ModelReader::load()?;
+            let ent=reader.get_entity_model(name.as_str())?;
+            match ent {
+                Some(ent) => {
+                    let ent_json=serde_json::to_string_pretty(&ent)?;
+                    println!("{}",  ent_json);
+                }
+                _ => ()
+            }
+
+        }
+
+        Some(Command::Seed { name  }) => {
+            load_seed_model_z_file(name.as_str(), |n| {
+                println!("{} ({:?})", n.tag_name().name(), n.range());
+                for attr in n.attributes() {
+                    println!("\t{} = {}", attr.name(), attr.value());
+                }
+                true
+            })?;
         }
 
         None => {

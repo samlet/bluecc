@@ -1,5 +1,5 @@
 use serde_json::json;
-use crate::GenericError;
+use crate::{GenericError, load_xml};
 use glob::{MatchOptions, glob_with};
 use std::fs::read_to_string;
 use std::path::PathBuf;
@@ -8,6 +8,8 @@ use std::str::FromStr;
 use std::str;
 use super::*;
 use serde::{Serialize, de};
+use crate::meta_model::{EntityModel, Entity};
+use roxmltree::Node;
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct DataFile{
@@ -183,3 +185,85 @@ fn load_z_file_works() -> anyhow::Result<()> {
     Ok(())
 }
 
+pub struct ModelReader{
+    data_files: DataFiles,
+}
+impl ModelReader{
+    pub fn load() -> Result<Self, GenericError> {
+        let bytes =std::fs::read("./.store/entity_model_files.jsonz")?;
+        Ok(ModelReader { data_files: (load_z::<DataFiles>(&bytes)?) })
+    }
+    pub fn get_entity_model(&self, entity_name: &str) -> Result<Option<Entity>, GenericError> {
+        for f in &self.data_files.files {
+            if f.items.contains(&entity_name.to_string()) {
+                let model: EntityModel = load_xml(f.content.as_bytes());
+                let ent = model.entities.iter()
+                    .filter(|e| e.entity_name == entity_name)
+                    .nth(0);
+                return Ok(ent.cloned());
+            }
+        }
+        Ok(None)
+    }
+}
+
+#[test]
+fn load_entity_model_z_file_works() -> anyhow::Result<()> {
+    let bytes =std::fs::read("./.store/entity_model_files.jsonz")?;
+    let data_files=load_z::<DataFiles>(&bytes)?;
+    let entity_name="Example";
+    for f in &data_files.files{
+        if f.items.contains(&entity_name.to_string()){
+            let model:EntityModel=load_xml(f.content.as_bytes());
+            let ent=model.entities.iter()
+                .filter(|e| e.entity_name==entity_name)
+                .nth(0);
+            let ent_json=serde_json::to_string_pretty(ent.unwrap())?;
+            println!("{}",  ent_json);
+        }
+    }
+    Ok(())
+}
+
+#[test]
+fn model_reader_works() -> anyhow::Result<()> {
+    let reader=ModelReader::load()?;
+    let ent=reader.get_entity_model("Example")?;
+    let ent_json=serde_json::to_string_pretty(&ent.unwrap())?;
+    println!("{}",  ent_json);
+    Ok(())
+}
+
+pub fn load_seed_model_z_file<P>(entity_name: &str, proc: P) -> Result<(), GenericError>
+where P: Fn(&Node<'_,'_>) -> bool,{
+    let bytes =std::fs::read("./.store/seed_files.jsonz")?;
+    let data_files=load_z::<DataFiles>(&bytes)?;
+    for f in &data_files.files{
+        if f.items.contains(&entity_name.to_string()){
+            let doc = roxmltree::Document::parse(f.content.as_str())?;
+            let nodes=doc.descendants()
+                .filter(|e|e.has_tag_name(entity_name))
+                .collect::<Vec<Node<'_,'_>>>();
+            println!("doc {} has {} {}", f.uri, nodes.len(), entity_name);
+            for n in nodes{
+                if !proc(&n){
+                    return Ok(());
+                }
+            }
+        }
+    }
+    Ok(())
+}
+
+
+#[test]
+fn load_seed_model_z_file_works() -> Result<(), GenericError> {
+    load_seed_model_z_file("Person", |n|{
+        println!("{} ({:?})", n.tag_name().name(), n.range());
+        for attr in n.attributes(){
+            println!("\t{} = {}", attr.name(), attr.value());
+        }
+        true
+    })?;
+    Ok(())
+}

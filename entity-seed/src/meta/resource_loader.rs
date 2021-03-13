@@ -35,18 +35,64 @@ lazy_static! {
         let mut m = HashMap::new();
         m
     };
+    pub static ref SKIP_NODES:Vec<&'static str>=vec!["create", "create-replace", "create-update", "delete"];
 }
 
-pub fn get_entities_in_file(xml_file: &str) -> Result<HashSet<String>, GenericError> {
+pub fn skip_nodes() -> &'static Vec<&'static str>{
+    return &SKIP_NODES;
+}
+
+pub enum FileTypes{
+    Data,
+    EntityModel,
+    ServiceModel
+}
+
+pub fn get_items_in_file(xml_file: &str, file_type: &FileTypes) -> Result<HashSet<String>, GenericError> {
     let xml_str=std::fs::read_to_string(xml_file)?;
     let mut doc = roxmltree::Document::parse(xml_str.as_str()).unwrap();
     let root = doc.root_element();
-    let excepts=vec!["create", "create-replace", "create-update", "delete"];
-    let ents=root.children().into_iter()
-        .filter(|e| e.is_element() && !excepts.contains(&e.tag_name().name()))
-        .map(|e| e.tag_name().name().to_string())
-        .collect::<HashSet<String>>();
-    Ok(ents)
+
+    match file_type {
+        FileTypes::Data => {
+            if root.has_tag_name("entity-engine-xml") {
+                let excepts = vec!["create", "create-replace", "create-update", "delete"];
+                let ents = root.children().into_iter()
+                    .filter(|e| e.is_element() && !excepts.contains(&e.tag_name().name()))
+                    .map(|e| e.tag_name().name().to_string())
+                    .collect::<HashSet<String>>();
+
+                Ok(ents)
+            }else{
+                Ok(HashSet::new())
+            }
+        }
+        FileTypes::EntityModel =>{
+            if root.has_tag_name("entitymodel") {
+                // let node_types=vec!["entity", "view-entity"];
+                let node_types = vec!["entity"];
+                let ents = root.children().into_iter()
+                    .filter(|e| e.is_element() && node_types.contains(&e.tag_name().name()))
+                    .map(|e| e.attribute("entity-name").expect("entity-node").to_string())
+                    .collect::<HashSet<String>>();
+
+                Ok(ents)
+            }else{
+                Ok(HashSet::new())
+            }
+        }
+        FileTypes::ServiceModel =>{
+            let node_types=vec!["service"];
+            let srvs = root.children().into_iter()
+                .filter(|e| e.is_element() && node_types.contains(&e.tag_name().name()))
+                .map(|e| e.attribute("name").expect("service-node").to_string())
+                .collect::<HashSet<String>>();
+
+            Ok(srvs)
+        }
+        // _ => Ok(HashSet::new())
+    }
+
 }
 
 #[test]
@@ -478,7 +524,7 @@ pub fn list_data_files() -> anyhow::Result<()> {
         format!("{}/**/data/*.xml", config.ofbiz_loc).as_str(), options)? {
         let path=entry?;
         println!("{}", path.display());
-        let ents=get_entities_in_file(path.to_str().unwrap())?;
+        let ents= get_items_in_file(path.to_str().unwrap(), &FileTypes::Data)?;
         let r=serde_json::to_string_pretty(&ents)?;
         println!("{}", r)
     }

@@ -13,6 +13,7 @@ use entity_seed::snowflake::new_snowflake_id;
 use entity_seed::{GenericError, get_entities_by_module_names};
 use tera::{Context, Tera};
 use entity_seed::meta::resource_loader::list_data_files;
+use entity_seed::meta::{FileTypes, merge_files, cc_conf};
 
 #[derive(StructOpt)]
 struct Args {
@@ -30,6 +31,7 @@ enum Command {
     List { module: String},
     Wrapper,
     DataFiles,
+    ModelFiles,
 }
 
 /**
@@ -41,6 +43,7 @@ $ cargo run --bin seed list security
 $ cargo run --bin seed all security
 $ cargo run --bin seed wrapper
 # $ cargo run --bin seed -- -o out_file list
+$ bluecc model-files  # 合并压缩所有的模型定义和数据文件
 ```
 */
 
@@ -139,6 +142,20 @@ async fn main(args: Args) -> anyhow::Result<()> {
 
         Some(Command::DataFiles {  }) => {
             list_data_files()?;
+        }
+        Some(Command::ModelFiles {  }) => {
+            let dir=&cc_conf()?.ofbiz_loc;
+            let zout=merge_files(dir, "**/data/*.xml",
+                        "./.store/seed_files.json", &FileTypes::Data)?;
+            println!("save seeds to {}", zout);
+
+            let zout=merge_files("./entitydef", "**/*.xml",
+                "./.store/entity_model_files.json", &FileTypes::EntityModel)?;
+            println!("save entity models to {}", zout);
+
+            let zout=merge_files(dir, "**/servicedef/*.xml",
+                "./.store/service_model_files.json", &FileTypes::ServiceModel)?;
+            println!("save service models to {}", zout);
         }
 
         None => {

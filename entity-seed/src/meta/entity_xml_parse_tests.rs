@@ -77,12 +77,12 @@ fn seed_works(){
 
     let root_elem=doc.root().first_element_child();
     let iter=root_elem.unwrap().children();
-    let skip_nodes=vec!["create", "create-replace", "create-update", "delete"];
+    let skip_nodes=skip_nodes();
     for n in iter{
         if !n.is_element() || skip_nodes.contains(&n.tag_name().name()){
             continue;
         }
-        println!("{}", n.tag_name().name());
+        println!("{} ({:?})", n.tag_name().name(), n.range());
         for attr in n.attributes(){
             println!("\t{} = {}", attr.name(), attr.value());
         }
@@ -121,6 +121,7 @@ use structmap_derive::FromHashMap;
 use std::collections::{HashMap, HashSet};
 use structmap::value::Value;
 use crate::util::parse_pair;
+use crate::meta::skip_nodes;
 
 #[test]
 fn struct_map_works() {

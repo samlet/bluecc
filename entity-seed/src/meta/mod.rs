@@ -34,9 +34,10 @@ mod test_helpers;
 pub mod seed_conf;
 #[cfg(test)]
 mod serializer_tests;
-mod cc_conf;
+pub mod cc_conf;
 mod security_procs;
 mod data_files_procs;
 
-pub use resource_loader::{get_entities_in_file};
+pub use resource_loader::{get_items_in_file, skip_nodes, FileTypes};
+pub use data_files_procs::{merge_files};
 pub use cc_conf::{cc_conf};

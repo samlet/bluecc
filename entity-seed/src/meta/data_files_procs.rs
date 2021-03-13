@@ -15,7 +15,7 @@ pub struct DataFile{
     pub path: String,
     pub content: String,
     #[serde(default)]
-    pub entities: Vec<String>,
+    pub items: Vec<String>,
 }
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct DataFiles{
@@ -66,7 +66,7 @@ fn list_files_works() -> anyhow::Result<()> {
     Ok(())
 }
 
-pub fn merge_files(dir: &str, filter: &str, json_output: &str)
+pub fn merge_files(dir: &str, filter: &str, json_output: &str, file_type: &FileTypes)
     -> Result<String,GenericError>{
 
     use std::io::prelude::*;
@@ -78,14 +78,17 @@ pub fn merge_files(dir: &str, filter: &str, json_output: &str)
         let cnt=std::fs::read_to_string(f)?;
         // println!(".. read {} end", f.as_display());
         let path=f.to_str().unwrap().to_owned();
-        data_files.files.push(DataFile{
-            uri: f.file_name().unwrap().to_str().unwrap().to_string(),
-            path: path.to_owned(),
-            content: cnt,
-            entities: get_entities_in_file(path.as_str())?.iter()
+        let items=get_items_in_file(path.as_str(), &file_type)?.iter()
                 .map(|e|e.clone())
-                .collect::<Vec<String>>(),
-        });
+                .collect::<Vec<String>>();
+        if !items.is_empty() {
+            data_files.files.push(DataFile {
+                uri: f.file_name().unwrap().to_str().unwrap().to_string(),
+                path: path.to_owned(),
+                content: cnt,
+                items: items,
+            });
+        }
     }
 
     let zout=store_z(&data_files, json_output)?;
@@ -111,9 +114,35 @@ where
 }
 
 #[test]
-fn merge_files_works() -> anyhow::Result<()> {
+fn merge_data_files_works() -> anyhow::Result<()> {
     let zout=merge_files("./data", "**/*.xml",
-                "./.store/data_files.json")?;
+                "./.store/data_files.json", &FileTypes::Data)?;
+    println!("save to {}", zout);
+    Ok(())
+}
+
+#[test]
+fn merge_seed_data_files_works() -> anyhow::Result<()> {
+    let dir=&cc_conf()?.ofbiz_loc;
+    let zout=merge_files(dir, "**/data/*.xml",
+                "./.store/seed_files.json", &FileTypes::Data)?;
+    println!("save to {}", zout);
+    Ok(())
+}
+
+#[test]
+fn merge_entity_models_works() -> anyhow::Result<()> {
+    let zout=merge_files("./entitydef", "**/*.xml",
+                "./.store/entity_model_files.json", &FileTypes::EntityModel)?;
+    println!("save to {}", zout);
+    Ok(())
+}
+
+#[test]
+fn merge_service_models_works() -> anyhow::Result<()> {
+    let dir=&cc_conf()?.ofbiz_loc;
+    let zout=merge_files(dir, "**/servicedef/*.xml",
+                "./.store/service_model_files.json", &FileTypes::ServiceModel)?;
     println!("save to {}", zout);
     Ok(())
 }
@@ -135,7 +164,7 @@ where
 
 #[test]
 fn load_z_works() -> anyhow::Result<()> {
-    let bytes:&[u8] =include_bytes!("data_files.z");
+    let bytes:&[u8] =include_bytes!("data_files.jsonz");
     let data_files=load_z::<DataFiles>(bytes)?;
     for f in &data_files.files{
         println!("{}: {}", f.uri, f.path);
@@ -149,7 +178,7 @@ fn load_z_file_works() -> anyhow::Result<()> {
     let data_files=load_z::<DataFiles>(&bytes)?;
     for f in &data_files.files{
         println!("{}: {}", f.uri, f.path);
-        println!("\t{:?}", f.entities);
+        println!("\t{:?}", f.items);
     }
     Ok(())
 }

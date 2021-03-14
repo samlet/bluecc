@@ -13,6 +13,7 @@ uuid = { version = "0.8", features = ["serde", "v4"] }
 url = { version = "2", features = ["serde"] }
 thiserror = "1.0"
 lazy_static = "1.4.0"
+log = "0.4"
 
 diesel = { version = "1.4", features = ["postgres", "serde_json", "chrono", "r2d2", "numeric"] }
 diesel_full_text_search = "1.0.0"
@@ -24,7 +25,7 @@ serde_json = "1.0"
 # doesn't require singularize, pluralize, class, table, demodulize, deconstantize.
 Inflector = {version="*", default-features=false}
 toml = "0.5.8"
-chrono = "0.4"
+chrono = { version = "0.4.0", features = ["serde"] }
 
 bigdecimal = "0.2.0"
 env_logger = "0.8.3"

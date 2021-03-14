@@ -34,3 +34,8 @@ up_sql="migrations/2021-03-14-132527_example/up.sql"
 down_sql="migrations/2021-03-14-132527_example/down.sql"
 model="src/models/example.rs"
 
+[party]
+up_sql="migrations/2021-03-14-142300_party/up.sql"
+down_sql="migrations/2021-03-14-142300_party/down.sql"
+model="src/models/party.rs"
+

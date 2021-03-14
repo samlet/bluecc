@@ -188,7 +188,7 @@ fn generate_models(only_dto: bool, modules: &Vec<String>) -> Result<(), GenericE
 
         let model = get_entity_module(module.as_str())?;
         let generator=EntityGenerator::new(model.entity_names());
-        let module_conf = &conf.module_conf(module.as_str()).unwrap();
+        let module_conf = &conf.module_conf(module.as_str()).expect("absent module conf");
         let model_file = module_conf.model.to_owned();
         let up_sql_file = module_conf.up_sql.to_owned();
         let down_sql_file = module_conf.down_sql.to_owned();

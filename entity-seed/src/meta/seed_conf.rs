@@ -12,9 +12,11 @@ pub struct SeedConfig {
     pub seed_types: String,
     pub seed_wrapper: String,
     api: ApiGenConf,
+
     security: Generate,
     common: Generate,
     example: Generate,
+    party: Generate,
 }
 
 #[derive(Clone, Deserialize)]
@@ -41,6 +43,7 @@ impl SeedConfig{
             "security" => Some(&self.security),
             "common" => Some(&self.common),
             "example" => Some(&self.example),
+            "party" => Some(&self.party),
             _ => None
         }
     }

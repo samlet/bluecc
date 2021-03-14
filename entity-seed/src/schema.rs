@@ -222,6 +222,45 @@ table! {
     use diesel_full_text_search::{TsVector as Tsvector};
     use bigdecimal::BigDecimal;
 
+    test_person (party_id) {
+        salutation -> Nullable<Varchar>,
+        first_name -> Nullable<Varchar>,
+        middle_name -> Nullable<Varchar>,
+        last_name -> Nullable<Varchar>,
+        personal_title -> Nullable<Varchar>,
+        suffix -> Nullable<Varchar>,
+        nickname -> Nullable<Varchar>,
+        first_name_local -> Nullable<Varchar>,
+        middle_name_local -> Nullable<Varchar>,
+        last_name_local -> Nullable<Varchar>,
+        other_local -> Nullable<Varchar>,
+        member_id -> Nullable<Int8>,
+        gender -> Nullable<Bool>,
+        birth_date -> Nullable<Date>,
+        deceased_date -> Nullable<Date>,
+        mothers_maiden_name -> Nullable<Varchar>,
+        old_marital_status -> Nullable<Bool>,
+        marital_status_enum_id -> Nullable<Int8>,
+        social_security_number -> Nullable<Varchar>,
+        passport_number -> Nullable<Varchar>,
+        passport_expire_date -> Nullable<Date>,
+        comments -> Nullable<Varchar>,
+        employment_status_enum_id -> Nullable<Int8>,
+        residence_status_enum_id -> Nullable<Int8>,
+        occupation -> Nullable<Varchar>,
+        years_with_employer -> Nullable<Int8>,
+        months_with_employer -> Nullable<Int8>,
+        existing_customer -> Nullable<Bool>,
+        card_id -> Nullable<Int8>,
+        party_id -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
     user_login (user_login_id) {
         current_password -> Nullable<Varchar>,
         password_hint -> Nullable<Varchar>,
@@ -361,6 +400,7 @@ allow_tables_to_appear_in_same_query!(
     security_group_permission,
     security_permission,
     tarpitted_login_view,
+    test_person,
     user_login,
     user_login_history,
     user_login_password_history,

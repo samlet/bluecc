@@ -14,7 +14,7 @@
     <field-type-def type="currency-amount" sql-type="NUMERIC(18,2)" java-type="java.math.BigDecimal" query-type="bigdecimal::BigDecimal"/>
     <field-type-def type="currency-precise" sql-type="NUMERIC(18,3)" java-type="java.math.BigDecimal" query-type="bigdecimal::BigDecimal"/>
     <field-type-def type="fixed-point" sql-type="NUMERIC(18,6)" java-type="java.math.BigDecimal" query-type="bigdecimal::BigDecimal"/>
-    <field-type-def type="floating-point" sql-type="FLOAT8" java-type="Double" query-type="f64"/>
+    <field-type-def type="floating-point" sql-type="NUMERIC(18,3)" java-type="Double" query-type="bigdecimal::BigDecimal"/>
     <field-type-def type="integer" sql-type="INTEGER" java-type="Integer" query-type="i32"/>
     <field-type-def type="numeric" sql-type="BIGINT" java-type="Long" query-type="i64" insert-type="i64"/>
     

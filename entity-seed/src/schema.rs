@@ -62,9 +62,9 @@ table! {
     use bigdecimal::BigDecimal;
 
     protected_view (group_id, view_name_id) {
-        max_hits -> Nullable<Numeric>,
-        max_hits_duration -> Nullable<Numeric>,
-        tarpit_duration -> Nullable<Numeric>,
+        max_hits -> Nullable<Int8>,
+        max_hits_duration -> Nullable<Int8>,
+        tarpit_duration -> Nullable<Int8>,
         group_id -> Int8,
         view_name_id -> Int8,
     }
@@ -112,7 +112,7 @@ table! {
     use bigdecimal::BigDecimal;
 
     tarpitted_login_view (view_name_id, user_login_id) {
-        tarpit_release_date_time -> Nullable<Numeric>,
+        tarpit_release_date_time -> Nullable<Int8>,
         view_name_id -> Int8,
         user_login_id -> Int8,
     }
@@ -126,18 +126,18 @@ table! {
     user_login (user_login_id) {
         current_password -> Nullable<Varchar>,
         password_hint -> Nullable<Varchar>,
-        is_system -> Nullable<Bpchar>,
-        enabled -> Nullable<Bpchar>,
-        has_logged_out -> Nullable<Bpchar>,
-        require_password_change -> Nullable<Bpchar>,
-        last_currency_uom -> Int8,
+        is_system -> Nullable<Bool>,
+        enabled -> Nullable<Bool>,
+        has_logged_out -> Nullable<Bool>,
+        require_password_change -> Nullable<Bool>,
+        last_currency_uom -> Nullable<Int8>,
         last_locale -> Nullable<Varchar>,
-        last_time_zone -> Int8,
+        last_time_zone -> Nullable<Int8>,
         disabled_date_time -> Nullable<Timestamptz>,
-        successive_failed_logins -> Nullable<Numeric>,
-        external_auth_id -> Int8,
-        user_ldap_dn -> Int8,
-        disabled_by -> Int8,
+        successive_failed_logins -> Nullable<Int8>,
+        external_auth_id -> Nullable<Int8>,
+        user_ldap_dn -> Nullable<Int8>,
+        disabled_by -> Nullable<Int8>,
         user_login_id -> Int8,
     }
 }
@@ -148,11 +148,11 @@ table! {
     use bigdecimal::BigDecimal;
 
     user_login_history (user_login_id, from_date) {
-        visit_id -> Int8,
+        visit_id -> Nullable<Int8>,
         thru_date -> Nullable<Timestamptz>,
         password_used -> Nullable<Varchar>,
-        successful_login -> Nullable<Bpchar>,
-        origin_user_login_id -> Int8,
+        successful_login -> Nullable<Bool>,
+        origin_user_login_id -> Nullable<Int8>,
         user_login_id -> Int8,
         from_date -> Timestamptz,
     }

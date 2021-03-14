@@ -4,7 +4,7 @@ CREATE TABLE {{ent['entity-name'] | snake_case -}} (
 {%- endfor %}
 {% if ent.multiple_keys %}
 {%- for fld in keys %}
-    {{fld.name | snake_case}} {{fld['type'] | sqltype}},
+    {{fld.name | snake_case}} {{fld['type'] | sqltype}} NOT NULL,
 {%- endfor %}
 {%- endif %}
 {%- if not ent.multiple_keys %}

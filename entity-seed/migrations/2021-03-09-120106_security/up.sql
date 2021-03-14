@@ -12,18 +12,18 @@ CREATE TABLE x509_issuer_provision(
 CREATE TABLE user_login(
     current_password VARCHAR(255),
     password_hint VARCHAR(255),
-    is_system CHAR(1),
-    enabled CHAR(1),
-    has_logged_out CHAR(1),
-    require_password_change CHAR(1),
-    last_currency_uom BIGINT NOT NULL,
+    is_system BOOLEAN,
+    enabled BOOLEAN,
+    has_logged_out BOOLEAN,
+    require_password_change BOOLEAN,
+    last_currency_uom BIGINT,
     last_locale VARCHAR(10),
-    last_time_zone BIGINT NOT NULL,
+    last_time_zone BIGINT,
     disabled_date_time TIMESTAMPTZ,
-    successive_failed_logins NUMERIC(20,0),
-    external_auth_id BIGINT NOT NULL,
-    user_ldap_dn BIGINT NOT NULL,
-    disabled_by BIGINT NOT NULL,
+    successive_failed_logins BIGINT,
+    external_auth_id BIGINT,
+    user_ldap_dn BIGINT,
+    disabled_by BIGINT,
 
     user_login_id BIGSERIAL PRIMARY KEY
 );
@@ -32,18 +32,18 @@ CREATE TABLE user_login_password_history(
     current_password VARCHAR(255),
 
     user_login_id BIGINT NOT NULL,
-    from_date TIMESTAMPTZ,
+    from_date TIMESTAMPTZ NOT NULL,
     PRIMARY KEY (user_login_id, from_date)
 );
 CREATE TABLE user_login_history(
-    visit_id BIGINT NOT NULL,
+    visit_id BIGINT,
     thru_date TIMESTAMPTZ,
     password_used VARCHAR(255),
-    successful_login CHAR(1),
-    origin_user_login_id BIGINT NOT NULL,
+    successful_login BOOLEAN,
+    origin_user_login_id BIGINT,
 
     user_login_id BIGINT NOT NULL,
-    from_date TIMESTAMPTZ,
+    from_date TIMESTAMPTZ NOT NULL,
     PRIMARY KEY (user_login_id, from_date)
 );
 CREATE TABLE user_login_session(
@@ -63,7 +63,7 @@ CREATE TABLE security_group_permission(
 
     group_id BIGINT NOT NULL,
     permission_id BIGINT NOT NULL,
-    from_date TIMESTAMPTZ,
+    from_date TIMESTAMPTZ NOT NULL,
     PRIMARY KEY (group_id, permission_id, from_date)
 );
 CREATE TABLE security_permission(
@@ -76,20 +76,20 @@ CREATE TABLE user_login_security_group(
 
     user_login_id BIGINT NOT NULL,
     group_id BIGINT NOT NULL,
-    from_date TIMESTAMPTZ,
+    from_date TIMESTAMPTZ NOT NULL,
     PRIMARY KEY (user_login_id, group_id, from_date)
 );
 CREATE TABLE protected_view(
-    max_hits NUMERIC(20,0),
-    max_hits_duration NUMERIC(20,0),
-    tarpit_duration NUMERIC(20,0),
+    max_hits BIGINT,
+    max_hits_duration BIGINT,
+    tarpit_duration BIGINT,
 
     group_id BIGINT NOT NULL,
     view_name_id BIGINT NOT NULL,
     PRIMARY KEY (group_id, view_name_id)
 );
 CREATE TABLE tarpitted_login_view(
-    tarpit_release_date_time NUMERIC(20,0),
+    tarpit_release_date_time BIGINT,
 
     view_name_id BIGINT NOT NULL,
     user_login_id BIGINT NOT NULL,
@@ -110,7 +110,7 @@ ALTER TABLE user_login_session ADD CONSTRAINT USER_SESSION_USER
 
 ALTER TABLE security_group_permission ADD CONSTRAINT SEC_GRP_PERM_GRP
     FOREIGN KEY (group_id) REFERENCES security_group(group_id);
-ALTER TABLE security_group_permission ADD CONSTRAINT fk_213557788935327744
+ALTER TABLE security_group_permission ADD CONSTRAINT fk_213572916883886080
     FOREIGN KEY (permission_id) REFERENCES security_permission(permission_id);
 
 

@@ -11,6 +11,7 @@ use serde::{Serialize, de};
 use crate::meta_model::{EntityModel, Entity};
 use roxmltree::Node;
 use crate::meta::service_models::ServiceModel;
+use std::collections::HashMap;
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct DataFile{
@@ -188,23 +189,58 @@ fn load_z_file_works() -> anyhow::Result<()> {
 
 pub struct ModelReader{
     data_files: DataFiles,
+    cached_ents: HashMap<String, Entity>,
 }
+
 impl ModelReader{
     pub fn load() -> Result<Self, GenericError> {
         let bytes =std::fs::read("./.store/entity_model_files.jsonz")?;
-        Ok(ModelReader { data_files: (load_z::<DataFiles>(&bytes)?) })
+        Ok(ModelReader {
+            data_files: (load_z::<DataFiles>(&bytes)?),
+            cached_ents: HashMap::new(),
+        })
     }
-    pub fn get_entity_model(&self, entity_name: &str) -> Result<Option<Entity>, GenericError> {
+
+    pub fn get_entity_module(&self, module_name: &str) -> Result<EntityModel, GenericError> {
+        let mut target=module_name.to_string();
+        if !target.ends_with(".xml"){
+            target.push_str("-entitymodel.xml");
+        }
         for f in &self.data_files.files {
-            if f.items.contains(&entity_name.to_string()) {
-                let model: EntityModel = load_xml(f.content.as_bytes());
-                let ent = model.entities.iter()
-                    .filter(|e| e.entity_name == entity_name)
-                    .nth(0);
-                return Ok(ent.cloned());
+            if f.uri==target {
+                let mut model: EntityModel = load_xml(f.content.as_bytes());
+                model.build();
+                return Ok(model);
             }
         }
-        Ok(None)
+        Err(GenericError::NotFound {
+            item_name: target,
+            info: "entity module".to_string()
+        })
+    }
+
+    pub fn get_entity_model(&mut self, entity_name: &str) -> Result<Entity, GenericError> {
+        if let Some(ent)=self.cached_ents.get(entity_name){
+            return Ok(ent.clone());
+        }
+        for f in &self.data_files.files {
+            if f.items.contains(&entity_name.to_string()) {
+                let mut model: EntityModel = load_xml(f.content.as_bytes());
+                model.build();
+                let ent = &model.entities.iter()
+                    .filter(|e| e.entity_name == entity_name)
+                    .nth(0);
+                for e in &model.entities{
+                    self.cached_ents.insert(e.entity_name.to_owned(), e.clone());
+                }
+                return Ok(ent.expect("entity").clone());
+            }
+        }
+
+        Err(GenericError::NotFound {
+            item_name: entity_name.to_string(),
+            info: "entity model".to_string()
+        })
     }
 }
 
@@ -215,7 +251,8 @@ fn load_entity_model_z_file_works() -> anyhow::Result<()> {
     let entity_name="Example";
     for f in &data_files.files{
         if f.items.contains(&entity_name.to_string()){
-            let model:EntityModel=load_xml(f.content.as_bytes());
+            let mut model:EntityModel=load_xml(f.content.as_bytes());
+            model.build();
             let ent=model.entities.iter()
                 .filter(|e| e.entity_name==entity_name)
                 .nth(0);
@@ -228,9 +265,9 @@ fn load_entity_model_z_file_works() -> anyhow::Result<()> {
 
 #[test]
 fn model_reader_works() -> anyhow::Result<()> {
-    let reader=ModelReader::load()?;
+    let mut reader=ModelReader::load()?;
     let ent=reader.get_entity_model("Example")?;
-    let ent_json=serde_json::to_string_pretty(&ent.unwrap())?;
+    let ent_json=serde_json::to_string_pretty(&ent)?;
     println!("{}",  ent_json);
     Ok(())
 }

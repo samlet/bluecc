@@ -88,10 +88,10 @@ pub fn example_model() -> EntityModel{
 }
 
 #[test]
-fn entity_model_works() {
+fn entity_model_works() -> anyhow::Result<()>{
     // let model: EntityModel = example_model();
-    let model = &APP_CONTEXT.get_model("example");
-        println!("{:#?}", model);
+    let model = get_entity_module("example")?;
+    println!("{:#?}", model);
     let ents=&model.entities;
     let ent=ents.iter().find(|n|n.entity_name=="Example").unwrap();
     for f in &ent.fields{
@@ -101,22 +101,26 @@ fn entity_model_works() {
     let pks:Vec<String>=ent.primary_keys.iter().map(|x| x.field_name.clone()).collect();
     println!("primary key: {}", pks.iter().join(", ").to_string());
     assert_eq!(1, pks.len());
+
+    Ok(())
 }
 
 #[test]
-fn entity_relation_works() {
-    let model=&APP_CONTEXT.get_model("example").get_entity("Example");
+fn entity_relation_works() -> anyhow::Result<()> {
+    let model=get_entity_model("Example")?;
     let rels=model.relations
         .iter().map(|x|
         (&x.keymaps.get(0).unwrap().field_name,
          &x.rel_entity_name)).collect::<Vec<_>>();
     println!("{:?}", rels);
+
+    Ok(())
 }
 
 #[test]
 fn topo_works() -> anyhow::Result<()> {
     let mut ts = TopologicalSort::<String>::new();
-    let model=&APP_CONTEXT.get_model("security");
+    let model=get_entity_module("security")?;
     for ent in &model.entities{
         let deps:Vec<String>=ent.belongs().iter().map(|e|e.model_name.clone()).collect();
         println!("{} -> {:?}", ent.entity_name, deps);
@@ -136,7 +140,7 @@ fn topo_works() -> anyhow::Result<()> {
 
 #[test]
 fn model_topo_works() -> anyhow::Result<()> {
-    let model=&APP_CONTEXT.get_model("security");
+    let model=get_entity_module("security")?;
     let topo=model.topo();
     println!("{}, {}", model.entities.len(), topo.len());
     println!("{:?}", topo);
@@ -152,7 +156,7 @@ fn entity_gen_works() {
     struct SqlType;
     impl Filter for SqlType {
         fn filter(&self, value: &Value, _args: &HashMap<String, Value>) -> Result<Value> {
-            let val=APP_CONTEXT.field_mappings.sql_type(value.as_str().unwrap());
+            let val=FIELD_MAPPINGS.sql_type(value.as_str().unwrap());
             Ok(Value::String(format!("{}", val)))
         }
 

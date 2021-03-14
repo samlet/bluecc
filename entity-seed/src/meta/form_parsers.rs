@@ -4,9 +4,9 @@ use decimal::prelude::*;
 
 use crate::meta_model::*;
 
-lazy_static_include_bytes! {
-    EXAMPLE_DOC => "src/meta/ExampleForms.xml",
-}
+// lazy_static_include_bytes! {
+//     EXAMPLE_DOC => "src/meta/ExampleForms.xml",
+// }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 struct Item {
@@ -40,10 +40,12 @@ struct ModelGrid{
 mod tests {
     use super::*;
     use crate::load_xml;
+    use std::fs::read_to_string;
 
     #[test]
-    fn form_parse_works() {
-        let model:ModelForms=load_xml(&**EXAMPLE_DOC);
+    fn form_parse_works() -> anyhow::Result<()>{
+        let model:ModelForms=load_xml(read_to_string("src/meta/fixtures/ExampleForms.xml")?.as_bytes());
         println!("total forms {}, grids {}", model.forms.len(), model.grids.len());
+        Ok(())
     }
 }

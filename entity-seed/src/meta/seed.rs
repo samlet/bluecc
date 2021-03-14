@@ -5,12 +5,12 @@ extern crate lazy_static;
 // use std::env;
 use structopt::StructOpt;
 use std::collections::HashMap;
-use entity_seed::meta::app_context::{APP_CONTEXT};
+use entity_seed::meta::app_context::{APP_CONTEXT, FIELD_MAPPINGS, get_entities_by_module_names};
 use std::path::PathBuf;
 use entity_seed::meta_model::{ModelField, EntityModel};
 use entity_seed::meta::seed_conf::SeedConfig;
 use entity_seed::snowflake::new_snowflake_id;
-use entity_seed::{GenericError, get_entities_by_module_names};
+use entity_seed::{GenericError, get_entity_model, get_entity_module};
 use tera::{Context, Tera};
 use entity_seed::meta::resource_loader::list_data_files;
 use entity_seed::meta::*;
@@ -28,8 +28,8 @@ struct Args {
 /**
 ```bash
 $ cargo run --bin seed gen Example ent
-$ cargo run --bin seed gen example ExampleStatus dto
-$ cargo run --bin seed gen security UserLogin dto
+$ cargo run --bin seed gen ExampleStatus dto
+$ cargo run --bin seed gen UserLogin dto
 $ cargo run --bin seed list security
 $ cargo run --bin seed all security
 $ cargo run --bin seed wrapper
@@ -43,7 +43,7 @@ $ bluecc seed Person
 
 #[derive(StructOpt)]
 enum Command {
-    Gen { module: String, entity: String, type_name:String },
+    Gen { entity: String, type_name:String },
     All { module: String},
     List { module: String},
     Wrapper,
@@ -65,12 +65,12 @@ async fn main(args: Args) -> anyhow::Result<()> {
     //     .unwrap().display());
 
     match args.cmd {
-        Some(Command::Gen { module, entity, type_name }) => {
-            entity_gen_works(module.as_str(), entity.as_str(), type_name.as_str())
+        Some(Command::Gen { entity, type_name }) => {
+            entity_gen_works(entity.as_str(), type_name.as_str())
                 .and_then(|x| {println!("{}", x); Ok(())}).ok();
         }
         Some(Command::List { module  }) => {
-            let model=&APP_CONTEXT.get_model(module.as_str());
+            let model=get_entity_module(module.as_str())?;
             println!("list all entities");
             for ent in &model.entities {
                 println!("{}", ent.entity_name);
@@ -80,7 +80,7 @@ async fn main(args: Args) -> anyhow::Result<()> {
             let mut context = Context::new();
             context.insert("module", &module);
 
-            let model=&APP_CONTEXT.get_model(module.as_str());
+            let model=get_entity_module(module.as_str())?;
             let conf=SeedConfig::load()?;
             let module_conf=&conf.module_conf(module.as_str()).unwrap();
             let model_file=&module_conf.model.to_owned();
@@ -112,7 +112,7 @@ async fn main(args: Args) -> anyhow::Result<()> {
                     for ent in &ents {
                         println!("generate {} for {}", ent, typ);
 
-                        let cnt: String = entity_gen_works(module.as_str(), ent.as_str(), typ).unwrap();
+                        let cnt: String = entity_gen_works(ent.as_str(), typ).unwrap();
                         output.push_str(cnt.as_str());
                     }
 
@@ -165,10 +165,10 @@ async fn main(args: Args) -> anyhow::Result<()> {
         }
 
         Some(Command::Entity { name  }) => {
-            let reader=ModelReader::load()?;
-            let ent=reader.get_entity_model(name.as_str())?;
+            let mut reader=ModelReader::load()?;
+            let ent=reader.get_entity_model(name.as_str());
             match ent {
-                Some(ent) => {
+                Ok(ent) => {
                     let ent_json=serde_json::to_string_pretty(&ent)?;
                     println!("{}",  ent_json);
                 }
@@ -188,21 +188,20 @@ async fn main(args: Args) -> anyhow::Result<()> {
         }
 
         None => {
-            let module="example";
             println!(".. model Example");
-            entity_gen_works(module, "Example", "ent")
+            entity_gen_works("Example", "ent")
                 .and_then(|x| {println!("{}", x); Ok(())}).ok();
-            entity_gen_works(module, "Example", "model")
+            entity_gen_works("Example", "model")
                 .and_then(|x| {println!("{}", x); Ok(())}).ok();
-            entity_gen_works(module, "Example", "dto")
+            entity_gen_works("Example", "dto")
                 .and_then(|x| {println!("{}", x); Ok(())}).ok();
 
             println!(".. model ExampleItem");
-            entity_gen_works(module, "ExampleItem", "ent")
+            entity_gen_works("ExampleItem", "ent")
                 .and_then(|x| {println!("{}", x); Ok(())}).ok();
-            entity_gen_works(module, "ExampleItem", "model")
+            entity_gen_works("ExampleItem", "model")
                 .and_then(|x| {println!("{}", x); Ok(())}).ok();
-            entity_gen_works(module, "ExampleItem", "dto")
+            entity_gen_works("ExampleItem", "dto")
                 .and_then(|x| {println!("{}", x); Ok(())}).ok();
         }
     }
@@ -210,7 +209,8 @@ async fn main(args: Args) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn entity_gen_works(module:&str, entity_name: &str, template_name: &str) -> Result<String, GenericError> {
+fn entity_gen_works(entity_name: &str, template_name: &str) 
+    -> Result<String, GenericError> {
     use tera::{Result, Context, Filter, Function};
     use tera::Tera;
     use serde_json::{json, Value};
@@ -218,7 +218,7 @@ fn entity_gen_works(module:&str, entity_name: &str, template_name: &str) -> Resu
     struct SqlType;
     impl Filter for SqlType {
         fn filter(&self, value: &Value, _args: &HashMap<String, Value>) -> Result<Value> {
-            let val=APP_CONTEXT.field_mappings.sql_type(value.as_str().unwrap());
+            let val=FIELD_MAPPINGS.sql_type(value.as_str().unwrap());
             Ok(Value::String(format!("{}", val)))
         }
 
@@ -231,12 +231,12 @@ fn entity_gen_works(module:&str, entity_name: &str, template_name: &str) -> Resu
         Ok(Value::String(format!("{}", val)))
     }
     fn query_type(value: &Value, _args: &HashMap<String, Value>) -> Result<Value> {
-        let val=APP_CONTEXT.field_mappings.query_type(value.as_str().unwrap());
+        let val=FIELD_MAPPINGS.query_type(value.as_str().unwrap());
         Ok(Value::String(format!("{}", val)))
     }
 
     fn orig_type(value: &Value, _args: &HashMap<String, Value>) -> Result<Value> {
-        let val=APP_CONTEXT.field_mappings.orig_type(value.as_str().unwrap());
+        let val=FIELD_MAPPINGS.orig_type(value.as_str().unwrap());
         if val.starts_with("Option") {
             Ok(Value::String(format!("{}", val)))
         }else{
@@ -245,7 +245,7 @@ fn entity_gen_works(module:&str, entity_name: &str, template_name: &str) -> Resu
     }
 
     fn opt_query_type(value: &Value, _args: &HashMap<String, Value>) -> Result<Value> {
-        let val=APP_CONTEXT.field_mappings.query_type(value.as_str().unwrap());
+        let val=FIELD_MAPPINGS.query_type(value.as_str().unwrap());
         if val.starts_with("Option") {
             Ok(Value::String(format!("{}", val)))
         }else{
@@ -253,7 +253,7 @@ fn entity_gen_works(module:&str, entity_name: &str, template_name: &str) -> Resu
         }
     }
     fn insert_type(value: &Value, _args: &HashMap<String, Value>) -> Result<Value> {
-        let val=APP_CONTEXT.field_mappings.insert_type(value.as_str().unwrap());
+        let val=FIELD_MAPPINGS.insert_type(value.as_str().unwrap());
         Ok(Value::String(format!("{}", val)))
     }
     fn fk_name(value: &Value, _args: &HashMap<String, Value>) -> Result<Value> {
@@ -264,8 +264,8 @@ fn entity_gen_works(module:&str, entity_name: &str, template_name: &str) -> Resu
         }
     }
 
-    let model=&APP_CONTEXT.get_model(module);
-    let ent=model.get_entity(entity_name);
+    // let model=&APP_CONTEXT.get_model(module);
+    let ent=get_entity_model(entity_name)?;
     assert_eq!(entity_name, ent.entity_name);
     // for f in &ent.fields {
     //     println!("* {}: {}", f.field_name, f.is_primary);

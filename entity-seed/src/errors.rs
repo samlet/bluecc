@@ -37,6 +37,11 @@ pub enum GenericError {
         file_name: String,
         info: String,
     },
+    #[error("Error finding: {item_name:?}; {info:?}")]
+    NotFound {
+        item_name: String,
+        info: String,
+    },
     #[error("unknown error")]
     Unknown,
     #[error(transparent)]

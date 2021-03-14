@@ -13,7 +13,7 @@ use std::fs;
 // use decimal::prelude::*;
 use serde::de::DeserializeOwned;
 use crate::snowflake::new_snowflake_id;
-use crate::{load_xml, get_entity_model, GenericError, get_entity_by_name};
+use crate::{load_xml, get_entity_model, GenericError};
 use roxmltree::Node;
 use std::fs::read_to_string;
 use crate::models::enum_types::EntityTypes;
@@ -24,11 +24,10 @@ use glob::{MatchOptions, glob_with};
 
 use super::*;
 
-lazy_static_include_bytes! {
-// lazy_static_include_str! {
-    EXAMPLE_DOC => "entitydef/example-entitymodel.xml",
-    ACCOUNTING_DOC => "entitydef/accounting-entitymodel.xml",
-}
+// lazy_static_include_bytes! {
+//     EXAMPLE_DOC => "entitydef/example-entitymodel.xml",
+//     ACCOUNTING_DOC => "entitydef/accounting-entitymodel.xml",
+// }
 
 lazy_static! {
     pub static ref ENTITY_FACTORY: HashMap<u32, &'static str> = {
@@ -98,9 +97,9 @@ pub fn get_items_in_file(xml_file: &str, file_type: &FileTypes) -> Result<HashSe
 #[test]
 fn doc_works() -> anyhow::Result<()>{
     // let _ = simple_logger::init();
-    // let model:EntityModel=from_str(str::from_utf8(&EXAMPLE_DOC).unwrap())?;
-    // let model:EntityModel=from_str(str::from_utf8(&ACCOUNTING_DOC).unwrap())?;
-    let model:EntityModel=load_xml(&**ACCOUNTING_DOC);
+    // let model:EntityModel=load_xml(&**ACCOUNTING_DOC);
+    let cnt=read_to_string("entitydef/accounting-entitymodel.xml")?;
+    let model:EntityModel=load_xml(cnt.as_bytes());
     // let model:EntityModel= match from_str(str::from_utf8(&ACCOUNTING_DOC).unwrap()) {
     //     Ok(doc) => doc,
     //     Err(e) => {
@@ -356,7 +355,8 @@ fn process_seed(xml_str: &str) -> Result<Vec<SeedTypes>, GenericError>{
     let mut result_set=Vec::new();
     for node in nodes{
         let node_name=node.tag_name().name();
-        let mod_ent=get_entity_by_name(node_name).expect("entity");
+        // let mod_ent=get_entity_by_name(node_name).expect("entity");
+        let mod_ent=get_entity_model(node_name)?;
         let flds:Vec<String>=node.attributes().iter().map(|f| {
             let fld_name=f.name();
             let mut fld_val:String=f.value().to_string();

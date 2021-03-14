@@ -32,7 +32,7 @@ $ cargo run --bin seed gen ExampleStatus dto
 $ cargo run --bin seed gen UserLogin dto
 $ cargo run --bin seed list security
 $ cargo run --bin seed all security
-$ cargo run --bin seed wrapper
+$ cargo run --bin seed wrapper security party
 # $ cargo run --bin seed -- -o out_file list
 $ bluecc model-files  # 合并压缩所有的模型定义和数据文件
 $ bluecc entity StatusItem
@@ -41,12 +41,16 @@ $ bluecc seed Person
 */
 
 
-#[derive(StructOpt)]
+#[derive(StructOpt, Debug)]
 enum Command {
     Gen { entity: String, type_name:String },
-    All { module: String},
+    All {
+        #[structopt(short)]
+        only_dto: bool,
+        modules: Vec<String>
+    },
     List { module: String},
-    Wrapper,
+    Wrapper {modules: Vec<String>} ,
     DataFiles,
     ModelFiles,
     Entity {name: String},
@@ -63,6 +67,7 @@ async fn main(args: Args) -> anyhow::Result<()> {
     // println!(".. generate files .. to {}", args.output
     //     .or(Some(PathBuf::from(tempfile.path())))
     //     .unwrap().display());
+    println!("{:?}", Command::from_args());
 
     match args.cmd {
         Some(Command::Gen { entity, type_name }) => {
@@ -76,71 +81,19 @@ async fn main(args: Args) -> anyhow::Result<()> {
                 println!("{}", ent.entity_name);
             }
         }
-        Some(Command::All { module }) => {
-            let mut context = Context::new();
-            context.insert("module", &module);
-
-            let model=get_entity_module(module.as_str())?;
-            let conf=SeedConfig::load()?;
-            let module_conf=&conf.module_conf(module.as_str()).unwrap();
-            let model_file=&module_conf.model.to_owned();
-            let up_sql_file=module_conf.up_sql.to_owned();
-            let down_sql_file=module_conf.down_sql.to_owned();
-
-            println!("generate all entities to {} ..", model_file);
-
-            let header=&conf.get_header(module.as_str());
-            let enum_header=&conf.get_enum_header(module.as_str());
-            let enum_footer=&conf.enum_footer.unwrap().to_owned();
-            let enum_output=&conf.enum_output.unwrap().to_owned();
-            let seed_output=&conf.seed_types.unwrap().to_owned();
-
-            let gen = |typs:Vec<&str>, write_header:bool|  {
-                let mut output=String::new();
-                if write_header {
-                    output.push_str(header.as_str());
-                }
-                for typ in typs {
-                    let mut ents:Vec<String>= model.entities.iter()
-                        .map(|x|x.entity_name.clone()).collect::<Vec<String>>();
-                    if typ=="ent_drop"{
-                        // ents.reverse();
-                        ents=model.topo();
-                    }else if typ=="enum"{
-                        output.push_str(enum_header.as_str());
-                    }
-                    for ent in &ents {
-                        println!("generate {} for {}", ent, typ);
-
-                        let cnt: String = entity_gen_works(ent.as_str(), typ).unwrap();
-                        output.push_str(cnt.as_str());
-                    }
-
-                    if typ=="enum"{
-                        output.push_str(enum_footer);
-                    }
-                }
-                output
-            };
-
-            std::fs::write(model_file, gen(vec!["model"], true))?;
-            std::fs::write(up_sql_file, gen(vec!["ent", "ent_rel"], false))?;
-            std::fs::write(down_sql_file, gen(vec!["ent_drop"], false))?;
-            std::fs::write(enum_output, gen(vec!["enum"], false))?;
-            std::fs::write(Tera::one_off(seed_output, &context, true)?,
-                           gen(vec!["dto_seed"], true))?;
-            println!("done.");
+        Some(Command::All { only_dto, modules }) => {
+            generate_models(only_dto, &modules)?;
         }
 
-        Some(Command::Wrapper {  }) => {
+        Some(Command::Wrapper { modules  }) => {
             let conf=SeedConfig::load()?;
 
             let mut context = Context::new();
-            let mods=vec!["security".into()];
-            let ents=get_entities_by_module_names(&mods);
+            // let mods=vec!["security".into()];
+            let ents=get_entities_by_module_names(&modules);
             // let names=ents.iter().map(|e|e.entity_name).collect();
             context.insert("ents", &ents);
-            context.insert("modules", &mods);
+            context.insert("modules", &modules);
             let result=Tera::one_off(include_str!("incls/seed_wrapper.j2"), &context, true)?;
             println!("{}", result);
             std::fs::write(conf.seed_wrapper, result)?;
@@ -188,22 +141,92 @@ async fn main(args: Args) -> anyhow::Result<()> {
         }
 
         None => {
-            println!(".. model Example");
-            entity_gen_works("Example", "ent")
-                .and_then(|x| {println!("{}", x); Ok(())}).ok();
-            entity_gen_works("Example", "model")
-                .and_then(|x| {println!("{}", x); Ok(())}).ok();
-            entity_gen_works("Example", "dto")
-                .and_then(|x| {println!("{}", x); Ok(())}).ok();
-
-            println!(".. model ExampleItem");
-            entity_gen_works("ExampleItem", "ent")
-                .and_then(|x| {println!("{}", x); Ok(())}).ok();
-            entity_gen_works("ExampleItem", "model")
-                .and_then(|x| {println!("{}", x); Ok(())}).ok();
-            entity_gen_works("ExampleItem", "dto")
-                .and_then(|x| {println!("{}", x); Ok(())}).ok();
+            println!(".. specific a subcommand.");
+            // entity_gen_works("Example", "ent")
+            //     .and_then(|x| {println!("{}", x); Ok(())}).ok();
+            // entity_gen_works("Example", "model")
+            //     .and_then(|x| {println!("{}", x); Ok(())}).ok();
+            // entity_gen_works("Example", "dto")
+            //     .and_then(|x| {println!("{}", x); Ok(())}).ok();
+            //
+            // println!(".. model ExampleItem");
+            // entity_gen_works("ExampleItem", "ent")
+            //     .and_then(|x| {println!("{}", x); Ok(())}).ok();
+            // entity_gen_works("ExampleItem", "model")
+            //     .and_then(|x| {println!("{}", x); Ok(())}).ok();
+            // entity_gen_works("ExampleItem", "dto")
+            //     .and_then(|x| {println!("{}", x); Ok(())}).ok();
         }
+    }
+
+    Ok(())
+}
+
+fn generate_models(only_dto: bool, modules: &Vec<String>) -> Result<(), GenericError>{
+    let conf=SeedConfig::load()?;
+
+    for module in modules {
+        let mut context = Context::new();
+        context.insert("module", &module);
+
+        let model = get_entity_module(module.as_str())?;
+        let module_conf = &conf.module_conf(module.as_str()).unwrap();
+        let model_file = module_conf.model.to_owned();
+        let up_sql_file = module_conf.up_sql.to_owned();
+        let down_sql_file = module_conf.down_sql.to_owned();
+
+        println!("generate all entities to {} ..", model_file);
+
+        let header = &conf.get_header(module.as_str());
+        let enum_header = &conf.get_enum_header(module.as_str());
+        let enum_footer = &conf.enum_footer.to_owned();
+        // let enum_output=&conf.enum_output.unwrap().to_owned();
+        let seed_output = &conf.seed_types.to_owned();
+
+        let gen = move |typs: Vec<&str>, write_header: bool| {
+            let mut output = String::new();
+            if write_header {
+                output.push_str(header.as_str());
+            }
+            for typ in typs {
+                let mut ents: Vec<String> = model.entities.iter()
+                    .map(|x| x.entity_name.clone()).collect::<Vec<String>>();
+                if typ == "ent_drop" {
+                    // ents.reverse();
+                    ents = model.topo();
+                } else if typ == "enum" {
+                    output.push_str(enum_header.as_str());
+                }
+                for ent in &ents {
+                    println!("generate {} for {}", ent, typ);
+
+                    let cnt: String = entity_gen_works(ent.as_str(), typ).unwrap();
+                    output.push_str(cnt.as_str());
+                }
+
+                if typ == "enum" {
+                    output.push_str(enum_footer);
+                }
+            }
+            output
+        };
+
+        if !only_dto {
+            // model relates ...
+            std::fs::write(model_file, gen(vec!["model"], true))?;
+            // std::fs::write(enum_output, gen(vec!["enum"], false))?;
+            std::fs::write(Tera::one_off(seed_output, &context, true)?,
+                           gen(vec!["dto_seed"], true))?;
+
+            // sql relates ...
+            std::fs::write(up_sql_file, gen(vec!["ent", "ent_rel"], false))?;
+            std::fs::write(down_sql_file, gen(vec!["ent_drop"], false))?;
+
+        }else{
+            std::fs::write(Tera::one_off(seed_output, &context, true)?,
+                           gen(vec!["dto_seed"], true))?;
+        }
+        println!("done.");
     }
 
     Ok(())

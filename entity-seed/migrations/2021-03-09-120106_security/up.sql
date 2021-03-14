@@ -110,7 +110,7 @@ ALTER TABLE user_login_session ADD CONSTRAINT USER_SESSION_USER
 
 ALTER TABLE security_group_permission ADD CONSTRAINT SEC_GRP_PERM_GRP
     FOREIGN KEY (group_id) REFERENCES security_group(group_id);
-ALTER TABLE security_group_permission ADD CONSTRAINT fk_213572916883886080
+ALTER TABLE security_group_permission ADD CONSTRAINT fk_213599982199115776
     FOREIGN KEY (permission_id) REFERENCES security_permission(permission_id);
 
 

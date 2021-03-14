@@ -17,6 +17,7 @@ pub struct X509IssuerProvision{
     pub country: Option<String>,
     pub serial_number: Option<String>
 }
+
 #[derive(Debug, Queryable, Identifiable)]
 #[primary_key(user_login_id)]
 #[table_name = "user_login"]
@@ -39,6 +40,7 @@ pub struct UserLogin{
     pub user_ldap_dn: i64,
     pub disabled_by: i64
 }
+
 #[derive(Debug, Queryable, Identifiable, Associations)]
 #[primary_key(user_login_id, from_date)]
 #[belongs_to(UserLogin, foreign_key = "user_login_id")]
@@ -51,6 +53,7 @@ pub struct UserLoginPasswordHistory{
     pub thru_date: chrono::NaiveDateTime,
     pub current_password: Option<String>
 }
+
 #[derive(Debug, Queryable, Identifiable, Associations)]
 #[primary_key(user_login_id, from_date)]
 #[belongs_to(UserLogin, foreign_key = "user_login_id")]
@@ -66,6 +69,7 @@ pub struct UserLoginHistory{
     pub successful_login: bool,
     pub origin_user_login_id: i64
 }
+
 #[derive(Debug, Queryable, Identifiable, Associations)]
 #[primary_key(user_login_id)]
 #[belongs_to(UserLogin, foreign_key = "user_login_id")]
@@ -77,6 +81,7 @@ pub struct UserLoginSession{
     pub saved_date: chrono::NaiveDateTime,
     pub session_data: Option<String>
 }
+
 #[derive(Debug, Queryable, Identifiable)]
 #[primary_key(group_id)]
 #[table_name = "security_group"]
@@ -87,6 +92,7 @@ pub struct SecurityGroup{
     pub group_name: Option<String>,
     pub description: Option<String>
 }
+
 #[derive(Debug, Queryable, Identifiable, Associations)]
 #[primary_key(group_id, permission_id, from_date)]
 #[belongs_to(SecurityGroup, foreign_key = "group_id")]
@@ -100,6 +106,7 @@ pub struct SecurityGroupPermission{
     // fields
     pub thru_date: chrono::NaiveDateTime
 }
+
 #[derive(Debug, Queryable, Identifiable)]
 #[primary_key(permission_id)]
 #[table_name = "security_permission"]
@@ -109,6 +116,7 @@ pub struct SecurityPermission{
     // fields
     pub description: Option<String>
 }
+
 #[derive(Debug, Queryable, Identifiable, Associations)]
 #[primary_key(user_login_id, group_id, from_date)]
 #[belongs_to(UserLogin, foreign_key = "user_login_id")]
@@ -122,6 +130,7 @@ pub struct UserLoginSecurityGroup{
     // fields
     pub thru_date: chrono::NaiveDateTime
 }
+
 #[derive(Debug, Queryable, Identifiable, Associations)]
 #[primary_key(group_id, view_name_id)]
 #[belongs_to(SecurityGroup, foreign_key = "group_id")]
@@ -135,6 +144,7 @@ pub struct ProtectedView{
     pub max_hits_duration: i64,
     pub tarpit_duration: i64
 }
+
 #[derive(Debug, Queryable, Identifiable)]
 #[primary_key(view_name_id, user_login_id)]
 #[table_name = "tarpitted_login_view"]
@@ -145,3 +155,4 @@ pub struct TarpittedLoginView{
     // fields
     pub tarpit_release_date_time: i64
 }
+

@@ -1,6 +1,6 @@
 {%- for mod in modules -%}
 use crate::models::{{mod-}}_types::*;
-{%- endfor %}
+{% endfor %}
 
 #[derive(Deserialize, Debug)]
 pub struct SeedRecords {

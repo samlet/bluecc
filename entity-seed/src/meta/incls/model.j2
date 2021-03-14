@@ -14,3 +14,4 @@ pub struct {{ent['entity-name'] -}} {
     pub {{fld.name | snake_case}}: {{fld['type'] | query_type}}{% if not loop.last %},{% endif %}
 {%- endfor %}
 }
+

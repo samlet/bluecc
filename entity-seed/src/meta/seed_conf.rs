@@ -2,14 +2,14 @@ use serde_derive::Deserialize;
 use tera::{Tera, Context};
 use inflector::Inflector;
 
-#[derive(Clone, Deserialize)]
+#[derive(Deserialize)]
 pub struct SeedConfig {
     pub version: String,
     header: Option<String>,
     enum_header: Option<String>,
-    pub enum_footer: Option<String>,
+    pub enum_footer: String,
     pub enum_output: Option<String>,
-    pub seed_types: Option<String>,
+    pub seed_types: String,
     pub seed_wrapper: String,
     api: ApiGenConf,
     security: Generate,

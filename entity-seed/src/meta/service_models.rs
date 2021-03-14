@@ -82,8 +82,8 @@ pub struct ServiceAttribute{
 }
 
 fn ex_service_models() -> ServiceModel{
-    // from_reader(include_bytes!("entitymodel_example.xml").unwrap()).unwrap()
-    from_str(str::from_utf8(include_bytes!("services.xml")).unwrap()).unwrap()
+    // from_reader(include_bytes!("fixtures/entitymodel_example.xml").unwrap()).unwrap()
+    from_str(str::from_utf8(include_bytes!("fixtures/services.xml")).unwrap()).unwrap()
 }
 
 #[cfg(test)]

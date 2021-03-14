@@ -41,7 +41,7 @@ fn find_by_attr<'input>(doc:&mut roxmltree::Document<'input>,
 
 #[test]
 fn custom_err_works() -> anyhow::Result<()> {
-    let xml_str=str::from_utf8(include_bytes!("ExampleDemoData.xml"))?;
+    let xml_str=str::from_utf8(include_bytes!("fixtures/ExampleDemoData.xml"))?;
     let mut doc = roxmltree::Document::parse(xml_str).unwrap();
     let node_name= find_by_attr(&mut doc, "statusTypeId", "EXAMPLE_STATUS")?;
     assert_eq!("StatusType", node_name);
@@ -50,7 +50,7 @@ fn custom_err_works() -> anyhow::Result<()> {
 
 #[test]
 fn get_entities_test() -> anyhow::Result<()> {
-    let xml_str=str::from_utf8(include_bytes!("ExampleDemoData.xml"))?;
+    let xml_str=str::from_utf8(include_bytes!("fixtures/ExampleDemoData.xml"))?;
     let mut doc = roxmltree::Document::parse(xml_str).unwrap();
     let root = doc.root_element();
     // for node in root.children(){
@@ -69,7 +69,7 @@ fn get_entities_test() -> anyhow::Result<()> {
 /// ref: https://github.com/RazrFalcon/roxmltree/blob/master/tests/dom-api.rs
 #[test]
 fn seed_works(){
-    let xml_str=str::from_utf8(include_bytes!("ExampleDemoData.xml")).unwrap();
+    let xml_str=str::from_utf8(include_bytes!("fixtures/ExampleDemoData.xml")).unwrap();
     let doc = roxmltree::Document::parse(xml_str).unwrap();
     let elem = doc.descendants().find(|n|
         n.attribute("statusTypeId") == Some("EXAMPLE_STATUS")).unwrap();
@@ -109,7 +109,7 @@ fn seed_file_works() -> Result<(), TestError>{
 fn reader_works() {
     // https://simplabs.com/blog/2020/12/31/xml-and-rust/
     // https://stackoverflow.com/questions/19076719/how-do-i-convert-a-vector-of-bytes-u8-to-a-string
-    let xml_str=include_bytes!("simple.xml");
+    let xml_str=include_bytes!("fixtures/simple.xml");
     let parser = xml::reader::EventReader::from_str(str::from_utf8(xml_str).unwrap());
     for event in parser {
         println!("{:?}", event.unwrap());

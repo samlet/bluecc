@@ -30,7 +30,7 @@ fn new_works() {
 
 #[test]
 fn embed_string() {
-    let my_str = include_str!("spanish.in");
+    let my_str = include_str!("fixtures/spanish.in");
     assert_eq!(my_str, "adiós\n");
     print!("{}", my_str);
 }
@@ -195,7 +195,7 @@ CREATE TABLE {{ent['entity-name'] | snake_case -}} (
 #[test]
 fn fields_works() {
     let model: EntityModel = from_str(
-        str::from_utf8(include_bytes!("entitymodel_example.xml")).unwrap()).unwrap();
+        str::from_utf8(include_bytes!("fixtures/entitymodel_example.xml")).unwrap()).unwrap();
     println!("{:#?}", model.title);
     let ents=&model.entities;
     let ent=ents.iter().find(|n|n.entity_name=="Example").unwrap();
@@ -211,7 +211,7 @@ fn fields_works() {
 
 #[test]
 fn field_mapping_works() {
-    let model:FieldTypes=from_str(str::from_utf8(include_bytes!("fieldtypemysql.xml")).unwrap()).unwrap();
+    let model:FieldTypes=from_str(str::from_utf8(include_bytes!("fixtures/fieldtypemysql.xml")).unwrap()).unwrap();
     let ft=model.field_types.iter().find(|x| x.field_type=="id").unwrap();
     println!("{}, {}", ft.sql_type, ft.insert_type);
 

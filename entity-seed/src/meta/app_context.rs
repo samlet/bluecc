@@ -18,11 +18,11 @@ lazy_static_include_bytes! {
 }
 
 fn get_field_mappings() -> FieldTypes{
-    // from_str(str::from_utf8(include_bytes!("fieldtypemysql.xml")).unwrap()).unwrap()
-    from_str(str::from_utf8(include_bytes!("fieldtypepostgres_saas.xml")).unwrap()).unwrap()
+    // from_str(str::from_utf8(include_bytes!("fixtures/fieldtypemysql.xml")).unwrap()).unwrap()
+    from_str(str::from_utf8(include_bytes!("fixtures/fieldtypepostgres_saas.xml")).unwrap()).unwrap()
 }
 // fn example_models() -> EntityModel{
-//     from_str(str::from_utf8(include_bytes!("entitymodel_example.xml")).unwrap()).unwrap()
+//     from_str(str::from_utf8(include_bytes!("fixtures/entitymodel_example.xml")).unwrap()).unwrap()
 // }
 
 pub struct AppContext{

@@ -167,7 +167,7 @@ where
 
 #[test]
 fn load_z_works() -> anyhow::Result<()> {
-    let bytes:&[u8] =include_bytes!("data_files.jsonz");
+    let bytes:&[u8] =include_bytes!("fixtures/data_files.jsonz");
     let data_files=load_z::<DataFiles>(bytes)?;
     for f in &data_files.files{
         println!("{}: {}", f.uri, f.path);

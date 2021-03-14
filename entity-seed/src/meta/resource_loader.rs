@@ -385,7 +385,7 @@ fn process_seed(xml_str: &str) -> Result<Vec<SeedTypes>, GenericError>{
 
         let node_str=format!("<{} {}/>", node.tag_name().name(), flds.join(" "));
         let data:SeedTypes=serde_xml_rs::from_str(node_str.as_str()).unwrap();
-        println!("{} ->\n  {:?}", node_str, data);
+        debug!("{} ->\n  {:?}", node_str, data);
         result_set.push(data);
     }
 
@@ -395,15 +395,26 @@ fn process_seed(xml_str: &str) -> Result<Vec<SeedTypes>, GenericError>{
 
 #[test]
 fn process_seed_works() -> anyhow::Result<()> {
-    let cnt=read_to_string("data/security/SecurityGroupDemoData.xml")?;
+    std::env::set_var("RUST_LOG", "info,entity_seed=debug");
+    env_logger::init();
+    debug!("process seed xml ...");
+
+    // let cnt=read_to_string("data/security/SecurityGroupDemoData.xml")?;
+    let cnt=read_to_string("data/security/SecurityPermissionSeedData.xml")?;
     let rs=process_seed(cnt.as_str())?;
     println!("total {}", rs.len());
-    match rs.get(0) {
-        Some(SeedTypes::SecurityGroup(e))=> {
-            println!("group id {:?}\n{}", e.group_id, serde_json::to_string_pretty(e)?);
-            // store it to db
+    for rec in rs {
+        match rec {
+            SeedTypes::SecurityGroup(e) => {
+                println!("security-group id {:?}\n{}", e.group_id, serde_json::to_string_pretty(&e)?);
+            }
+            SeedTypes::UserLogin(e) => {
+                println!("user-login id {:?}\n{}", e.user_login_id,
+                         serde_json::to_string_pretty(&e)?);
+                // store it to db
+            }
+            _ => ()
         }
-        _ => ()
     }
     Ok(())
 }

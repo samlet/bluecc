@@ -12,6 +12,8 @@ enum_footer="}"
 enum_output="src/models/enum_types.rs"
 seed_types="../cc-types/src/models/{{module}}_types.rs"
 seed_wrapper="../cc-types/src/models/model_types.rs"
+#seed_types="src/models/{{module}}_types.rs"
+#seed_wrapper="src/models/model_types.rs"
 
 [api]
 gen_root="../cc-types/src"

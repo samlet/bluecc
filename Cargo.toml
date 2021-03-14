@@ -8,6 +8,7 @@ members = [
 	"meta-server",
     "functor",
 	"cc-types",
+	"cc-pipes",
 	"modules/mod-common",
     "modules/sample-books",
     "modules/sample-posts",

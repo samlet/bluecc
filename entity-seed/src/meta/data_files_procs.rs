@@ -10,6 +10,7 @@ use super::*;
 use serde::{Serialize, de};
 use crate::meta_model::{EntityModel, Entity};
 use roxmltree::Node;
+use crate::meta::service_models::ServiceModel;
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct DataFile{
@@ -265,5 +266,23 @@ fn load_seed_model_z_file_works() -> Result<(), GenericError> {
         }
         true
     })?;
+    Ok(())
+}
+
+#[test]
+fn load_service_model_z_file_works() -> anyhow::Result<()> {
+    let bytes =std::fs::read("./.store/service_model_files.jsonz")?;
+    let data_files=load_z::<DataFiles>(&bytes)?;
+    let srv_name="createExample";
+    for f in &data_files.files{
+        if f.items.contains(&srv_name.to_string()){
+            let model:ServiceModel=load_xml(f.content.as_bytes());
+            let item=model.services.iter()
+                .filter(|e| e.name==srv_name)
+                .nth(0);
+            let json_str=serde_json::to_string_pretty(item.unwrap())?;
+            println!("{} => {}",  srv_name, json_str);
+        }
+    }
     Ok(())
 }

@@ -1,4 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports, unused_mut))]
 
 #[macro_use]
 extern crate serde_derive;
@@ -26,7 +26,6 @@ pub mod snowflake;
 mod object_id;
 mod topo;
 mod delegators;
-mod kube;
 
 pub use self::database::establish_connection;
 pub use self::util::deserialize_branch_with_contiguous_check as load_xml;

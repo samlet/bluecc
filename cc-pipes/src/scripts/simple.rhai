@@ -1,0 +1,28 @@
+let now = timestamp();
+
+const MAX_NUMBER_TO_CHECK = 1_000;
+
+let prime_mask = [];
+prime_mask.pad(MAX_NUMBER_TO_CHECK, true);
+
+prime_mask[0] = false;
+prime_mask[1] = false;
+
+let total_primes_found = 0;
+
+for p in range(2, MAX_NUMBER_TO_CHECK) {
+    if !prime_mask[p] { continue; }
+
+    //print(p);
+
+    total_primes_found += 1;
+
+    for i in range(2 * p, MAX_NUMBER_TO_CHECK, p) {
+        prime_mask[i] = false;
+        i += p;
+    }
+}
+
+print("Total " + total_primes_found + " primes <= " + MAX_NUMBER_TO_CHECK);
+print("Run time = " + now.elapsed + " seconds.");
+

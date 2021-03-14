@@ -32,6 +32,11 @@ pub enum GenericError {
         expected: String,
         found: String,
     },
+    #[error("Error reading script file: {file_name:?}; {info:?}")]
+    ScriptError {
+        file_name: String,
+        info: String,
+    },
     #[error("unknown error")]
     Unknown,
     #[error(transparent)]

@@ -136,7 +136,7 @@ mod tests {
 
     #[test]
     fn service_model_works() {
-        let model=ex_service_models();
+        let model:ServiceModel=ex_service_models();
         println!("{}", model.version);
         assert_eq!("1.0", model.version.to_string());
         for srv in model.services {

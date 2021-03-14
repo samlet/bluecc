@@ -26,6 +26,11 @@ resetdb:
 security:
     cargo run --bin seed all security
 
+all:
+    cargo run --bin seed all example
+    cargo run --bin seed all security
+    cargo run --bin seed wrapper security example
+
 # $ just cli data-files
 cli cmd:
     cargo run --bin seed {{cmd}}

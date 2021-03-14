@@ -103,3 +103,33 @@ fn user_login_works() -> anyhow::Result<()> {
     Ok(())
 }
 
+#[test]
+fn user_login_gen_works() -> anyhow::Result<()> {
+    use crate::models::security_types::UserLogin;
+    use crate::schema::user_login::dsl::*;
+
+    let conn = establish_connection();
+    let json = json!(
+        {
+          "userLoginId": new_snowflake_id(),
+          "currentPassword": null,
+          "passwordHint": null,
+          "isSystem": true,
+          "enabled": false,
+          "hasLoggedOut": null,
+          "requirePasswordChange": null,
+          "lastCurrencyUom": null,
+          "lastLocale": null,
+          "lastTimeZone": null,
+          "disabledDateTime": null,
+          "successiveFailedLogins": null,
+          "externalAuthId": null,
+          "userLdapDn": null,
+          "disabledBy": null
+        }
+    );
+    let rec = serde_json::from_value::<UserLogin>(json)?;
+    diesel::insert_into(user_login).values(&rec).execute(&conn)?;
+    Ok(())
+}
+

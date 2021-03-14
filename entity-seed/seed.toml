@@ -10,10 +10,11 @@ pub enum EntityTypes {
 '''
 enum_footer="}"
 enum_output="src/models/enum_types.rs"
-seed_types="../cc-types/src/models/{{module}}_types.rs"
-seed_wrapper="../cc-types/src/models/model_types.rs"
-#seed_types="src/models/{{module}}_types.rs"
-#seed_wrapper="src/models/model_types.rs"
+
+#seed_types="../cc-types/src/models/{{module}}_types.rs"
+#seed_wrapper="../cc-types/src/models/model_types.rs"
+seed_types="src/models/{{module}}_types.rs"
+seed_wrapper="src/models/model_types.rs"
 
 [api]
 gen_root="../cc-types/src"
@@ -32,3 +33,4 @@ model="src/models/common.rs"
 up_sql="migrations/2021-03-09-083808_example/up.sql"
 down_sql="migrations/2021-03-09-083808_example/down.sql"
 model="src/models/example.rs"
+

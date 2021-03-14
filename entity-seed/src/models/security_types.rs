@@ -1,5 +1,10 @@
-#[derive(Debug, Deserialize, Serialize, Clone)]
+use serde_derive::{Deserialize, Serialize};
+// use crate::schema::security;
+use crate::schema::*;
+use diesel::prelude::*;
+#[derive(Debug, Insertable, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
+#[table_name = "x509_issuer_provision"]
 pub struct X509IssuerProvision{
     // keys
     pub cert_provision_id: Option<i64>, // id
@@ -13,8 +18,9 @@ pub struct X509IssuerProvision{
     pub serial_number: Option<String> // value
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Insertable, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
+#[table_name = "user_login"]
 pub struct UserLogin{
     // keys
     pub user_login_id: Option<i64>, // id-vlong
@@ -35,8 +41,9 @@ pub struct UserLogin{
     pub disabled_by: Option<i64> // id-vlong
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Insertable, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
+#[table_name = "user_login_password_history"]
 pub struct UserLoginPasswordHistory{
     // keys
     pub user_login_id: Option<i64>, // id-vlong
@@ -46,8 +53,9 @@ pub struct UserLoginPasswordHistory{
     pub current_password: Option<String> // long-varchar
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Insertable, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
+#[table_name = "user_login_history"]
 pub struct UserLoginHistory{
     // keys
     pub user_login_id: Option<i64>, // id-vlong
@@ -60,8 +68,9 @@ pub struct UserLoginHistory{
     pub origin_user_login_id: Option<i64> // id-vlong
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Insertable, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
+#[table_name = "user_login_session"]
 pub struct UserLoginSession{
     // keys
     pub user_login_id: Option<i64>, // id-vlong
@@ -70,8 +79,9 @@ pub struct UserLoginSession{
     pub session_data: Option<String> // very-long
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Insertable, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
+#[table_name = "security_group"]
 pub struct SecurityGroup{
     // keys
     pub group_id: Option<i64>, // id
@@ -80,8 +90,9 @@ pub struct SecurityGroup{
     pub description: Option<String> // description
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Insertable, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
+#[table_name = "security_group_permission"]
 pub struct SecurityGroupPermission{
     // keys
     pub group_id: Option<i64>, // id
@@ -91,8 +102,9 @@ pub struct SecurityGroupPermission{
     pub thru_date: Option<chrono::NaiveDateTime> // date-time
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Insertable, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
+#[table_name = "security_permission"]
 pub struct SecurityPermission{
     // keys
     pub permission_id: Option<i64>, // id-long
@@ -100,8 +112,9 @@ pub struct SecurityPermission{
     pub description: Option<String> // description
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Insertable, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
+#[table_name = "user_login_security_group"]
 pub struct UserLoginSecurityGroup{
     // keys
     pub user_login_id: Option<i64>, // id-vlong
@@ -111,8 +124,9 @@ pub struct UserLoginSecurityGroup{
     pub thru_date: Option<chrono::NaiveDateTime> // date-time
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Insertable, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
+#[table_name = "protected_view"]
 pub struct ProtectedView{
     // keys
     pub group_id: Option<i64>, // id
@@ -123,8 +137,9 @@ pub struct ProtectedView{
     pub tarpit_duration: Option<i64> // numeric
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Insertable, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
+#[table_name = "tarpitted_login_view"]
 pub struct TarpittedLoginView{
     // keys
     pub view_name_id: Option<i64>, // id-long

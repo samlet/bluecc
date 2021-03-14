@@ -1,13 +1,14 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 #[macro_use]
 extern crate lazy_static;
+#[macro_use] extern crate log;
 
 // use std::env;
 use structopt::StructOpt;
 use std::collections::HashMap;
 use entity_seed::meta::app_context::{APP_CONTEXT, FIELD_MAPPINGS, get_entities_by_module_names};
 use std::path::PathBuf;
-use entity_seed::meta_model::{ModelField, EntityModel};
+use entity_seed::meta_model::{ModelField, EntityModel, BelongsTo};
 use entity_seed::meta::seed_conf::SeedConfig;
 use entity_seed::snowflake::new_snowflake_id;
 use entity_seed::{GenericError, get_entity_model, get_entity_module};
@@ -26,6 +27,7 @@ $ cargo run --bin seed wrapper security party
 # $ cargo run --bin seed -- -o out_file list
 $ bluecc model-files  # 合并压缩所有的模型定义和数据文件
 $ bluecc entity StatusItem
+$ bluecc entity all
 $ bluecc seed Person
 ```
 */
@@ -74,6 +76,9 @@ async fn main(args: Args) -> anyhow::Result<()> {
     //     .or(Some(PathBuf::from(tempfile.path())))
     //     .unwrap().display());
     println!("{:?}", Command::from_args());
+
+    std::env::set_var("RUST_LOG", "info,entity_seed=debug,seed=debug");
+    env_logger::init();
 
     match args.cmd {
         Some(Command::Gen { entity, type_name }) => {
@@ -126,13 +131,18 @@ async fn main(args: Args) -> anyhow::Result<()> {
 
         Some(Command::Entity { name  }) => {
             let mut reader=ModelReader::load()?;
-            let ent=reader.get_entity_model(name.as_str());
-            match ent {
-                Ok(ent) => {
-                    let ent_json=serde_json::to_string_pretty(&ent)?;
-                    println!("{}",  ent_json);
+            if name=="all"{
+                let items=reader.get_all_entity_names();
+                println!("total {} => {:?}", items.len(), items);
+            }else {
+                let ent = reader.get_entity_model(name.as_str());
+                match ent {
+                    Ok(ent) => {
+                        let ent_json = serde_json::to_string_pretty(&ent)?;
+                        println!("{}", ent_json);
+                    }
+                    _ => ()
                 }
-                _ => ()
             }
 
         }
@@ -183,7 +193,7 @@ fn generate_models(only_dto: bool, modules: &Vec<String>) -> Result<(), GenericE
         let up_sql_file = module_conf.up_sql.to_owned();
         let down_sql_file = module_conf.down_sql.to_owned();
 
-        println!("generate all entities to {} ..", model_file);
+        info!("generate all entities to {} ..", model_file);
 
         let header = &conf.get_header(module.as_str());
         let enum_header = &conf.get_enum_header(module.as_str());
@@ -197,10 +207,13 @@ fn generate_models(only_dto: bool, modules: &Vec<String>) -> Result<(), GenericE
                 output.push_str(header.as_str());
             }
             for typ in typs {
+                debug!(".. create from {} entities -> {}",model.entities.len(), typ);
+
                 let mut ents: Vec<String> = model.entities.iter()
                     .map(|x| x.entity_name.clone()).collect::<Vec<String>>();
                 if typ == "ent_drop" {
                     // ents.reverse();
+                    debug!(".. model.topo");
                     ents = model.topo();
                 } else if typ == "enum" {
                     output.push_str(enum_header.as_str());
@@ -228,6 +241,7 @@ fn generate_models(only_dto: bool, modules: &Vec<String>) -> Result<(), GenericE
 
             // sql relates ...
             std::fs::write(up_sql_file, gen(vec!["ent", "ent_rel"], false))?;
+            info!("generate drop script ...");
             std::fs::write(down_sql_file, gen(vec!["ent_drop"], false))?;
 
         }else{
@@ -241,11 +255,12 @@ fn generate_models(only_dto: bool, modules: &Vec<String>) -> Result<(), GenericE
 }
 
 struct EntityGenerator{
-    entities: Vec<String>
+    entities: Vec<String>,
+    pub belongs_filter: bool,
 }
 impl EntityGenerator {
     pub fn new(entities: Vec<String>) -> Self {
-        EntityGenerator { entities }
+        EntityGenerator { entities, belongs_filter: true }
     }
 
     fn entity_gen_works(&self, entity_name: &str, template_name: &str)
@@ -346,10 +361,18 @@ impl EntityGenerator {
         context.insert("pks", &ent.pks_str());
 
         let belongs = &ent.belongs();
-        context.insert("belongs", &belongs);
-
-        let has_rels = belongs.len() > 0;
-        context.insert("has_rels", &has_rels);
+        if !self.belongs_filter {
+            context.insert("belongs", belongs);
+            let has_rels = belongs.len() > 0;
+            context.insert("has_rels", &has_rels);
+        }else{
+            let belongs=belongs.iter()
+                .filter(|e|self.entities.contains(&e.model_name))
+                .collect::<Vec<&BelongsTo>>();
+            context.insert("belongs", &belongs);
+            let has_rels = belongs.len() > 0;
+            context.insert("has_rels", &has_rels);
+        }
 
         let result = tera.render(template_name, &context)?;
         Ok(result)

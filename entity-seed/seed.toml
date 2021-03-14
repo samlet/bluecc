@@ -30,7 +30,7 @@ down_sql="migrations/2021-03-09-104216_common/down.sql"
 model="src/models/common.rs"
 
 [example]
-up_sql="migrations/2021-03-09-083808_example/up.sql"
-down_sql="migrations/2021-03-09-083808_example/down.sql"
+up_sql="migrations/2021-03-14-132527_example/up.sql"
+down_sql="migrations/2021-03-14-132527_example/down.sql"
 model="src/models/example.rs"
 

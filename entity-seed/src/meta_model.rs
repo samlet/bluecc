@@ -202,15 +202,23 @@ impl EntityModel {
 
     pub fn topo(&self) -> Vec<String>{
         let mut ts = TopologicalSort::<String>::new();
+        let names=self.entity_names();
         for ent in &self.entities{
             let deps:Vec<String>=ent.belongs().iter().map(|e|e.model_name.clone()).collect();
             for belong in deps {
-                ts.add_dependency(belong, &ent.entity_name);
+                if names.contains(&belong) {
+                    ts.add_dependency(belong, &ent.entity_name);
+                }
             }
         }
         let mut topo_stack:Vec<String>=Vec::new();
         while !ts.is_empty() {
             let mut result = ts.pop_all();
+            if result.is_empty(){
+                // If `pop_all` returns an empty vector and `len` is not 0, there is cyclic dependencies.
+                warn!("has cyclic dependencies");
+                break;
+            }
             result.sort();
             topo_stack.append(&mut result);
         }

@@ -192,6 +192,14 @@ pub struct ModelReader{
     cached_ents: HashMap<String, Entity>,
 }
 
+fn fix_module_name(module_name: &str) -> String {
+    let mut target=module_name.to_string();
+    if !target.ends_with(".xml"){
+        target.push_str("-entitymodel.xml");
+    }
+    target
+}
+
 impl ModelReader{
     pub fn load() -> Result<Self, GenericError> {
         let bytes =std::fs::read("./.store/entity_model_files.jsonz")?;
@@ -202,10 +210,7 @@ impl ModelReader{
     }
 
     pub fn get_entity_module(&self, module_name: &str) -> Result<EntityModel, GenericError> {
-        let mut target=module_name.to_string();
-        if !target.ends_with(".xml"){
-            target.push_str("-entitymodel.xml");
-        }
+        let target=fix_module_name(module_name);
         for f in &self.data_files.files {
             if f.uri==target {
                 let mut model: EntityModel = load_xml(f.content.as_bytes());
@@ -217,6 +222,10 @@ impl ModelReader{
             item_name: target,
             info: "entity module".to_string()
         })
+    }
+
+    pub fn get_all_entity_names(&self)->Vec<String>{
+        self.data_files.files.iter().flat_map(|f|f.items.clone()).collect::<Vec<String>>()
     }
 
     pub fn get_entity_model(&mut self, entity_name: &str) -> Result<Entity, GenericError> {

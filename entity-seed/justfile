@@ -28,8 +28,8 @@ security:
 
 all:
     cargo run --bin seed all example
-    cargo run --bin seed all security
-    cargo run --bin seed wrapper security example
+    # cargo run --bin seed all security
+    # cargo run --bin seed wrapper security example
 
 # $ just cli data-files
 cli cmd:

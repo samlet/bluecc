@@ -1,4 +1,6 @@
 use crate::models::security_types::*;
+use crate::models::example_types::*;
+
 
 #[derive(Deserialize, Debug)]
 pub struct SeedRecords {
@@ -18,5 +20,12 @@ pub enum SeedTypes {
     UserLoginSecurityGroup(UserLoginSecurityGroup),
     ProtectedView(ProtectedView),
     TarpittedLoginView(TarpittedLoginView),
+    Example(Example),
+    ExampleItem(ExampleItem),
+    ExampleStatus(ExampleStatus),
+    ExampleType(ExampleType),
+    ExampleFeature(ExampleFeature),
+    ExampleFeatureAppl(ExampleFeatureAppl),
+    ExampleFeatureApplType(ExampleFeatureApplType),
 }
 

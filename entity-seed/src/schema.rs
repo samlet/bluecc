@@ -31,6 +31,105 @@ table! {
     use diesel_full_text_search::{TsVector as Tsvector};
     use bigdecimal::BigDecimal;
 
+    example (example_id) {
+        example_type_id -> Nullable<Int8>,
+        status_id -> Nullable<Int8>,
+        example_name -> Nullable<Varchar>,
+        description -> Nullable<Varchar>,
+        long_description -> Nullable<Text>,
+        comments -> Nullable<Varchar>,
+        example_size -> Nullable<Int8>,
+        example_date -> Nullable<Timestamptz>,
+        another_date -> Nullable<Timestamptz>,
+        another_text -> Nullable<Varchar>,
+        example_id -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    example_feature (example_feature_id) {
+        feature_source_enum_id -> Nullable<Int8>,
+        description -> Nullable<Varchar>,
+        example_feature_id -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    example_feature_appl (example_id, example_feature_id, from_date) {
+        thru_date -> Nullable<Timestamptz>,
+        example_feature_appl_type_id -> Nullable<Int8>,
+        sequence_num -> Nullable<Int8>,
+        example_id -> Int8,
+        example_feature_id -> Int8,
+        from_date -> Timestamptz,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    example_feature_appl_type (example_feature_appl_type_id) {
+        parent_type_id -> Nullable<Int8>,
+        description -> Nullable<Varchar>,
+        example_feature_appl_type_id -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    example_item (example_id, example_item_seq_id) {
+        description -> Nullable<Varchar>,
+        amount -> Nullable<Float8>,
+        amount_uom_id -> Nullable<Int8>,
+        example_id -> Int8,
+        example_item_seq_id -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    example_status (example_id, status_date) {
+        status_end_date -> Nullable<Timestamptz>,
+        change_by_user_login_id -> Nullable<Int8>,
+        status_id -> Nullable<Int8>,
+        example_id -> Int8,
+        status_date -> Timestamptz,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    example_type (example_type_id) {
+        parent_type_id -> Nullable<Int8>,
+        description -> Nullable<Varchar>,
+        example_type_id -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
     mnemonics (id) {
         id -> Int4,
         path -> Varchar,
@@ -229,6 +328,12 @@ table! {
 
 joinable!(comments -> posts (post_id));
 joinable!(comments -> users (user_id));
+joinable!(example -> example_type (example_type_id));
+joinable!(example_feature_appl -> example (example_id));
+joinable!(example_feature_appl -> example_feature (example_feature_id));
+joinable!(example_feature_appl -> example_feature_appl_type (example_feature_appl_type_id));
+joinable!(example_item -> example (example_id));
+joinable!(example_status -> example (example_id));
 joinable!(posts -> users (user_id));
 joinable!(protected_view -> security_group (group_id));
 joinable!(security_group_permission -> security_group (group_id));
@@ -242,6 +347,13 @@ joinable!(user_login_session -> user_login (user_login_id));
 allow_tables_to_appear_in_same_query!(
     books,
     comments,
+    example,
+    example_feature,
+    example_feature_appl,
+    example_feature_appl_type,
+    example_item,
+    example_status,
+    example_type,
     mnemonics,
     posts,
     protected_view,

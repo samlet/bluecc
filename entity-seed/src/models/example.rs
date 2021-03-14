@@ -5,7 +5,6 @@ use diesel::prelude::*;
 #[derive(Debug, Queryable, Identifiable, Associations)]
 #[primary_key(example_id)]
 #[belongs_to(ExampleType, foreign_key = "example_type_id")]
-#[belongs_to(StatusItem, foreign_key = "status_id")]
 #[table_name = "example"]
 pub struct Example{
     // keys
@@ -25,7 +24,6 @@ pub struct Example{
 
 #[derive(Debug, Queryable, Identifiable, Associations)]
 #[primary_key(example_id, example_item_seq_id)]
-#[belongs_to(Uom, foreign_key = "amount_uom_id")]
 #[belongs_to(Example, foreign_key = "example_id")]
 #[table_name = "example_item"]
 pub struct ExampleItem{
@@ -41,8 +39,6 @@ pub struct ExampleItem{
 #[derive(Debug, Queryable, Identifiable, Associations)]
 #[primary_key(example_id, status_date)]
 #[belongs_to(Example, foreign_key = "example_id")]
-#[belongs_to(StatusItem, foreign_key = "status_id")]
-#[belongs_to(UserLogin, foreign_key = "change_by_user_login_id")]
 #[table_name = "example_status"]
 pub struct ExampleStatus{
     // keys
@@ -66,9 +62,8 @@ pub struct ExampleType{
     pub description: Option<String>
 }
 
-#[derive(Debug, Queryable, Identifiable, Associations)]
+#[derive(Debug, Queryable, Identifiable)]
 #[primary_key(example_feature_id)]
-#[belongs_to(Enumeration, foreign_key = "feature_source_enum_id")]
 #[table_name = "example_feature"]
 pub struct ExampleFeature{
     // keys

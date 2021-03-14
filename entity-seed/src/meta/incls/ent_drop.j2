@@ -1,1 +1,1 @@
-DROP TABLE {{ent['entity-name'] | snake_case }};
+DROP TABLE if exists {{ent['entity-name'] | snake_case }} cascade;

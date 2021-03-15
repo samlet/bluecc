@@ -29,6 +29,7 @@ $ bluecc model-files  # 合并压缩所有的模型定义和数据文件
 $ bluecc entity StatusItem
 $ bluecc entity all
 $ bluecc seed Person
+$ bluecc list-services | grep Person
 ```
 */
 
@@ -67,6 +68,10 @@ enum Command {
     Entity {name: String},
     /// Show entity seed data
     Seed {name: String},
+    /// Show service meta-info
+    Service {name: String},
+    /// List all service names
+    ListServices,
 }
 
 #[async_std::main]
@@ -161,6 +166,21 @@ async fn main(args: Args) -> anyhow::Result<()> {
                 }
                 true
             })?;
+        }
+
+        Some(Command::Service { name  }) => {
+            let mut sr = ServiceModelReader::new()?;
+            let item = sr.get_service_model(name.as_str())?;
+            let json_str = serde_json::to_string_pretty(&item)?;
+            println!("{} => {}", name, json_str);
+        }
+
+        Some(Command::ListServices {   }) => {
+            let sr = ServiceModelReader::new()?;
+
+            for (i, srv) in sr.get_all_service_names().iter().enumerate(){
+                println!("{}. {}", i, srv);
+            }
         }
 
         None => {

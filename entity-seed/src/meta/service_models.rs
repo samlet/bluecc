@@ -12,7 +12,7 @@ struct Item {
 
 // ------
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ServiceModel{
     pub description: String,
     pub vendor: String,
@@ -21,7 +21,7 @@ pub struct ServiceModel{
     pub services: Vec<ModelService>
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ModelService{
     pub name: String,
     #[serde(rename = "default-entity-name", default)]
@@ -49,11 +49,11 @@ pub struct ModelService{
     pub attributes: Vec<ServiceAttribute>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ServiceImplements{
     pub service: String
 }
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ServiceAutoAttributes{
     pub include: String,
     #[serde(default)]
@@ -63,7 +63,7 @@ pub struct ServiceAutoAttributes{
     #[serde(default)]
     pub optional: bool
 }
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ServiceOverride{
     #[serde(default)]
     pub mode: String,
@@ -71,7 +71,7 @@ pub struct ServiceOverride{
     #[serde(default)]
     pub optional: bool
 }
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ServiceAttribute{
     #[serde(rename = "type", default)]
     pub data_type: String,

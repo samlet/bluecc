@@ -10,7 +10,7 @@ use super::*;
 use serde::{Serialize, de};
 use crate::meta_model::{EntityModel, Entity};
 use roxmltree::Node;
-use crate::meta::service_models::ServiceModel;
+use crate::meta::service_models::{ServiceModel, ModelService};
 use std::collections::HashMap;
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -315,20 +315,54 @@ fn load_seed_model_z_file_works() -> Result<(), GenericError> {
     Ok(())
 }
 
-#[test]
-fn load_service_model_z_file_works() -> anyhow::Result<()> {
-    let bytes =std::fs::read("./.store/service_model_files.jsonz")?;
-    let data_files=load_z::<DataFiles>(&bytes)?;
-    let srv_name="createExample";
-    for f in &data_files.files{
-        if f.items.contains(&srv_name.to_string()){
-            let model:ServiceModel=load_xml(f.content.as_bytes());
-            let item=model.services.iter()
-                .filter(|e| e.name==srv_name)
-                .nth(0);
-            let json_str=serde_json::to_string_pretty(item.unwrap())?;
-            println!("{} => {}",  srv_name, json_str);
+pub struct ServiceModelReader{
+    data_files: DataFiles,
+    cached_srvs: HashMap<String, ModelService>,
+}
+impl ServiceModelReader{
+    pub fn new() -> Result<Self, GenericError> {
+        let bytes =std::fs::read("./.store/service_model_files.jsonz")?;
+        let data_files=load_z::<DataFiles>(&bytes)?;
+        Ok(ServiceModelReader { data_files: (data_files), cached_srvs:HashMap::new() })
+    }
+
+    pub fn get_all_service_names(&self)->Vec<String>{
+        self.data_files.files.iter().flat_map(|f|f.items.clone()).collect::<Vec<String>>()
+    }
+
+    pub fn get_service_model(&mut self, srv_name: &str) -> Result<&ModelService, GenericError> {
+        if !self.cached_srvs.contains_key(srv_name) {
+            for f in &self.data_files.files {
+                if f.items.contains(&srv_name.to_string()) {
+                    let model: ServiceModel = load_xml(f.content.as_bytes());
+                    let item = model.services.iter()
+                        .filter(|e| e.name == srv_name)
+                        .nth(0);
+
+                    self.cached_srvs.insert(srv_name.to_string(), item.unwrap().clone());
+                    break;
+                }
+            }
+        }
+
+        if !self.cached_srvs.contains_key(srv_name) {
+            Err(GenericError::NotFound {
+                item_name: srv_name.to_string(),
+                info: "no such service".to_string()
+            })
+        }else{
+            Ok(self.cached_srvs.get(srv_name).unwrap())
         }
     }
+}
+
+#[test]
+fn load_service_model_z_file_works() -> anyhow::Result<()> {
+    let srv_name = "createExample";
+    let mut sr = ServiceModelReader::new()?;
+    let item = sr.get_service_model(srv_name)?;
+    let json_str = serde_json::to_string_pretty(&item)?;
+    println!("{} => {}", srv_name, json_str);
     Ok(())
 }
+

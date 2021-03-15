@@ -15,6 +15,7 @@ use entity_seed::{GenericError, get_entity_model, get_entity_module};
 use tera::{Context, Tera};
 use entity_seed::meta::resource_loader::list_data_files;
 use entity_seed::meta::*;
+use inflector::Inflector;
 
 /**
 ```bash
@@ -30,6 +31,7 @@ $ bluecc entity StatusItem
 $ bluecc entity all
 $ bluecc seed Person
 $ bluecc list-services | grep Person
+$ bluecc list-services -s | grep payment
 ```
 */
 
@@ -71,7 +73,10 @@ enum Command {
     /// Show service meta-info
     Service {name: String},
     /// List all service names
-    ListServices,
+    ListServices {
+        #[structopt(short)]
+        snake_case: bool,
+    }
 }
 
 #[async_std::main]
@@ -175,11 +180,12 @@ async fn main(args: Args) -> anyhow::Result<()> {
             println!("{} => {}", name, json_str);
         }
 
-        Some(Command::ListServices {   }) => {
+        Some(Command::ListServices { snake_case  }) => {
             let sr = ServiceModelReader::new()?;
 
             for (i, srv) in sr.get_all_service_names().iter().enumerate(){
-                println!("{}. {}", i, srv);
+                let srv_name= if !snake_case {srv.to_owned()} else {srv.to_snake_case()};
+                println!("{}. {}", i, srv_name);
             }
         }
 

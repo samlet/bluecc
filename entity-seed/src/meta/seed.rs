@@ -131,17 +131,17 @@ async fn main(args: Args) -> anyhow::Result<()> {
         }
         Some(Command::ModelFiles {  }) => {
             let zout=merge_files("./entitydef", "**/*.xml",
-                "./.store/entity_model_files.json", &FileTypes::EntityModel)?;
+                "./src/meta/pkgs/entity_model_files.json", &FileTypes::EntityModel)?;
             println!("save entity models to {}", zout);
         }
         Some(Command::DataFiles {  }) => {
             let zout = merge_files(dir, "**/data/*.xml",
-                                   "./.store/seed_files.json", &FileTypes::Data)?;
+                                   "./src/meta/pkgs/seed_files.json", &FileTypes::Data)?;
             println!("save seeds to {}", zout);
         }
         Some(Command::ServiceFiles {  }) => {
             let zout=merge_files(dir, "**/servicedef/*.xml",
-                "./.store/service_model_files.json", &FileTypes::ServiceModel)?;
+                "./src/meta/pkgs/service_model_files.json", &FileTypes::ServiceModel)?;
             println!("save service models to {}", zout);
         }
 

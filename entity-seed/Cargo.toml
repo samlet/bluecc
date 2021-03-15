@@ -13,6 +13,7 @@ futures = "0.3"
 paw = "1.0"
 structopt = { version = "0.3", features = [ "paw" ] }
 itertools = "0.10"
+regex = "1"
 
 decimal = {package="rust_decimal", version="1.10.3", features=["serde-str"]}
 chrono = { version = "0.4.0", features = ["serde"] }
@@ -29,8 +30,8 @@ array-init = { version = "1.0" }
 #kvdb-memorydb = "0.9.0"
 #linked-hash-map = "0.5.2"
 
-common = { version = "0.1.0", path = "../common"}
-functor = { package="linq", version="0.0.1-release", path="../functor"}
+#common = { version = "0.1.0", path = "../common"}
+#functor = { package="linq", version="0.0.1-release", path="../functor"}
 #serde-xml-rs = "0.4.1"
 serde-xml-rs = { git = "https://github.com/tobz1000/serde-xml-rs", branch = "out-of-order-elements", package = "serde-xml-rs" }
 #askama = { version = "0.10", default-features = false, features = ["with-warp", "mime", "mime_guess"] }

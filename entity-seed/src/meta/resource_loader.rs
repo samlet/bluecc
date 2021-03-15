@@ -340,7 +340,7 @@ fn transform_works() {
     store.store().unwrap();
 }
 
-struct SeedProcessor{
+pub struct SeedProcessor{
     revs: Revisions,
 }
 impl SeedProcessor {

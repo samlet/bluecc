@@ -89,5 +89,6 @@ mod cc_common {
             cc_common.flip();
             assert_eq!(cc_common.get(), true);
         }
+
     }
 }

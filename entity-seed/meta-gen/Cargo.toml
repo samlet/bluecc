@@ -1,0 +1,23 @@
+[package]
+name = "meta-gen"
+version = "0.1.0"
+authors = ["Samlet Wu <xiaofei.wu@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+seed = { package="entity-seed", version = "0.1.0",  path = "../../entity-seed"}
+
+anyhow = "1.0"
+futures = "0.3"
+paw = "1.0"
+structopt = { version = "0.3", features = [ "paw" ] }
+itertools = "0.10"
+thiserror = "1.0"
+lazy_static = "1.4.0"
+
+serde = "1.0"
+serde_json = "1.0.11"
+serde_derive = "1.0"
+

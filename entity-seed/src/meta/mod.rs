@@ -24,8 +24,8 @@ mod scale_tests;
 mod template_tests;
 #[cfg(test)]
 mod functor_tests;
-#[cfg(test)]
-mod linq_tests;
+// #[cfg(test)]
+// mod linq_tests;
 #[cfg(test)]
 mod askama_tests;
 #[cfg(test)]

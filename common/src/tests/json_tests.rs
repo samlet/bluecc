@@ -64,10 +64,12 @@ fn as_string_map_works() {
         location: String,
         age: i32,
     }
+
     let mut map = BTreeMap::new();
     map.insert("fingerprint", Value::from("XXXXX"));
     map.insert("location", Value::from("Menlo Park, CA"));
     map.insert("age", Value::from(12));
+
     let val:Value=serde_json::to_value(map).unwrap();
     println!("{}", val);
     println!("{:?}", serde_json::from_value::<User>(val).unwrap())

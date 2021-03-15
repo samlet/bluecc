@@ -202,9 +202,10 @@ fn fix_module_name(module_name: &str) -> String {
 
 impl ModelReader{
     pub fn load() -> Result<Self, GenericError> {
-        let bytes =std::fs::read("./.store/entity_model_files.jsonz")?;
+        // let bytes =std::fs::read("./.store/entity_model_files.jsonz")?;
+        let bytes=include_bytes!("pkgs/entity_model_files.jsonz");
         Ok(ModelReader {
-            data_files: (load_z::<DataFiles>(&bytes)?),
+            data_files: (load_z::<DataFiles>(bytes)?),
             cached_ents: HashMap::new(),
         })
     }
@@ -255,8 +256,9 @@ impl ModelReader{
 
 #[test]
 fn load_entity_model_z_file_works() -> anyhow::Result<()> {
-    let bytes =std::fs::read("./.store/entity_model_files.jsonz")?;
-    let data_files=load_z::<DataFiles>(&bytes)?;
+    // let bytes =std::fs::read("./.store/entity_model_files.jsonz")?;
+    let bytes=include_bytes!("pkgs/entity_model_files.jsonz");
+    let data_files=load_z::<DataFiles>(bytes)?;
     let entity_name="Example";
     for f in &data_files.files{
         if f.items.contains(&entity_name.to_string()){
@@ -283,8 +285,9 @@ fn model_reader_works() -> anyhow::Result<()> {
 
 pub fn load_seed_model_z_file<P>(entity_name: &str, proc: P) -> Result<(), GenericError>
 where P: Fn(&Node<'_,'_>) -> bool,{
-    let bytes =std::fs::read("./.store/seed_files.jsonz")?;
-    let data_files=load_z::<DataFiles>(&bytes)?;
+    // let bytes =std::fs::read("./.store/seed_files.jsonz")?;
+    let bytes=include_bytes!("pkgs/seed_files.jsonz");
+    let data_files=load_z::<DataFiles>(bytes)?;
     for f in &data_files.files{
         if f.items.contains(&entity_name.to_string()){
             let doc = roxmltree::Document::parse(f.content.as_str())?;
@@ -321,8 +324,9 @@ pub struct ServiceModelReader{
 }
 impl ServiceModelReader{
     pub fn new() -> Result<Self, GenericError> {
-        let bytes =std::fs::read("./.store/service_model_files.jsonz")?;
-        let data_files=load_z::<DataFiles>(&bytes)?;
+        // let bytes =std::fs::read("./.store/service_model_files.jsonz")?;
+        let bytes=include_bytes!("pkgs/service_model_files.jsonz");
+        let data_files=load_z::<DataFiles>(bytes)?;
         Ok(ServiceModelReader { data_files: (data_files), cached_srvs:HashMap::new() })
     }
 

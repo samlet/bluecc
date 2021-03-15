@@ -26,11 +26,14 @@ resetdb:
 security:
     cargo run --bin seed all security
 
-all:
-    cargo run --bin seed all example
+wrapper:
+    # cargo run --bin seed all example
     # cargo run --bin seed all security
-    # cargo run --bin seed wrapper security example
+    cargo run --bin seed wrapper security example common party
 
 # $ just cli data-files
 cli cmd:
     cargo run --bin seed {{cmd}}
+
+list:
+    diesel migration list

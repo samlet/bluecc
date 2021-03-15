@@ -5,7 +5,7 @@ use std::fmt;
 use std::hash::Hash;
 use std::iter::FromIterator;
 
-/// https://github.com/gifnksm/topological-sort-rs/blob/master/src/lib.rs
+/// ref: https://github.com/gifnksm/topological-sort-rs/blob/master/src/lib.rs
 #[derive(Clone)]
 struct Dependency<T> {
     num_prec: usize,

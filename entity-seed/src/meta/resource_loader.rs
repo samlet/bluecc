@@ -23,6 +23,7 @@ use crate::meta::cc_conf::CcConfig;
 use glob::{MatchOptions, glob_with};
 
 use super::*;
+use crate::meta::model_revisions::Revisions;
 
 // lazy_static_include_bytes! {
 //     EXAMPLE_DOC => "entitydef/example-entitymodel.xml",
@@ -339,58 +340,69 @@ fn transform_works() {
     store.store().unwrap();
 }
 
-fn process_seed(xml_str: &str) -> Result<Vec<SeedTypes>, GenericError>{
-    use chrono::format::strftime::StrftimeItems;
-
-    let parse_dt=NaiveDateTime::parse_from_str;
-    let fmt = StrftimeItems::new("%Y-%m-%dT%H:%M:%S");
-    let mut store=StringStore::load().unwrap();
-
-    let doc = roxmltree::Document::parse(xml_str).unwrap();
-    let root=doc.root_element();
-    let nodes=root.children()
-        .filter(|n| n.is_element()).collect::<Vec<Node<'_,'_>>>();
-    // let model=get_entity_model("security");
-
-    let mut result_set=Vec::new();
-    for node in nodes{
-        let node_name=node.tag_name().name();
-        // let mod_ent=get_entity_by_name(node_name).expect("entity");
-        let mod_ent=get_entity_model(node_name)?;
-        let flds:Vec<String>=node.attributes().iter().map(|f| {
-            let fld_name=f.name();
-            let mut fld_val:String=f.value().to_string();
-            let mod_fld=mod_ent.get_field(fld_name).expect("field");
-            if mod_fld.is_dt_type() {
-                fld_val=parse_dt(f.value(), "%Y-%m-%d %H:%M:%S%.f").unwrap()
-                    .format_with_items(fmt.clone()).to_string();
-
-            } else if mod_fld.is_id_type() {
-                let mut rel_ent=node_name.to_string();
-                match mod_ent.get_relation_entity(fld_name) {
-                    Some(r) => rel_ent=r,
-                    _ => ()
-                }
-                let val=store.id(SerialKey::new(rel_ent.as_str(), f.name(), f.value()));
-                fld_val=val.to_string();
-            } else if mod_fld.field_type=="indicator" {
-                fld_val= match fld_val.as_str() {
-                    "Y" => "true".to_string(),
-                    "N" => "false".to_string(),
-                    _ => "false".to_string()
-                };
-            }
-            format!(" {}=\"{}\"", f.name(), fld_val)
-        }).collect();
-
-        let node_str=format!("<{} {}/>", node.tag_name().name(), flds.join(" "));
-        let data:SeedTypes=serde_xml_rs::from_str(node_str.as_str()).unwrap();
-        debug!("{} ->\n  {:?}", node_str, data);
-        result_set.push(data);
+struct SeedProcessor{
+    revs: Revisions,
+}
+impl SeedProcessor {
+    pub fn new(revs: Revisions) -> Self {
+        SeedProcessor { revs }
     }
 
-    store.store()?;
-    Ok(result_set)
+    fn process_seed(&self, xml_str: &str) -> Result<Vec<SeedTypes>, GenericError> {
+        use chrono::format::strftime::StrftimeItems;
+
+        let parse_dt = NaiveDateTime::parse_from_str;
+        let fmt = StrftimeItems::new("%Y-%m-%dT%H:%M:%S");
+        let mut store = StringStore::load().unwrap();
+
+        let doc = roxmltree::Document::parse(xml_str).unwrap();
+        let root = doc.root_element();
+        let nodes = root.children()
+            .filter(|n| n.is_element()).collect::<Vec<Node<'_, '_>>>();
+        // let model=get_entity_model("security");
+
+        let mut result_set = Vec::new();
+        for node in nodes {
+            let node_name = node.tag_name().name();
+            // let mod_ent=get_entity_by_name(node_name).expect("entity");
+            let mod_ent = get_entity_model(node_name)?;
+            let flds: Vec<String> = node.attributes().iter().map(|f| {
+                let fld_name= self.revs.get_field_rev(node_name, f.name());
+
+                let mut fld_val: String = f.value().to_string();
+                let mod_fld = mod_ent.get_field(fld_name.as_str()).expect("field");
+                if mod_fld.is_dt_type() {
+                    fld_val = parse_dt(f.value(), "%Y-%m-%d %H:%M:%S%.f").unwrap()
+                        .format_with_items(fmt.clone()).to_string();
+                } else if mod_fld.is_id_type() {
+                    let mut rel_ent = node_name.to_string();
+                    match mod_ent.get_relation_entity(fld_name.as_str()) {
+                        Some(r) => rel_ent = r,
+                        _ => ()
+                    }
+                    let val = store.id(SerialKey::new(rel_ent.as_str(), f.name(), f.value()));
+                    fld_val = val.to_string();
+                } else if mod_fld.field_type == "indicator" {
+                    fld_val = match fld_val.as_str() {
+                        "Y" => "true".to_string(),
+                        "N" => "false".to_string(),
+                        _ => "false".to_string()
+                    };
+                }
+
+                format!(" {}=\"{}\"", fld_name, fld_val)
+            }).collect();
+
+            let node_str = format!("<{} {}/>", node.tag_name().name(), flds.join(" "));
+            let data: SeedTypes = serde_xml_rs::from_str(node_str.as_str()).unwrap();
+            debug!("{} ->\n  {:?}", node_str, data);
+            result_set.push(data);
+        }
+
+        store.store()?;
+        Ok(result_set)
+    }
+
 }
 
 #[test]
@@ -399,9 +411,14 @@ fn process_seed_works() -> anyhow::Result<()> {
     env_logger::init();
     debug!("process seed xml ...");
 
+    let toml_str = include_str!("model_revs.toml");
+    let revs:Revisions=toml::from_str(toml_str)?;
+    let procs=SeedProcessor::new(revs);
+
     // let cnt=read_to_string("data/security/SecurityGroupDemoData.xml")?;
-    let cnt=read_to_string("data/security/SecurityPermissionSeedData.xml")?;
-    let rs=process_seed(cnt.as_str())?;
+    // let cnt=read_to_string("data/security/SecurityPermissionSeedData.xml")?;
+    let cnt=read_to_string("data/common/CountryCodeData.xml")?;
+    let rs=procs.process_seed(cnt.as_str())?;
     println!("total {}", rs.len());
     for rec in rs {
         match rec {
@@ -412,6 +429,14 @@ fn process_seed_works() -> anyhow::Result<()> {
                 println!("user-login id {:?}\n{}", e.user_login_id,
                          serde_json::to_string_pretty(&e)?);
                 // store it to db
+            }
+            SeedTypes::CountryCapital(ref e) => {
+                println!("{:?}; {}",  e.country_capital_name,
+                         serde_json::to_string_pretty(&e)?);
+            }
+            SeedTypes::CountryCode(ref e) => {
+                println!("{:?}; {}", e.country_code_id,
+                         serde_json::to_string_pretty(&e)?);
             }
             _ => ()
         }

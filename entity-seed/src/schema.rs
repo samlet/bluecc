@@ -569,10 +569,201 @@ table! {
     use diesel_full_text_search::{TsVector as Tsvector};
     use bigdecimal::BigDecimal;
 
+    country_address_format (geo_id) {
+        geo_assoc_type_id -> Nullable<Int8>,
+        require_state_province_id -> Nullable<Int8>,
+        require_postal_code -> Nullable<Bool>,
+        postal_code_regex -> Nullable<Varchar>,
+        has_postal_code_ext -> Nullable<Bool>,
+        require_postal_code_ext -> Nullable<Bool>,
+        address_format -> Nullable<Varchar>,
+        geo_id -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    country_capital (country_code) {
+        country_capital_name -> Nullable<Varchar>,
+        country_code -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    country_code (country_code_id) {
+        country_abbr -> Nullable<Varchar>,
+        country_number -> Nullable<Varchar>,
+        country_name -> Nullable<Varchar>,
+        country_code_id -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    country_tele_code (country_code) {
+        tele_code -> Nullable<Varchar>,
+        country_code -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    custom_method (custom_method_id) {
+        custom_method_type_id -> Nullable<Int8>,
+        custom_method_name -> Nullable<Varchar>,
+        description -> Nullable<Varchar>,
+        custom_method_id -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    custom_method_type (custom_method_type_id) {
+        parent_type_id -> Nullable<Int8>,
+        has_table -> Nullable<Bool>,
+        description -> Nullable<Varchar>,
+        custom_method_type_id -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    custom_screen (custom_screen_id) {
+        custom_screen_type_id -> Nullable<Int8>,
+        custom_screen_name -> Nullable<Varchar>,
+        custom_screen_location -> Nullable<Varchar>,
+        description -> Nullable<Varchar>,
+        custom_screen_id -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    custom_screen_type (custom_screen_type_id) {
+        parent_type_id -> Nullable<Int8>,
+        has_table -> Nullable<Bool>,
+        description -> Nullable<Varchar>,
+        custom_screen_type_id -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    custom_time_period (custom_time_period_id) {
+        parent_period_id -> Nullable<Int8>,
+        period_type_id -> Nullable<Int8>,
+        period_num -> Nullable<Int8>,
+        period_name -> Nullable<Varchar>,
+        from_date -> Nullable<Timestamptz>,
+        thru_date -> Nullable<Timestamptz>,
+        is_closed -> Nullable<Bool>,
+        custom_time_period_id -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    data_source (data_source_id) {
+        data_source_type_id -> Nullable<Int8>,
+        description -> Nullable<Varchar>,
+        data_source_id -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    data_source_type (data_source_type_id) {
+        description -> Nullable<Varchar>,
+        data_source_type_id -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
     email_address_verification (email_address) {
         verify_hash -> Nullable<Varchar>,
         expire_date -> Nullable<Timestamptz>,
         email_address -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    email_template_setting (email_template_setting_id) {
+        email_type -> Nullable<Int8>,
+        description -> Nullable<Varchar>,
+        body_screen_location -> Nullable<Varchar>,
+        xslfo_attach_screen_location -> Nullable<Varchar>,
+        from_address -> Nullable<Varchar>,
+        cc_address -> Nullable<Varchar>,
+        bcc_address -> Nullable<Varchar>,
+        subject -> Nullable<Varchar>,
+        content_type -> Nullable<Varchar>,
+        email_template_setting_id -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    enumeration (enum_id) {
+        enum_type_id -> Nullable<Int8>,
+        enum_code -> Nullable<Varchar>,
+        sequence_id -> Nullable<Int8>,
+        description -> Nullable<Varchar>,
+        enum_id -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    enumeration_type (enum_type_id) {
+        parent_type_id -> Nullable<Int8>,
+        has_table -> Nullable<Bool>,
+        description -> Nullable<Varchar>,
+        enum_type_id -> Int8,
     }
 }
 
@@ -699,6 +890,88 @@ table! {
     use diesel_full_text_search::{TsVector as Tsvector};
     use bigdecimal::BigDecimal;
 
+    geo (geo_id) {
+        geo_type_id -> Nullable<Int8>,
+        geo_name -> Nullable<Varchar>,
+        geo_code -> Nullable<Varchar>,
+        geo_sec_code -> Nullable<Varchar>,
+        abbreviation -> Nullable<Varchar>,
+        well_known_text -> Nullable<Text>,
+        geo_id -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    geo_assoc (geo_id, geo_id_to) {
+        geo_assoc_type_id -> Nullable<Int8>,
+        geo_id -> Int8,
+        geo_id_to -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    geo_assoc_type (geo_assoc_type_id) {
+        description -> Nullable<Varchar>,
+        geo_assoc_type_id -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    geo_point (geo_point_id) {
+        geo_point_type_enum_id -> Nullable<Int8>,
+        description -> Nullable<Varchar>,
+        data_source_id -> Nullable<Int8>,
+        latitude -> Nullable<Varchar>,
+        longitude -> Nullable<Varchar>,
+        elevation -> Nullable<Numeric>,
+        elevation_uom_id -> Nullable<Int8>,
+        information -> Nullable<Varchar>,
+        geo_point_id -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    geo_type (geo_type_id) {
+        parent_type_id -> Nullable<Int8>,
+        has_table -> Nullable<Bool>,
+        description -> Nullable<Varchar>,
+        geo_type_id -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    keyword_thesaurus (entered_keyword, alternate_keyword) {
+        relationship_enum_id -> Nullable<Int8>,
+        entered_keyword -> Varchar,
+        alternate_keyword -> Varchar,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
     mnemonics (id) {
         id -> Int4,
         path -> Varchar,
@@ -716,6 +989,19 @@ table! {
     need_type (need_type_id) {
         description -> Nullable<Varchar>,
         need_type_id -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    note_data (note_id) {
+        note_name -> Nullable<Varchar>,
+        note_info -> Nullable<Text>,
+        note_date_time -> Nullable<Timestamptz>,
+        note_id -> Int8,
     }
 }
 
@@ -1142,6 +1428,19 @@ table! {
     use diesel_full_text_search::{TsVector as Tsvector};
     use bigdecimal::BigDecimal;
 
+    period_type (period_type_id) {
+        description -> Nullable<Varchar>,
+        period_length -> Nullable<Int8>,
+        uom_id -> Nullable<Int8>,
+        period_type_id -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
     person (party_id) {
         salutation -> Nullable<Varchar>,
         first_name -> Nullable<Varchar>,
@@ -1176,6 +1475,107 @@ table! {
         existing_customer -> Nullable<Bool>,
         card_id -> Nullable<Int8>,
         party_id -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    portal_page (portal_page_id) {
+        portal_page_name -> Nullable<Varchar>,
+        description -> Nullable<Varchar>,
+        owner_user_login_id -> Nullable<Int8>,
+        original_portal_page_id -> Nullable<Int8>,
+        parent_portal_page_id -> Nullable<Int8>,
+        sequence_num -> Nullable<Int8>,
+        security_group_id -> Nullable<Int8>,
+        portal_page_id -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    portal_page_column (portal_page_id, column_seq_id) {
+        column_width_pixels -> Nullable<Int8>,
+        column_width_percentage -> Nullable<Int8>,
+        portal_page_id -> Int8,
+        column_seq_id -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    portal_page_portlet (portal_page_id, portal_portlet_id, portlet_seq_id) {
+        column_seq_id -> Nullable<Int8>,
+        sequence_num -> Nullable<Int8>,
+        portal_page_id -> Int8,
+        portal_portlet_id -> Int8,
+        portlet_seq_id -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    portal_portlet (portal_portlet_id) {
+        portlet_name -> Nullable<Varchar>,
+        screen_name -> Nullable<Varchar>,
+        screen_location -> Nullable<Varchar>,
+        edit_form_name -> Nullable<Varchar>,
+        edit_form_location -> Nullable<Varchar>,
+        description -> Nullable<Varchar>,
+        screenshot -> Nullable<Varchar>,
+        security_service_name -> Nullable<Varchar>,
+        security_main_action -> Nullable<Varchar>,
+        portal_portlet_id -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    portlet_attribute (portal_page_id, portal_portlet_id, portlet_seq_id, attr_name) {
+        attr_value -> Nullable<Varchar>,
+        attr_description -> Nullable<Varchar>,
+        attr_type -> Nullable<Varchar>,
+        portal_page_id -> Int8,
+        portal_portlet_id -> Int8,
+        portlet_seq_id -> Int8,
+        attr_name -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    portlet_category (portlet_category_id) {
+        description -> Nullable<Varchar>,
+        portlet_category_id -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    portlet_portlet_category (portal_portlet_id, portlet_category_id) {
+        portal_portlet_id -> Int8,
+        portlet_category_id -> Int8,
     }
 }
 
@@ -1324,10 +1724,101 @@ table! {
     use diesel_full_text_search::{TsVector as Tsvector};
     use bigdecimal::BigDecimal;
 
+    standard_language (standard_language_id) {
+        lang_code_3t -> Nullable<Varchar>,
+        lang_code_3b -> Nullable<Varchar>,
+        lang_code_2 -> Nullable<Varchar>,
+        lang_name -> Nullable<Varchar>,
+        lang_family -> Nullable<Varchar>,
+        lang_charset -> Nullable<Varchar>,
+        standard_language_id -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    status_item (status_id) {
+        status_type_id -> Nullable<Int8>,
+        status_code -> Nullable<Varchar>,
+        sequence_id -> Nullable<Int8>,
+        description -> Nullable<Varchar>,
+        status_id -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    status_type (status_type_id) {
+        parent_type_id -> Nullable<Int8>,
+        has_table -> Nullable<Bool>,
+        description -> Nullable<Varchar>,
+        status_type_id -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    status_valid_change (status_id, status_id_to) {
+        condition_expression -> Nullable<Varchar>,
+        transition_name -> Nullable<Varchar>,
+        status_id -> Int8,
+        status_id_to -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    system_property (system_resource_id, system_property_id) {
+        system_property_value -> Nullable<Varchar>,
+        description -> Nullable<Varchar>,
+        system_resource_id -> Int8,
+        system_property_id -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
     tarpitted_login_view (view_name_id, user_login_id) {
         tarpit_release_date_time -> Nullable<Int8>,
         view_name_id -> Int8,
         user_login_id -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    telecom_gateway_config (telecom_gateway_config_id) {
+        description -> Nullable<Varchar>,
+        telecom_gateway_config_id -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    telecom_method_type (telecom_method_type_id) {
+        description -> Nullable<Varchar>,
+        telecom_method_type_id -> Int8,
     }
 }
 
@@ -1417,6 +1908,77 @@ table! {
     use diesel_full_text_search::{TsVector as Tsvector};
     use bigdecimal::BigDecimal;
 
+    uom (uom_id) {
+        uom_type_id -> Nullable<Int8>,
+        abbreviation -> Nullable<Varchar>,
+        numeric_code -> Nullable<Int8>,
+        description -> Nullable<Varchar>,
+        uom_id -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    uom_conversion (uom_id, uom_id_to) {
+        conversion_factor -> Nullable<Numeric>,
+        custom_method_id -> Nullable<Int8>,
+        decimal_scale -> Nullable<Int8>,
+        rounding_mode -> Nullable<Int8>,
+        uom_id -> Int8,
+        uom_id_to -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    uom_conversion_dated (uom_id, uom_id_to, from_date) {
+        thru_date -> Nullable<Timestamptz>,
+        conversion_factor -> Nullable<Numeric>,
+        custom_method_id -> Nullable<Int8>,
+        decimal_scale -> Nullable<Int8>,
+        rounding_mode -> Nullable<Int8>,
+        purpose_enum_id -> Nullable<Int8>,
+        uom_id -> Int8,
+        uom_id_to -> Int8,
+        from_date -> Timestamptz,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    uom_group (uom_group_id, uom_id) {
+        uom_group_id -> Int8,
+        uom_id -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    uom_type (uom_type_id) {
+        parent_type_id -> Nullable<Int8>,
+        has_table -> Nullable<Bool>,
+        description -> Nullable<Varchar>,
+        uom_type_id -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
     user_login (user_login_id) {
         current_password -> Nullable<Varchar>,
         password_hint -> Nullable<Varchar>,
@@ -1495,6 +2057,31 @@ table! {
     use diesel_full_text_search::{TsVector as Tsvector};
     use bigdecimal::BigDecimal;
 
+    user_pref_group_type (user_pref_group_type_id) {
+        description -> Nullable<Varchar>,
+        user_pref_group_type_id -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    user_preference (user_login_id, user_pref_type_id) {
+        user_pref_group_type_id -> Nullable<Int8>,
+        user_pref_value -> Nullable<Varchar>,
+        user_pref_data_type -> Nullable<Int8>,
+        user_login_id -> Int8,
+        user_pref_type_id -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
     users (id) {
         id -> Int4,
         username -> Text,
@@ -1526,6 +2113,42 @@ table! {
         manifest_logo_url -> Nullable<Varchar>,
         manifest_policies -> Nullable<Text>,
         party_id -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    visual_theme (visual_theme_id) {
+        visual_theme_set_id -> Nullable<Int8>,
+        description -> Nullable<Varchar>,
+        visual_theme_id -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    visual_theme_resource (visual_theme_id, resource_type_enum_id, sequence_id) {
+        resource_value -> Nullable<Varchar>,
+        visual_theme_id -> Int8,
+        resource_type_enum_id -> Int8,
+        sequence_id -> Int8,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use diesel_full_text_search::{TsVector as Tsvector};
+    use bigdecimal::BigDecimal;
+
+    visual_theme_set (visual_theme_set_id) {
+        description -> Nullable<Varchar>,
+        visual_theme_set_id -> Int8,
     }
 }
 
@@ -1595,6 +2218,16 @@ joinable!(contact_mech_link -> contact_mech (contact_mech_id_from));
 joinable!(contact_mech_type_attr -> contact_mech_type (contact_mech_type_id));
 joinable!(contact_mech_type_purpose -> contact_mech_purpose_type (contact_mech_purpose_type_id));
 joinable!(contact_mech_type_purpose -> contact_mech_type (contact_mech_type_id));
+joinable!(country_address_format -> geo (geo_id));
+joinable!(country_address_format -> geo_assoc_type (geo_assoc_type_id));
+joinable!(country_capital -> country_code (country_code));
+joinable!(country_tele_code -> country_code (country_code));
+joinable!(custom_method -> custom_method_type (custom_method_type_id));
+joinable!(custom_screen -> custom_screen_type (custom_screen_type_id));
+joinable!(custom_time_period -> period_type (period_type_id));
+joinable!(data_source -> data_source_type (data_source_type_id));
+joinable!(email_template_setting -> enumeration (email_type));
+joinable!(enumeration -> enumeration_type (enum_type_id));
 joinable!(example -> example_type (example_type_id));
 joinable!(example_feature_appl -> example (example_id));
 joinable!(example_feature_appl -> example_feature (example_feature_id));
@@ -1602,6 +2235,13 @@ joinable!(example_feature_appl -> example_feature_appl_type (example_feature_app
 joinable!(example_item -> example (example_id));
 joinable!(example_status -> example (example_id));
 joinable!(ftp_address -> contact_mech (contact_mech_id));
+joinable!(geo -> geo_type (geo_type_id));
+joinable!(geo_assoc -> geo (geo_id));
+joinable!(geo_assoc -> geo_assoc_type (geo_assoc_type_id));
+joinable!(geo_point -> data_source (data_source_id));
+joinable!(geo_point -> enumeration (geo_point_type_enum_id));
+joinable!(geo_point -> uom (elevation_uom_id));
+joinable!(keyword_thesaurus -> enumeration (relationship_enum_id));
 joinable!(party -> party_type (party_type_id));
 joinable!(party_attribute -> party (party_id));
 joinable!(party_carrier_account -> party (party_id));
@@ -1653,7 +2293,14 @@ joinable!(party_role -> party (party_id));
 joinable!(party_role -> role_type (role_type_id));
 joinable!(party_status -> party (party_id));
 joinable!(party_type_attr -> party_type (party_type_id));
+joinable!(period_type -> uom (uom_id));
 joinable!(person -> party (party_id));
+joinable!(portal_page_column -> portal_page (portal_page_id));
+joinable!(portal_page_portlet -> portal_page (portal_page_id));
+joinable!(portal_page_portlet -> portal_portlet (portal_portlet_id));
+joinable!(portlet_attribute -> portal_portlet (portal_portlet_id));
+joinable!(portlet_portlet_category -> portal_portlet (portal_portlet_id));
+joinable!(portlet_portlet_category -> portlet_category (portlet_category_id));
 joinable!(postal_address -> contact_mech (contact_mech_id));
 joinable!(postal_address_boundary -> postal_address (contact_mech_id));
 joinable!(posts -> users (user_id));
@@ -1661,16 +2308,29 @@ joinable!(protected_view -> security_group (group_id));
 joinable!(role_type_attr -> role_type (role_type_id));
 joinable!(security_group_permission -> security_group (group_id));
 joinable!(security_group_permission -> security_permission (permission_id));
+joinable!(status_item -> status_type (status_type_id));
+joinable!(status_valid_change -> status_item (status_id));
 joinable!(telecom_number -> contact_mech (contact_mech_id));
 joinable!(term_type_attr -> term_type (term_type_id));
+joinable!(uom -> uom_type (uom_type_id));
+joinable!(uom_conversion -> custom_method (custom_method_id));
+joinable!(uom_conversion -> uom (uom_id));
+joinable!(uom_conversion_dated -> custom_method (custom_method_id));
+joinable!(uom_conversion_dated -> enumeration (purpose_enum_id));
+joinable!(uom_conversion_dated -> uom (uom_id));
+joinable!(uom_group -> uom (uom_id));
 joinable!(user_login_history -> user_login (user_login_id));
 joinable!(user_login_password_history -> user_login (user_login_id));
 joinable!(user_login_security_group -> security_group (group_id));
 joinable!(user_login_security_group -> user_login (user_login_id));
 joinable!(user_login_session -> user_login (user_login_id));
+joinable!(user_preference -> user_pref_group_type (user_pref_group_type_id));
 joinable!(valid_contact_mech_role -> contact_mech_type (contact_mech_type_id));
 joinable!(valid_contact_mech_role -> role_type (role_type_id));
 joinable!(vendor -> party (party_id));
+joinable!(visual_theme -> visual_theme_set (visual_theme_set_id));
+joinable!(visual_theme_resource -> enumeration (resource_type_enum_id));
+joinable!(visual_theme_resource -> visual_theme (visual_theme_id));
 
 allow_tables_to_appear_in_same_query!(
     addendum,
@@ -1713,7 +2373,21 @@ allow_tables_to_appear_in_same_query!(
     contact_mech_type,
     contact_mech_type_attr,
     contact_mech_type_purpose,
+    country_address_format,
+    country_capital,
+    country_code,
+    country_tele_code,
+    custom_method,
+    custom_method_type,
+    custom_screen,
+    custom_screen_type,
+    custom_time_period,
+    data_source,
+    data_source_type,
     email_address_verification,
+    email_template_setting,
+    enumeration,
+    enumeration_type,
     example,
     example_feature,
     example_feature_appl,
@@ -1722,8 +2396,15 @@ allow_tables_to_appear_in_same_query!(
     example_status,
     example_type,
     ftp_address,
+    geo,
+    geo_assoc,
+    geo_assoc_type,
+    geo_point,
+    geo_type,
+    keyword_thesaurus,
     mnemonics,
     need_type,
+    note_data,
     party,
     party_attribute,
     party_carrier_account,
@@ -1753,7 +2434,15 @@ allow_tables_to_appear_in_same_query!(
     party_status,
     party_type,
     party_type_attr,
+    period_type,
     person,
+    portal_page,
+    portal_page_column,
+    portal_page_portlet,
+    portal_portlet,
+    portlet_attribute,
+    portlet_category,
+    portlet_portlet_category,
     postal_address,
     postal_address_boundary,
     posts,
@@ -1764,18 +2453,35 @@ allow_tables_to_appear_in_same_query!(
     security_group,
     security_group_permission,
     security_permission,
+    standard_language,
+    status_item,
+    status_type,
+    status_valid_change,
+    system_property,
     tarpitted_login_view,
+    telecom_gateway_config,
+    telecom_method_type,
     telecom_number,
     term_type,
     term_type_attr,
     test_person,
+    uom,
+    uom_conversion,
+    uom_conversion_dated,
+    uom_group,
+    uom_type,
     user_login,
     user_login_history,
     user_login_password_history,
     user_login_security_group,
     user_login_session,
+    user_pref_group_type,
+    user_preference,
     users,
     valid_contact_mech_role,
     vendor,
+    visual_theme,
+    visual_theme_resource,
+    visual_theme_set,
     x509_issuer_provision,
 );

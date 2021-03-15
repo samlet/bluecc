@@ -25,8 +25,8 @@ down_sql="migrations/2021-03-09-120106_security/down.sql"
 model="src/models/security.rs"
 
 [common]
-up_sql="migrations/2021-03-09-104216_common/up.sql"
-down_sql="migrations/2021-03-09-104216_common/down.sql"
+up_sql="migrations/2021-03-14-161428_common/up.sql"
+down_sql="migrations/2021-03-14-161428_common/down.sql"
 model="src/models/common.rs"
 
 [example]

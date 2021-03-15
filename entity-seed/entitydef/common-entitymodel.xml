@@ -149,20 +149,20 @@ under the License.
             dependent-on="CountryCode"
             title="Country Capital">
       <field name="countryCode" type="id"></field>
-      <field name="countryCapital" type="description"></field>
+      <field name="countryCapitalName" type="description"></field>
       <prim-key field="countryCode"/>
       <relation type="one" fk-name="CNTRY_CAP_TO_CODE" rel-entity-name="CountryCode">
-        <key-map field-name="countryCode"/>
+        <key-map field-name="countryCode" rel-field-name="countryCodeId"/>
       </relation>
     </entity>
     <entity entity-name="CountryCode"
             package-name="org.apache.ofbiz.common.geo"
             title="ISO Country Code">
-      <field name="countryCode" type="id"></field>
+      <field name="countryCodeId" type="id"></field>
       <field name="countryAbbr" type="short-varchar"></field>
       <field name="countryNumber" type="short-varchar"></field>
       <field name="countryName" type="description"></field>
-      <prim-key field="countryCode"/>
+      <prim-key field="countryCodeId"/>
     </entity>
     <entity entity-name="CountryTeleCode"
             package-name="org.apache.ofbiz.common.geo"
@@ -172,7 +172,7 @@ under the License.
       <field name="teleCode" type="short-varchar"></field>
       <prim-key field="countryCode"/>
       <relation type="one" fk-name="CNTRY_TELE_TO_CODE" rel-entity-name="CountryCode">
-        <key-map field-name="countryCode"/>
+        <key-map field-name="countryCode" rel-field-name="countryCodeId"/>
       </relation>
     </entity>
     <view-entity entity-name="CountryTeleCodeAndName" package-name="org.apache.ofbiz.common.geo"
@@ -183,7 +183,7 @@ under the License.
         <alias entity-alias="CC" name="countryCode" prim-key="countryCodeId"/>
         <alias entity-alias="CC" name="countryName"/>
         <view-link entity-alias="CC" rel-entity-alias="CT">
-            <key-map field-name="countryCode"/>
+            <key-map field-name="countryCode" rel-field-name="countryCodeId"/>
         </view-link>
     </view-entity>
     <entity entity-name="CountryAddressFormat" package-name="org.apache.ofbiz.common.geo" default-resource-name="CommonEntityLabels"

@@ -55,10 +55,14 @@ enum Command {
     List { module: String},
     /// Generate model-types
     Wrapper {modules: Vec<String>} ,
+    /// List all data files and it's entities
+    ListDataFiles,
     /// Build all seed data files into a compressed resource file
     DataFiles,
     /// Build all entity schema into a compressed resource file
     ModelFiles,
+    /// Build all service schema into a compressed resource file
+    ServiceFiles,
     /// Show entity meta-info
     Entity {name: String},
     /// Show entity seed data
@@ -75,11 +79,12 @@ async fn main(args: Args) -> anyhow::Result<()> {
     // println!(".. generate files .. to {}", args.output
     //     .or(Some(PathBuf::from(tempfile.path())))
     //     .unwrap().display());
-    println!("{:?}", Command::from_args());
+    println!(".. execute => {:?}", Command::from_args());
 
-    std::env::set_var("RUST_LOG", "info,entity_seed=debug,seed=debug");
+    std::env::set_var("RUST_LOG", "info,entity_seed=info,seed=debug");
     env_logger::init();
 
+    let dir=&cc_conf()?.ofbiz_loc;
     match args.cmd {
         Some(Command::Gen { entity, type_name }) => {
             let generator=EntityGenerator::new(vec![entity.to_owned()]);
@@ -111,19 +116,20 @@ async fn main(args: Args) -> anyhow::Result<()> {
             std::fs::write(conf.seed_wrapper, result)?;
         }
 
-        Some(Command::DataFiles {  }) => {
+        Some(Command::ListDataFiles {  }) => {
             list_data_files()?;
         }
         Some(Command::ModelFiles {  }) => {
-            let dir=&cc_conf()?.ofbiz_loc;
-            let zout=merge_files(dir, "**/data/*.xml",
-                        "./.store/seed_files.json", &FileTypes::Data)?;
-            println!("save seeds to {}", zout);
-
             let zout=merge_files("./entitydef", "**/*.xml",
                 "./.store/entity_model_files.json", &FileTypes::EntityModel)?;
             println!("save entity models to {}", zout);
-
+        }
+        Some(Command::DataFiles {  }) => {
+            let zout = merge_files(dir, "**/data/*.xml",
+                                   "./.store/seed_files.json", &FileTypes::Data)?;
+            println!("save seeds to {}", zout);
+        }
+        Some(Command::ServiceFiles {  }) => {
             let zout=merge_files(dir, "**/servicedef/*.xml",
                 "./.store/service_model_files.json", &FileTypes::ServiceModel)?;
             println!("save service models to {}", zout);

@@ -8,3 +8,6 @@ mod example;
 mod example_types;
 mod party;
 mod party_types;
+
+mod common_types;
+mod common;

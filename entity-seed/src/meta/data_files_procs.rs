@@ -78,7 +78,7 @@ pub fn merge_files(dir: &str, filter: &str, json_output: &str, file_type: &FileT
     let mut data_files=DataFiles{ files: vec![] };
     let files=list_files(dir, filter)?;
     for f in &files{
-        println!(".. read {} start", f.as_display());
+        debug!(".. read {} start", f.as_display());
         let cnt=std::fs::read_to_string(f)?;
         // println!(".. read {} end", f.as_display());
         let path=f.to_str().unwrap().to_owned();

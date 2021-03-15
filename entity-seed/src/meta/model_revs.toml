@@ -1,0 +1,4 @@
+behaves = [
+    { RenameField = { entity = "CountryCapital", from = "countryCapital", to = "countryCapitalName" } },
+    { RenameField = { entity = "CountryCode", from = "countryCode", to = "countryCodeId" } }
+]

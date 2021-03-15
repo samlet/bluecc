@@ -1,4 +1,5 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports, unused_mut))]
+#![recursion_limit="256"]
 
 #[macro_use]
 extern crate serde_derive;

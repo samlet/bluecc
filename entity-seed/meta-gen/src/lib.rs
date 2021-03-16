@@ -1,7 +1,14 @@
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports, unused_mut))]
+
+mod seed_gen;
+mod conn;
+mod entity_auto_procs;
+
 #[macro_use]
 extern crate serde_derive;
 #[macro_use]
 extern crate lazy_static;
+#[macro_use] extern crate log;
 
 #[cfg(test)]
 mod tests {
@@ -30,7 +37,6 @@ mod tests {
         Ok(())
     }
 
-
     #[test]
     fn load_service_model_z_file_works() -> anyhow::Result<()> {
         let srv_name = "createExample";
@@ -40,7 +46,6 @@ mod tests {
         println!("{} => {}", srv_name, json_str);
         Ok(())
     }
-
 }
 
 

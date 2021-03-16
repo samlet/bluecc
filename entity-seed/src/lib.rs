@@ -33,6 +33,9 @@ pub use self::util::deserialize_branch_with_contiguous_check as load_xml;
 pub use self::errors::GenericError;
 pub use self::meta::app_context::{get_entity_model, get_entity_module};
 pub use self::snowflake::new_snowflake_id;
+pub use self::meta::resource_loader::{SeedProcessor, StringStore, SerialKey};
+pub use self::meta::model_revisions::{Revisions};
+pub use self::models::model_types::{SeedTypes};
 
 #[cfg(test)]
 mod lib_tests {

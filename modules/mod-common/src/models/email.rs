@@ -20,3 +20,9 @@ pub struct NewEmail<'a> {
     pub user_id: i32,
     pub email: &'a str,
 }
+
+#[test]
+fn it_works() -> anyhow::Result<()> {
+    Ok(())
+}
+

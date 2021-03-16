@@ -9,7 +9,7 @@ pub struct SeedRecords {
     pub items: Vec<SeedTypes>
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub enum SeedTypes {
     X509IssuerProvision(X509IssuerProvision),
     UserLogin(UserLogin),

@@ -341,11 +341,17 @@ fn transform_works() {
 }
 
 pub struct SeedProcessor{
-    revs: Revisions,
+    pub revs: Revisions,
 }
 impl SeedProcessor {
     pub fn new(revs: Revisions) -> Self {
         SeedProcessor { revs }
+    }
+
+    pub fn default() -> Self{
+        let toml_str = include_str!("model_revs.toml");
+        let revs:Revisions=toml::from_str(toml_str).expect("parse toml conf");
+        SeedProcessor { revs:revs }
     }
 
     fn process_seed(&self, xml_str: &str) -> Result<Vec<SeedTypes>, GenericError> {

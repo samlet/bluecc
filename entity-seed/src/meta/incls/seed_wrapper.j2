@@ -2,12 +2,12 @@
 use crate::models::{{mod-}}_types::*;
 {% endfor %}
 
-#[derive(Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct SeedRecords {
     pub items: Vec<SeedTypes>
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub enum SeedTypes {
 {%- for ent in ents %}
     {{ent}}({{ent}}),

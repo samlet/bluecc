@@ -9,6 +9,7 @@ edition = "2018"
 [dependencies]
 seed = { package="entity-seed", version = "0.1.0",  path = "../../entity-seed"}
 
+log = "0.4"
 anyhow = "1.0"
 futures = "0.3"
 paw = "1.0"
@@ -20,4 +21,10 @@ lazy_static = "1.4.0"
 serde = "1.0"
 serde_json = "1.0.11"
 serde_derive = "1.0"
+
+chrono = { version = "0.4.0", features = ["serde"] }
+roxmltree = "0.14.0"
+diesel = { version = "1.4", features = ["postgres"] }
+serde-xml-rs = "0.4.1"
+env_logger = "0.8.3"
 

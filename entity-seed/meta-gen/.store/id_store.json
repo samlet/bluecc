@@ -1,0 +1,100 @@
+{
+  "items": [
+    {
+      "key": {
+        "entity_name": "SecurityGroup",
+        "field_name": "groupId",
+        "field_value": "BIZADMIN"
+      },
+      "id": 214291259173507072
+    },
+    {
+      "key": {
+        "entity_name": "SecurityGroup",
+        "field_name": "groupId",
+        "field_value": "FLEXADMIN"
+      },
+      "id": 214291259169312769
+    },
+    {
+      "key": {
+        "entity_name": "SecurityGroup",
+        "field_name": "groupId",
+        "field_value": "FULLADMIN"
+      },
+      "id": 214291259169312768
+    },
+    {
+      "key": {
+        "entity_name": "SecurityGroup",
+        "field_name": "groupId",
+        "field_value": "IMPERSONATION"
+      },
+      "id": 214291259173507073
+    },
+    {
+      "key": {
+        "entity_name": "SecurityGroup",
+        "field_name": "groupId",
+        "field_value": "VIEWADMIN"
+      },
+      "id": 214291259169312770
+    },
+    {
+      "key": {
+        "entity_name": "SecurityPermission",
+        "field_name": "permissionId",
+        "field_value": "OFBTOOLS_VIEW"
+      },
+      "id": 214291259173507075
+    },
+    {
+      "key": {
+        "entity_name": "UserLogin",
+        "field_name": "userLoginId",
+        "field_value": "admin"
+      },
+      "id": 214291259177701379
+    },
+    {
+      "key": {
+        "entity_name": "UserLogin",
+        "field_name": "userLoginId",
+        "field_value": "bizadmin"
+      },
+      "id": 214291259181895687
+    },
+    {
+      "key": {
+        "entity_name": "UserLogin",
+        "field_name": "userLoginId",
+        "field_value": "demoadmin"
+      },
+      "id": 214291259181895681
+    },
+    {
+      "key": {
+        "entity_name": "UserLogin",
+        "field_name": "userLoginId",
+        "field_value": "flexadmin"
+      },
+      "id": 214291259177701381
+    },
+    {
+      "key": {
+        "entity_name": "UserLogin",
+        "field_name": "userLoginId",
+        "field_value": "ltdadmin"
+      },
+      "id": 214291259181895683
+    },
+    {
+      "key": {
+        "entity_name": "UserLogin",
+        "field_name": "userLoginId",
+        "field_value": "ltdadmin1"
+      },
+      "id": 214291259181895685
+    }
+  ]
+}

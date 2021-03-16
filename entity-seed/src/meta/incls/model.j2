@@ -5,13 +5,13 @@
 {%- endfor %}
 #[table_name = "{{ent['entity-name'] | snake_case}}"]
 pub struct {{ent['entity-name'] -}} {
+    // fields
+{%- for fld in flds %}
+    pub {{fld.name | snake_case}}: {{fld['type'] | opt_query_type}},
+{%- endfor %}
     // keys
 {%- for fld in keys %}
     pub {{fld.name | snake_case}}: {{fld['type'] | query_type}},
-{%- endfor %}
-    // fields
-{%- for fld in flds %}
-    pub {{fld.name | snake_case}}: {{fld['type'] | query_type}}{% if not loop.last %},{% endif %}
 {%- endfor %}
 }
 

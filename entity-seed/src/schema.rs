@@ -833,7 +833,7 @@ table! {
 
     example_item (example_id, example_item_seq_id) {
         description -> Nullable<Varchar>,
-        amount -> Nullable<Float8>,
+        amount -> Nullable<Numeric>,
         amount_uom_id -> Nullable<Int8>,
         example_id -> Int8,
         example_item_seq_id -> Int8,
@@ -1866,48 +1866,6 @@ table! {
     use diesel_full_text_search::{TsVector as Tsvector};
     use bigdecimal::BigDecimal;
 
-    test_person (party_id) {
-        salutation -> Nullable<Varchar>,
-        first_name -> Nullable<Varchar>,
-        middle_name -> Nullable<Varchar>,
-        last_name -> Nullable<Varchar>,
-        personal_title -> Nullable<Varchar>,
-        suffix -> Nullable<Varchar>,
-        nickname -> Nullable<Varchar>,
-        first_name_local -> Nullable<Varchar>,
-        middle_name_local -> Nullable<Varchar>,
-        last_name_local -> Nullable<Varchar>,
-        other_local -> Nullable<Varchar>,
-        member_id -> Nullable<Int8>,
-        gender -> Nullable<Bool>,
-        birth_date -> Nullable<Date>,
-        deceased_date -> Nullable<Date>,
-        height -> Nullable<Numeric>,
-        weight -> Nullable<Numeric>,
-        mothers_maiden_name -> Nullable<Varchar>,
-        old_marital_status -> Nullable<Bool>,
-        marital_status_enum_id -> Nullable<Int8>,
-        social_security_number -> Nullable<Varchar>,
-        passport_number -> Nullable<Varchar>,
-        passport_expire_date -> Nullable<Date>,
-        total_years_work_experience -> Nullable<Numeric>,
-        comments -> Nullable<Varchar>,
-        employment_status_enum_id -> Nullable<Int8>,
-        residence_status_enum_id -> Nullable<Int8>,
-        occupation -> Nullable<Varchar>,
-        years_with_employer -> Nullable<Int8>,
-        months_with_employer -> Nullable<Int8>,
-        existing_customer -> Nullable<Bool>,
-        card_id -> Nullable<Int8>,
-        party_id -> Int8,
-    }
-}
-
-table! {
-    use diesel::sql_types::*;
-    use diesel_full_text_search::{TsVector as Tsvector};
-    use bigdecimal::BigDecimal;
-
     uom (uom_id) {
         uom_type_id -> Nullable<Int8>,
         abbreviation -> Nullable<Varchar>,
@@ -2464,7 +2422,6 @@ allow_tables_to_appear_in_same_query!(
     telecom_number,
     term_type,
     term_type_attr,
-    test_person,
     uom,
     uom_conversion,
     uom_conversion_dated,

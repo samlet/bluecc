@@ -7,19 +7,19 @@ use diesel::prelude::*;
 #[belongs_to(ExampleType, foreign_key = "example_type_id")]
 #[table_name = "example"]
 pub struct Example{
-    // keys
-    pub example_id: i64,
     // fields
-    pub example_type_id: i64,
-    pub status_id: i64,
+    pub example_type_id: Option<i64>,
+    pub status_id: Option<i64>,
     pub example_name: Option<String>,
     pub description: Option<String>,
     pub long_description: Option<String>,
     pub comments: Option<String>,
-    pub example_size: i64,
-    pub example_date: chrono::NaiveDateTime,
-    pub another_date: chrono::NaiveDateTime,
-    pub another_text: Option<String>
+    pub example_size: Option<i64>,
+    pub example_date: Option<chrono::NaiveDateTime>,
+    pub another_date: Option<chrono::NaiveDateTime>,
+    pub another_text: Option<String>,
+    // keys
+    pub example_id: i64,
 }
 
 #[derive(Debug, Queryable, Identifiable, Associations)]
@@ -27,13 +27,13 @@ pub struct Example{
 #[belongs_to(Example, foreign_key = "example_id")]
 #[table_name = "example_item"]
 pub struct ExampleItem{
+    // fields
+    pub description: Option<String>,
+    pub amount: Option<bigdecimal::BigDecimal>,
+    pub amount_uom_id: Option<i64>,
     // keys
     pub example_id: i64,
     pub example_item_seq_id: i64,
-    // fields
-    pub description: Option<String>,
-    pub amount: f64,
-    pub amount_uom_id: i64
 }
 
 #[derive(Debug, Queryable, Identifiable, Associations)]
@@ -41,13 +41,13 @@ pub struct ExampleItem{
 #[belongs_to(Example, foreign_key = "example_id")]
 #[table_name = "example_status"]
 pub struct ExampleStatus{
+    // fields
+    pub status_end_date: Option<chrono::NaiveDateTime>,
+    pub change_by_user_login_id: Option<i64>,
+    pub status_id: Option<i64>,
     // keys
     pub example_id: i64,
     pub status_date: chrono::NaiveDateTime,
-    // fields
-    pub status_end_date: chrono::NaiveDateTime,
-    pub change_by_user_login_id: i64,
-    pub status_id: i64
 }
 
 #[derive(Debug, Queryable, Identifiable, Associations)]
@@ -55,22 +55,22 @@ pub struct ExampleStatus{
 #[belongs_to(ExampleType, foreign_key = "parent_type_id")]
 #[table_name = "example_type"]
 pub struct ExampleType{
+    // fields
+    pub parent_type_id: Option<i64>,
+    pub description: Option<String>,
     // keys
     pub example_type_id: i64,
-    // fields
-    pub parent_type_id: i64,
-    pub description: Option<String>
 }
 
 #[derive(Debug, Queryable, Identifiable)]
 #[primary_key(example_feature_id)]
 #[table_name = "example_feature"]
 pub struct ExampleFeature{
+    // fields
+    pub feature_source_enum_id: Option<i64>,
+    pub description: Option<String>,
     // keys
     pub example_feature_id: i64,
-    // fields
-    pub feature_source_enum_id: i64,
-    pub description: Option<String>
 }
 
 #[derive(Debug, Queryable, Identifiable, Associations)]
@@ -80,14 +80,14 @@ pub struct ExampleFeature{
 #[belongs_to(ExampleFeatureApplType, foreign_key = "example_feature_appl_type_id")]
 #[table_name = "example_feature_appl"]
 pub struct ExampleFeatureAppl{
+    // fields
+    pub thru_date: Option<chrono::NaiveDateTime>,
+    pub example_feature_appl_type_id: Option<i64>,
+    pub sequence_num: Option<i64>,
     // keys
     pub example_id: i64,
     pub example_feature_id: i64,
     pub from_date: chrono::NaiveDateTime,
-    // fields
-    pub thru_date: chrono::NaiveDateTime,
-    pub example_feature_appl_type_id: i64,
-    pub sequence_num: i64
 }
 
 #[derive(Debug, Queryable, Identifiable, Associations)]
@@ -95,10 +95,10 @@ pub struct ExampleFeatureAppl{
 #[belongs_to(ExampleFeatureApplType, foreign_key = "parent_type_id")]
 #[table_name = "example_feature_appl_type"]
 pub struct ExampleFeatureApplType{
+    // fields
+    pub parent_type_id: Option<i64>,
+    pub description: Option<String>,
     // keys
     pub example_feature_appl_type_id: i64,
-    // fields
-    pub parent_type_id: i64,
-    pub description: Option<String>
 }
 

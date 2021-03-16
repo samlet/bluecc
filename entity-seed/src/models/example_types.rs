@@ -30,7 +30,7 @@ pub struct ExampleItem{
     pub example_item_seq_id: Option<i64>, // id
     // fields
     pub description: Option<String>, // description
-    pub amount: Option<f64>, // floating-point
+    pub amount: Option<bigdecimal::BigDecimal>, // floating-point
     pub amount_uom_id: Option<i64> // id
 }
 

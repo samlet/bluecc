@@ -8,6 +8,7 @@ use serde::Deserialize;
 trait SeedGen{
     fn gen_json(&self, xml_str: &str) -> Result<Vec<SeedTypes>, GenericError>;
 }
+
 impl SeedGen for SeedProcessor {
     fn gen_json(&self, xml_str: &str) -> Result<Vec<SeedTypes>, GenericError> {
         use chrono::format::strftime::StrftimeItems;
@@ -113,3 +114,4 @@ mod tests {
         Ok(())
     }
 }
+

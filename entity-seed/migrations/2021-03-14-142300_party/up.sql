@@ -741,9 +741,9 @@ CREATE TABLE vendor(
 ALTER TABLE addendum ADD CONSTRAINT ADDNDM_AGRMNT
     FOREIGN KEY (agreement_id) REFERENCES agreement(agreement_id);
 
-ALTER TABLE agreement ADD CONSTRAINT fk_213685528615325696
+ALTER TABLE agreement ADD CONSTRAINT fk_214335092397576192
     FOREIGN KEY (party_id_from) REFERENCES party(party_id);
-ALTER TABLE agreement ADD CONSTRAINT fk_213685528615325697
+ALTER TABLE agreement ADD CONSTRAINT fk_214335092397576193
     FOREIGN KEY (role_type_id_from) REFERENCES role_type(role_type_id);
 ALTER TABLE agreement ADD CONSTRAINT AGRMNT_TYPE
     FOREIGN KEY (agreement_type_id) REFERENCES agreement_type(agreement_type_id);
@@ -779,20 +779,20 @@ ALTER TABLE agreement_party_applic ADD CONSTRAINT AGRMNT_PTYA_AGR
 ALTER TABLE agreement_party_applic ADD CONSTRAINT AGRMNT_PTYA_PTY
     FOREIGN KEY (party_id) REFERENCES party(party_id);
 
-ALTER TABLE agreement_product_appl ADD CONSTRAINT fk_213685529315774464
+ALTER TABLE agreement_product_appl ADD CONSTRAINT fk_214335093072859136
     FOREIGN KEY (agreement_id) REFERENCES agreement(agreement_id);
 
-ALTER TABLE agreement_promo_appl ADD CONSTRAINT fk_213685529387077632
+ALTER TABLE agreement_promo_appl ADD CONSTRAINT fk_214335093139968000
     FOREIGN KEY (agreement_id) REFERENCES agreement(agreement_id);
 
-ALTER TABLE agreement_facility_appl ADD CONSTRAINT fk_213685529454186496
+ALTER TABLE agreement_facility_appl ADD CONSTRAINT fk_214335093198688256
     FOREIGN KEY (agreement_id) REFERENCES agreement(agreement_id);
 
 ALTER TABLE agreement_role ADD CONSTRAINT AGRMNT_ROLE_AGR
     FOREIGN KEY (agreement_id) REFERENCES agreement(agreement_id);
 ALTER TABLE agreement_role ADD CONSTRAINT AGRMNT_ROLE_PTY
     FOREIGN KEY (party_id) REFERENCES party(party_id);
-ALTER TABLE agreement_role ADD CONSTRAINT fk_213685529521295360
+ALTER TABLE agreement_role ADD CONSTRAINT fk_214335093265797120
     FOREIGN KEY (role_type_id) REFERENCES role_type(role_type_id);
 
 ALTER TABLE agreement_term ADD CONSTRAINT AGRMNT_TERM_TTYP
@@ -851,7 +851,7 @@ ALTER TABLE communication_event_role ADD CONSTRAINT COM_EVRL_CMEV
     FOREIGN KEY (communication_event_id) REFERENCES communication_event(communication_event_id);
 ALTER TABLE communication_event_role ADD CONSTRAINT COM_EVRL_PTY
     FOREIGN KEY (party_id) REFERENCES party(party_id);
-ALTER TABLE communication_event_role ADD CONSTRAINT fk_213685530578259968
+ALTER TABLE communication_event_role ADD CONSTRAINT fk_214335094234681344
     FOREIGN KEY (role_type_id) REFERENCES role_type(role_type_id);
 ALTER TABLE communication_event_role ADD CONSTRAINT COM_EVRL_CMCH
     FOREIGN KEY (contact_mech_id) REFERENCES contact_mech(contact_mech_id);
@@ -885,32 +885,32 @@ ALTER TABLE contact_mech_type_purpose ADD CONSTRAINT CONT_MECH_TP_PRPTP
 
 ALTER TABLE party_contact_mech ADD CONSTRAINT PARTY_CMECH_PARTY
     FOREIGN KEY (party_id) REFERENCES party(party_id);
-ALTER TABLE party_contact_mech ADD CONSTRAINT fk_213685531417120768
+ALTER TABLE party_contact_mech ADD CONSTRAINT fk_214335094880604160
     FOREIGN KEY (party_id) REFERENCES person(party_id);
-ALTER TABLE party_contact_mech ADD CONSTRAINT fk_213685531421315072
+ALTER TABLE party_contact_mech ADD CONSTRAINT fk_214335094880604161
     FOREIGN KEY (party_id) REFERENCES party_group(party_id);
 ALTER TABLE party_contact_mech ADD CONSTRAINT PARTY_CMECH_ROLE
     FOREIGN KEY (role_type_id) REFERENCES role_type(role_type_id);
 ALTER TABLE party_contact_mech ADD CONSTRAINT PARTY_CMECH_CMECH
     FOREIGN KEY (contact_mech_id) REFERENCES contact_mech(contact_mech_id);
-ALTER TABLE party_contact_mech ADD CONSTRAINT fk_213685531421315073
+ALTER TABLE party_contact_mech ADD CONSTRAINT fk_214335094884798464
     FOREIGN KEY (contact_mech_id) REFERENCES telecom_number(contact_mech_id);
-ALTER TABLE party_contact_mech ADD CONSTRAINT fk_213685531421315074
+ALTER TABLE party_contact_mech ADD CONSTRAINT fk_214335094884798465
     FOREIGN KEY (contact_mech_id) REFERENCES postal_address(contact_mech_id);
 
 ALTER TABLE party_contact_mech_purpose ADD CONSTRAINT PARTY_CMPRP_TYPE
     FOREIGN KEY (contact_mech_purpose_type_id) REFERENCES contact_mech_purpose_type(contact_mech_purpose_type_id);
 ALTER TABLE party_contact_mech_purpose ADD CONSTRAINT PARTY_CMPRP_PARTY
     FOREIGN KEY (party_id) REFERENCES party(party_id);
-ALTER TABLE party_contact_mech_purpose ADD CONSTRAINT fk_213685531488423936
+ALTER TABLE party_contact_mech_purpose ADD CONSTRAINT fk_214335094947713024
     FOREIGN KEY (party_id) REFERENCES person(party_id);
-ALTER TABLE party_contact_mech_purpose ADD CONSTRAINT fk_213685531492618240
+ALTER TABLE party_contact_mech_purpose ADD CONSTRAINT fk_214335094947713025
     FOREIGN KEY (party_id) REFERENCES party_group(party_id);
 ALTER TABLE party_contact_mech_purpose ADD CONSTRAINT PARTY_CMPRP_CMECH
     FOREIGN KEY (contact_mech_id) REFERENCES contact_mech(contact_mech_id);
-ALTER TABLE party_contact_mech_purpose ADD CONSTRAINT fk_213685531492618241
+ALTER TABLE party_contact_mech_purpose ADD CONSTRAINT fk_214335094947713026
     FOREIGN KEY (contact_mech_id) REFERENCES postal_address(contact_mech_id);
-ALTER TABLE party_contact_mech_purpose ADD CONSTRAINT fk_213685531492618242
+ALTER TABLE party_contact_mech_purpose ADD CONSTRAINT fk_214335094951907328
     FOREIGN KEY (contact_mech_id) REFERENCES telecom_number(contact_mech_id);
 
 ALTER TABLE postal_address ADD CONSTRAINT POST_ADDR_CMECH
@@ -1022,9 +1022,9 @@ ALTER TABLE party_note ADD CONSTRAINT PARTY_NOTE_PARTY
 ALTER TABLE party_profile_default ADD CONSTRAINT PARTY_PROF_PARTY
     FOREIGN KEY (party_id) REFERENCES party(party_id);
 
-ALTER TABLE party_relationship ADD CONSTRAINT fk_213685533564604416
+ALTER TABLE party_relationship ADD CONSTRAINT fk_214335096860315648
     FOREIGN KEY (party_id_from) REFERENCES party(party_id);
-ALTER TABLE party_relationship ADD CONSTRAINT fk_213685533564604417
+ALTER TABLE party_relationship ADD CONSTRAINT fk_214335096860315649
     FOREIGN KEY (role_type_id_from) REFERENCES role_type(role_type_id);
 ALTER TABLE party_relationship ADD CONSTRAINT PARTY_REL_PRTYP
     FOREIGN KEY (priority_type_id) REFERENCES priority_type(priority_type_id);

@@ -133,3 +133,25 @@ fn user_login_gen_works() -> anyhow::Result<()> {
     Ok(())
 }
 
+#[test]
+fn list_user_logins_works() -> anyhow::Result<()> {
+    use crate::schema::user_login::dsl::*;
+    use crate::models::security::UserLogin;
+
+    let conn = establish_connection();
+
+    // let rs=user_login
+    //             .order(user_login_id.desc())
+    //             .limit(5)
+    //             .load(&conn)?
+    //             .into_iter()
+    //             .rev()
+    //             .collect::<Vec<UserLoginCc>>();
+    let rs=user_login.select((user_login_id, current_password.nullable()))
+        .order(user_login_id.desc())
+        .load::<(i64, Option<String>)>(&conn)?;
+    // for r in &rs{
+    //     println!("{:?}", r);
+    // }
+    Ok(())
+}

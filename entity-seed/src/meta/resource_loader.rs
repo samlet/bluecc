@@ -359,7 +359,7 @@ impl SeedProcessor {
 
         let parse_dt = NaiveDateTime::parse_from_str;
         let fmt = StrftimeItems::new("%Y-%m-%dT%H:%M:%S");
-        let mut store = StringStore::load().unwrap();
+        let mut store = StringStore::load()?;
 
         let doc = roxmltree::Document::parse(xml_str).unwrap();
         let root = doc.root_element();

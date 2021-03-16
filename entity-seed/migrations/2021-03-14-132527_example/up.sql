@@ -14,7 +14,7 @@ CREATE TABLE example(
 );
 CREATE TABLE example_item(
     description VARCHAR(255),
-    amount FLOAT8,
+    amount NUMERIC(18,3),
     amount_uom_id BIGINT,
 
     example_id BIGINT NOT NULL,

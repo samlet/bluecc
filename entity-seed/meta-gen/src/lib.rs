@@ -3,15 +3,15 @@
 mod seed_gen;
 mod conn;
 mod entity_auto_procs;
-mod query_tests;
+// mod query_tests;
 
 #[macro_use]
 extern crate serde_derive;
 #[macro_use]
 extern crate lazy_static;
 #[macro_use] extern crate log;
-#[macro_use]
-extern crate diesel;
+// #[macro_use]
+// extern crate diesel;
 
 #[cfg(test)]
 mod tests {

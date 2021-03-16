@@ -42,7 +42,10 @@ fn list_user_logins_cols() -> anyhow::Result<()> {
 #[test]
 fn list_recs() -> anyhow::Result<()> {
     use seed::schema::uom_type::dsl::*;
+    use seed::schema::user_login::dsl::*;
     use seed::models::common::UomType;
+    use seed::models::security::UserLogin;
+
     let conn = establish_connection();
 
     let total=uom_type
@@ -56,5 +59,14 @@ fn list_recs() -> anyhow::Result<()> {
     for r in &rs{
         println!("{:?}", r);
     }
+
+    println!("list user_login recs");
+    let rs:Vec<UserLogin>=user_login
+                .load(&conn)?;
+    for r in &rs{
+        println!("{:?}", r);
+    }
     Ok(())
 }
+
+

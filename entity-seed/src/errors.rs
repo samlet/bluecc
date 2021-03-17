@@ -19,6 +19,8 @@ pub enum GenericError {
     TeraTemplateErr(#[from] tera::Error),
     #[error("database error")]
     DatabaseErr(#[from] quaint::error::Error),
+    #[error("diesel error")]
+    DieselErr(#[from] diesel::result::Error),
     #[error("config toml error")]
     ConfigTomlErr(#[from] toml::de::Error),
     #[error("glob pattern error")]

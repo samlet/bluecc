@@ -1,7 +1,7 @@
 use crate::conn::establish_connection;
 use diesel::prelude::*;
 use serde_json::json;
-use seed::new_snowflake_id;
+use seed::{new_snowflake_id, GenericError};
 use bcrypt::*;
 use diesel::{self, insert_into, delete, sql_query};
 
@@ -9,6 +9,7 @@ use seed::schema::users;
 use inflector::Inflector;
 use diesel::deserialize::FromSql;
 use diesel::backend::Backend;
+use chrono::NaiveDateTime;
 
 #[test]
 fn user_works() -> anyhow::Result<()> {
@@ -210,3 +211,109 @@ fn insert_or_ignore_into_works() -> anyhow::Result<()> {
     }
     Ok(())
 }
+
+#[derive(Queryable)]
+pub struct UserRec {
+    pub id: i32,
+    pub username: String,
+}
+
+fn get_user(conn: &PgConnection, id: i32) -> Result<UserRec, GenericError> {
+    let user = users::table
+        .filter(users::id.eq(id))
+        .select((users::id, users::username))
+        .first::<UserRec>(conn)?;
+    Ok(user)
+}
+
+#[test]
+fn find_by_id_works() -> Result<(), GenericError>  {
+    let conn = establish_connection();
+    let user=get_user(&conn, 1)?;
+    println!("user name {}", user.username);
+
+    if let Ok(user)=get_user(&conn, 8888) {
+        println!("user name {}", user.username);
+    }
+    Ok(())
+}
+
+mod relates {
+    use crate::conn::establish_connection;
+    use diesel::prelude::*;
+    use chrono::NaiveDateTime;
+    use seed::schema::{users, posts};
+    use seed::{new_snowflake_id, GenericError};
+
+    use diesel::pg::Pg;
+    use diesel::query_source::Queryable;
+    use diesel::sql_types::{Nullable, Timestamp};
+
+    #[derive(Debug, Serialize)]
+    pub enum Status {
+        Draft,
+        Published { at: NaiveDateTime },
+    }
+
+    impl Queryable<Nullable<Timestamp>, Pg> for Status {
+        type Row = Option<NaiveDateTime>;
+
+        fn build(row: Self::Row) -> Self {
+            match row {
+                Some(at) => Status::Published { at },
+                None => Status::Draft,
+            }
+        }
+    }
+
+    #[derive(Queryable, Associations, Identifiable, Debug, Serialize)]
+    #[belongs_to(User)]
+    pub struct Post {
+        pub id: i32,
+        pub user_id: i32,
+        pub title: String,
+        pub body: String,
+        pub created_at: NaiveDateTime,
+        pub updated_at: NaiveDateTime,
+        pub status: Status,
+    }
+
+    #[derive(Queryable, Identifiable, Debug, PartialEq)]
+    pub struct User {
+        pub id: i32,
+        pub username: String,
+    }
+
+    fn get_user_by_id(conn: &PgConnection, id: i32) -> Result<User, GenericError> {
+        let user = users::table
+            .filter(users::id.eq(id))
+            .select((users::id, users::username))
+            .first::<User>(conn)?;
+        Ok(user)
+    }
+
+    #[test]
+    fn relates_works() -> anyhow::Result<()> {
+        let conn = establish_connection();
+
+        let user = get_user_by_id(&conn, 1)?;
+        let body = "simple content";
+        let post_id = diesel::insert_into(posts::table)
+            .values((
+                posts::user_id.eq(user.id),
+                posts::title.eq("just a test blog"),
+                posts::body.eq(body),
+            ))
+            .returning(posts::id)
+            .get_result::<i32>(&conn)?;
+        println!("create a post {}", post_id);
+
+        let post = Post::belonging_to(&user)
+            .find(post_id)
+            .first::<Post>(&conn)?;
+        let post_json=serde_json::to_string_pretty(&post)?;
+        println!("post: {}", post_json);
+        Ok(())
+    }
+}
+

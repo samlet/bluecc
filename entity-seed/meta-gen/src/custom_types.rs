@@ -296,7 +296,7 @@ mod relates {
     fn relates_works() -> anyhow::Result<()> {
         let conn = establish_connection();
 
-        let user = get_user_by_id(&conn, 1)?;
+        let user = get_user_by_id(&conn, 2)?;
         let body = "simple content";
         let post_id = diesel::insert_into(posts::table)
             .values((
@@ -313,6 +313,15 @@ mod relates {
             .first::<Post>(&conn)?;
         let post_json=serde_json::to_string_pretty(&post)?;
         println!("post: {}", post_json);
+
+        println!("** find all posts belongs to the user {}", user.id);
+        let posts = Post::belonging_to(&user)
+            .load::<Post>(&conn)?;
+        for post in &posts {
+            let post_json = serde_json::to_string_pretty(post)?;
+            println!("post: {}", post_json);
+        }
+
         Ok(())
     }
 }

@@ -339,11 +339,15 @@ impl ServiceModelReader{
             for f in &self.data_files.files {
                 if f.items.contains(&srv_name.to_string()) {
                     let model: ServiceModel = load_xml(f.content.as_bytes());
-                    let item = model.services.iter()
-                        .filter(|e| e.name == srv_name)
-                        .nth(0);
+                    // let item = model.services.iter()
+                    //     .filter(|e| e.name == srv_name)
+                    //     .nth(0);
+                    // self.cached_srvs.insert(srv_name.to_string(), item.unwrap().clone());
 
-                    self.cached_srvs.insert(srv_name.to_string(), item.unwrap().clone());
+                    // put all services which defined in this service-model-file into cache
+                    for s in model.services{
+                        self.cached_srvs.insert(s.name.to_string(), s);
+                    }
                     break;
                 }
             }

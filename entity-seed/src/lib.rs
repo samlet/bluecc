@@ -36,6 +36,7 @@ pub use self::snowflake::new_snowflake_id;
 pub use self::meta::resource_loader::{SeedProcessor, StringStore, SerialKey};
 pub use self::meta::model_revisions::{Revisions};
 pub use self::models::model_types::{SeedTypes};
+pub use self::meta_model::{Entity};
 
 #[cfg(test)]
 mod lib_tests {

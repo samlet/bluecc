@@ -41,12 +41,25 @@ pub struct ModelService{
     pub description: String,
 
     pub implements: Option<ServiceImplements>,
+    #[serde(rename = "permission-service", default)]
+    pub permission_service: Option<ModelPermission>,
     #[serde(rename = "auto-attributes", default)]
     pub auto_attributes: Vec<ServiceAutoAttributes>,
     #[serde(rename = "override", default)]
     pub overrides: Vec<ServiceOverride>,
     #[serde(rename = "attribute", default)]
     pub attributes: Vec<ServiceAttribute>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "kebab-case")]
+pub struct ModelPermission{
+    pub service_name: String,
+    pub main_action: String,
+    #[serde(default)]
+    pub resource_description: String,
+    #[serde(default)]
+    pub require_new_transaction: bool
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

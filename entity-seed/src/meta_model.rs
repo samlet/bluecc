@@ -259,9 +259,11 @@ pub struct FieldTypes{
 }
 
 impl FieldTypes{
+
     fn get_field(&self, field_type:&str) -> &FieldTypeDef{
         self.field_types.iter()
-            .find(|x| x.field_type==field_type).unwrap()
+            .find(|x| x.field_type==field_type)
+            .expect(format!("not found field type {}", field_type).as_str())
     }
     pub fn sql_type(&self, field_type: &str) -> String{
         self.get_field(field_type).sql_type.clone()

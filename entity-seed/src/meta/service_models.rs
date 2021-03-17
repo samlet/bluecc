@@ -87,11 +87,10 @@ pub struct ExcludeAttr{
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ServiceOverride{
-    #[serde(default)]
-    pub mode: String,
     pub name: String,
-    #[serde(default)]
-    pub optional: bool
+    pub mode: Option<String>,
+    pub optional: Option<bool>,
+    pub default_value: Option<String>,
 }
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ServiceAttribute{

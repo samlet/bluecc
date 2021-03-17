@@ -74,8 +74,17 @@ pub struct ServiceAutoAttributes{
     #[serde(rename = "entity-name", default)]
     pub entity_name: String,
     #[serde(default)]
-    pub optional: bool
+    pub optional: bool,
+    #[serde(rename = "exclude", default)]
+    pub excludes: Vec<ExcludeAttr>,
 }
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct ExcludeAttr{
+    #[serde(rename = "field-name")]
+    pub name: String,
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ServiceOverride{
     #[serde(default)]

@@ -65,7 +65,10 @@ impl ServiceMeta{
 fn extract_auto_attrs<'a>(ent: &'a Entity, filter: &ServiceAutoAttributes) -> Vec<&'a ModelField>{
     let include_pk= filter.include=="pk" || filter.include=="all";
     let include_non_pk= filter.include=="nonpk" || filter.include=="all";
+    let excludes:Vec<String>=filter.excludes.iter()
+        .map(|ex|ex.name.clone()).collect();
     ent.fields.iter()
+        .filter(|&f| !excludes.contains( &f.field_name))
         .filter(|&f| {
             (f.is_primary && include_pk) || (!f.is_primary && include_non_pk)
         })
@@ -95,11 +98,22 @@ struct ModelParam{
     pub internal: bool,
 }
 
+impl From<&str> for ParamMode {
+    fn from(item: &str) -> Self {
+        match item {
+            "IN" => ParamMode::In,
+            "OUT" => ParamMode::Out,
+            "INOUT" => ParamMode::InOut,
+            _ => ParamMode::InOut
+        }
+    }
+}
+
 #[test]
 fn service_meta_works() -> anyhow::Result<()> {
     let mut srvs =ServiceMeta::load()?;
-    // createSecurityGroup, createExampleType
-    let srv = srvs.service_reader.get_service_model("createExampleType")?.to_owned();
+    // createSecurityGroup, createExampleType, updateExample
+    let srv = srvs.service_reader.get_service_model("updateExample")?.to_owned();
     let srv_json = serde_json::to_string_pretty(&srv)?;
     println!("srv {}", srv_json);
     let ent = srvs.srv_ent(srv.name.as_str())?;
@@ -148,10 +162,30 @@ fn service_meta_works() -> anyhow::Result<()> {
         }
     }
 
+    let attrs:Vec<ModelParam>= srv.attributes.iter()
+        .map(|att| ModelParam{
+            name: att.name.to_string(),
+            description: None,
+            type_name: att.data_type.to_string(),
+            mode: att.mode.as_str().into(),
+            form_label: None,
+            entity_name: None,
+            field_name: None,
+            optional: att.optional,
+            internal: false
+        })
+        .collect();
+
+    params.extend(attrs);
+
+    // ... overrides, impl-service
+
     println!("all params ->");
     for f in params{
-        println!("\t {}: {} ({:?})", f.name, f.type_name, f.mode);
+        println!("\t {}: {} ({:?},{})", f.name, f.type_name,
+                 f.mode, if f.optional {"optional"} else {"required"});
     }
+
 
     Ok(())
 }

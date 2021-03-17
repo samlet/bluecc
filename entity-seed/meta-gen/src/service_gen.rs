@@ -1,7 +1,8 @@
 use seed::meta::{ServiceModelReader, ServiceModel,
-                 ModelReader,
+                 ModelReader, ServiceAutoAttributes,
                  ModelService, ServiceImplements};
-use seed::{new_snowflake_id, GenericError, Entity};
+use seed::{new_snowflake_id, GenericError, Entity, ModelField};
+use std::collections::HashSet;
 
 fn ex_service_models() -> ServiceModel{
     let bytes:&[u8]=include_bytes!("fixtures/services.xml");
@@ -61,14 +62,96 @@ impl ServiceMeta{
     }
 }
 
+fn extract_auto_attrs<'a>(ent: &'a Entity, filter: &ServiceAutoAttributes) -> Vec<&'a ModelField>{
+    let include_pk= filter.include=="pk" || filter.include=="all";
+    let include_non_pk= filter.include=="nonpk" || filter.include=="all";
+    ent.fields.iter()
+        .filter(|&f| {
+            (f.is_primary && include_pk) || (!f.is_primary && include_non_pk)
+        })
+        .collect()
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+enum ParamMode{
+    In, Out, InOut
+}
+#[derive(Debug, Serialize, Deserialize, Clone)]
+struct ModelParam{
+    pub name: String,
+    #[serde(default)]
+    pub description: Option<String>,
+    pub type_name: String,
+    pub mode: ParamMode,
+    #[serde(default)]
+    pub form_label: Option<String>,
+    #[serde(default)]
+    pub entity_name: Option<String>,
+    #[serde(default)]
+    pub field_name: Option<String>,
+    #[serde(default)]
+    pub optional: bool,
+    #[serde(default)]
+    pub internal: bool,
+}
+
 #[test]
 fn service_meta_works() -> anyhow::Result<()> {
     let mut srvs =ServiceMeta::load()?;
-    let srv = srvs.service_reader.get_service_model("createSecurityGroup")?.to_owned();
+    // createSecurityGroup, createExampleType
+    let srv = srvs.service_reader.get_service_model("createExampleType")?.to_owned();
     let srv_json = serde_json::to_string_pretty(&srv)?;
     println!("srv {}", srv_json);
     let ent = srvs.srv_ent(srv.name.as_str())?;
     println!("srv ent {}: {}", ent.entity_name, ent.title);
+
+    let mut all_flds=Vec::new();
+    // let mut in_set=HashSet::new();
+    // let mut out_set=HashSet::new();
+    for auto_attr in &srv.auto_attributes {
+        let flds = extract_auto_attrs(&ent, auto_attr);
+
+        let mode:ParamMode=
+            match auto_attr.mode.as_str() {
+                // "IN" => flds.iter().map(|f| f.field_name.to_owned())
+                //     .for_each(|f| { in_set.insert(f); }),
+                "IN" => ParamMode::In,
+                "OUT" => ParamMode::Out,
+                "INOUT" => ParamMode::InOut,
+                _ => ParamMode::InOut
+            };
+
+        all_flds.push((mode, auto_attr.optional, flds));
+    }
+    println!("all fields ->");
+    for (mode,_, flds) in &all_flds{
+        println!("==> {:?}", mode);
+        for f in flds {
+            println!("\t {}: {}", f.field_name, f.field_type);
+        }
+    }
+    let mut params=Vec::new();
+    for (mode, opt, flds) in &all_flds {
+        for f in flds {
+            params.push(
+                ModelParam {
+                    name: f.field_name.to_string(),
+                    description: None,
+                    type_name: f.field_type.to_string(),
+                    mode: mode.to_owned(),
+                    form_label: None,
+                    entity_name: Some(ent.entity_name.to_owned()),
+                    field_name: Some(f.field_name.to_owned()),
+                    optional: *opt,
+                    internal: false
+                });
+        }
+    }
+
+    println!("all params ->");
+    for f in params{
+        println!("\t {}: {} ({:?})", f.name, f.type_name, f.mode);
+    }
 
     Ok(())
 }

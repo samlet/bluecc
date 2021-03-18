@@ -5,7 +5,7 @@ use serde::{Serialize, Deserialize, de};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct SimpleResp<T> {
+pub struct SrvResp<T> {
     pub status_code: i32,
     pub status_description: String,
     #[serde(default)]
@@ -34,15 +34,15 @@ pub struct TokenData{
     pub expires_in: String,
 }
 
-impl SimpleResp<TokenData>{
+impl SrvResp<TokenData>{
     pub fn is_ok(&self) -> bool {
         self.status_code==200
     }
 }
 
-struct SrvDeles{
+pub struct SrvDeles{
     client: Client,
-    access_token: String,
+    pub access_token: String,
 }
 impl SrvDeles{
     pub fn new() -> Self {
@@ -52,7 +52,7 @@ impl SrvDeles{
         SrvDeles { client: (client), access_token: "".to_string() }
     }
 
-    pub async fn default_auth(&self) -> Result<SimpleResp<TokenData>, GenericError> {
+    pub async fn default_auth(&self) -> Result<SrvResp<TokenData>, GenericError> {
         let res = self.client
             .post("https://localhost:8443/rest/auth/token")
             .header(header::AUTHORIZATION, "Basic YWRtaW46b2ZiaXo=")
@@ -62,12 +62,12 @@ impl SrvDeles{
 
         debug!("result -> {} {:?}", res.status(), res);
 
-        let data=res.json::<SimpleResp<TokenData>>().await?;
+        let data=res.json::<SrvResp<TokenData>>().await?;
         Ok(data)
     }
 
     pub async fn default_token(&self) -> Result<String, GenericError> {
-        let data:SimpleResp<TokenData>=self.default_auth().await?;
+        let data: SrvResp<TokenData>=self.default_auth().await?;
         let tok=if data.is_ok() {data.data.unwrap().access_token} else {"".to_string()};
         Ok(tok)
     }
@@ -77,7 +77,7 @@ impl SrvDeles{
          Ok(())
      }
 
-    pub async fn srv<T,R>(&self, srv_name: &str, json_req: &T) -> Result<SimpleResp<R>, GenericError>
+    pub async fn srv<T,R>(&self, srv_name: &str, json_req: &T) -> Result<SrvResp<R>, GenericError>
     where T: Serialize + ?Sized,
           R: de::DeserializeOwned {
         let srv_url = format!("https://localhost:8443/rest/services/{}", srv_name);
@@ -90,7 +90,7 @@ impl SrvDeles{
             .send()
             .await?;
         debug!("result -> {} {:?}", res.status(), res);
-        let data = res.json::<SimpleResp<R>>().await?;
+        let data = res.json::<SrvResp<R>>().await?;
         Ok(data)
     }
 }
@@ -98,7 +98,7 @@ impl SrvDeles{
 #[tokio::test]
 async fn srv_auth_works() -> Result<(), GenericError> {
     let dele=SrvDeles::new();
-    let data:SimpleResp<TokenData>=dele.default_auth().await?;
+    let data: SrvResp<TokenData>=dele.default_auth().await?;
     let data_json=serde_json::to_string_pretty(&data)?;
     println!("{}", data_json);
     let tok=if data.is_ok() {data.data.unwrap().access_token} else {"_".to_string()};
@@ -131,7 +131,7 @@ async fn auth_works() -> Result<(), GenericError> {
         .await?;
     println!("result -> {} {:?}", res.status(), res);
 
-    let data=res.json::<SimpleResp<TokenData>>().await?;
+    let data=res.json::<SrvResp<TokenData>>().await?;
     let data_json=serde_json::to_string_pretty(&data)?;
     println!("{}", data_json);
     Ok(())
@@ -170,7 +170,7 @@ async fn test_scv_works() -> Result<(), GenericError> {
         pub resp: String,
     }
 
-    let data=res.json::<SimpleResp<SrvData>>().await?;
+    let data=res.json::<SrvResp<SrvData>>().await?;
     let data_json=serde_json::to_string_pretty(&data)?;
     println!("{}", data_json);
 
@@ -208,7 +208,7 @@ async fn test_fail_srv_works() -> Result<(), GenericError> {
         pub resp: String,
     }
 
-    let data=res.json::<SimpleResp<SrvData>>().await?;
+    let data=res.json::<SrvResp<SrvData>>().await?;
     let data_json=serde_json::to_string_pretty(&data)?;
     println!("{}", data_json);
 
@@ -235,7 +235,7 @@ async fn srv_invoke_works() -> Result<(), GenericError> {
     dele.use_default_token().await?;
     println!("tok {}", dele.access_token);
 
-    let ret:SimpleResp<SrvData>=dele.srv("testScv", &SimpleReq{
+    let ret: SrvResp<SrvData>=dele.srv("testScv", &SimpleReq{
             default_value: 1.0,
             message: "hello".to_string()
         }).await?;

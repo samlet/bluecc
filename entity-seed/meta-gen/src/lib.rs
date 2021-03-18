@@ -6,7 +6,6 @@ mod entity_auto_procs;
 mod custom_types;
 mod service_gen;
 mod requests;
-// mod query_tests;
 
 #[macro_use]
 extern crate serde_derive;
@@ -15,6 +14,9 @@ extern crate lazy_static;
 #[macro_use] extern crate log;
 #[macro_use]
 extern crate diesel;
+
+pub use requests::{SrvResp, SrvErr, SrvDeles};
+pub use service_gen::{ServiceMeta};
 
 #[cfg(test)]
 mod tests {

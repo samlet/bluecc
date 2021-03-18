@@ -1,0 +1,3 @@
+token:
+	cargo run -- token
+

@@ -37,7 +37,7 @@ fn model_manager_works() -> anyhow::Result<()> {
     Ok(())
 }
 
-struct ServiceMeta{
+pub struct ServiceMeta{
     pub service_reader: ServiceModelReader,
     pub entity_reader: ModelReader,
 }
@@ -50,6 +50,10 @@ impl ServiceMeta{
         })
     }
 
+    pub fn srv(&mut self, srv_name: &str) -> Result<&ModelService, GenericError> {
+        self.service_reader.get_service_model(srv_name)
+    }
+
     pub fn srv_ent(&mut self, srv_name: &str) -> Result<Entity, GenericError> {
         let srv=self.service_reader.get_service_model(srv_name)?;
         if !srv.default_entity_name.is_empty() {
@@ -60,6 +64,93 @@ impl ServiceMeta{
                 info: format!("cannot find entity {}", srv.default_entity_name)
             })
         }
+    }
+
+    pub fn srv_params(&mut self, srv_name: &str) -> Result<Vec<ModelParam>, GenericError> {
+        let srv = self.service_reader.get_service_model(srv_name)?.to_owned();
+        let srv_json = serde_json::to_string_pretty(&srv)?;
+        debug!("srv {}", srv_json);
+
+        let mut all_flds = Vec::new();
+        let mut params = Vec::new();
+
+        // process entity-auto-attrs
+        if !srv.default_entity_name.is_empty() {
+            debug!("srv ent {:?}", srv.default_entity_name);
+
+            let ent = self.srv_ent(srv.name.as_str())?;
+            debug!("srv ent {}: {}", ent.entity_name, ent.title);
+
+            for auto_attr in &srv.auto_attributes {
+                let flds = extract_auto_attrs(&ent, auto_attr);
+                let mode: ParamMode = auto_attr.mode.as_str().into();
+                all_flds.push((mode, auto_attr.optional, flds));
+            }
+
+            debug!("all fields ->");
+            for (mode, _, flds) in &all_flds {
+                debug!("==> {:?}", mode);
+                for f in flds {
+                    debug!("\t {}: {}", f.field_name, f.field_type);
+                }
+            }
+
+            for (mode, opt, flds) in &all_flds {
+                let mut fld_opt = *opt;
+                let mut fld_mode = mode.to_owned();
+                let mut fld_def_val = "";
+                for f in flds {
+                    // do attributes override
+                    for ov in &srv.overrides {
+                        if ov.name == f.field_name {
+                            if let Some(opt_val) = ov.optional {
+                                fld_opt = opt_val;
+                            }
+                            if let Some(mode_val) = &ov.mode {
+                                fld_mode = mode_val.as_str().into();
+                            }
+                            if let Some(def_val) = &ov.default_value {
+                                fld_def_val = def_val;
+                            }
+                        }
+                    }
+
+                    // convert to service-parameters
+                    params.push(
+                        ModelParam {
+                            name: f.field_name.to_string(),
+                            description: None,
+                            type_name: f.field_type.to_string(),
+                            mode: fld_mode,
+                            form_label: None,
+                            entity_name: if !srv.default_entity_name.is_empty() { Some(srv.default_entity_name.to_owned()) } else { None },
+                            field_name: Some(f.field_name.to_owned()),
+                            optional: fld_opt,
+                            internal: false,
+                            default_value: if fld_def_val.is_empty() { None } else { Some(fld_def_val.to_string()) },
+                        });
+                }
+            }
+        }
+
+        // process services attrs
+        let attrs: Vec<ModelParam> = srv.attributes.iter()
+            .map(|att| ModelParam {
+                name: att.name.to_string(),
+                description: None,
+                type_name: att.data_type.to_string(),
+                mode: att.mode.as_str().into(),
+                form_label: None,
+                entity_name: None,
+                field_name: None,
+                optional: att.optional,
+                internal: false,
+                default_value: None
+            })
+            .collect();
+
+        params.extend(attrs);
+        Ok(params)
     }
 }
 
@@ -77,11 +168,11 @@ fn extract_auto_attrs<'a>(ent: &'a Entity, filter: &ServiceAutoAttributes) -> Ve
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, Copy)]
-enum ParamMode{
+pub enum ParamMode{
     In, Out, InOut
 }
 #[derive(Debug, Serialize, Deserialize, Clone)]
-struct ModelParam{
+pub struct ModelParam{
     pub name: String,
     #[serde(default)]
     pub description: Option<String>,
@@ -227,6 +318,27 @@ fn service_meta_works() -> anyhow::Result<()> {
         let intf=srvs.service_reader.get_service_model(imp.service.as_str())?;
         let intf_json=serde_json::to_string_pretty(intf)?;
         println!("{}", intf_json);
+    }
+
+    Ok(())
+}
+
+
+#[test]
+fn service_params_works() -> anyhow::Result<()> {
+    let mut srvs = ServiceMeta::load()?;
+    // let params=srvs.srv_params("updateExample")?;
+    let params=srvs.srv_params("createPerson")?;
+
+    println!("all params ->");
+    for f in params{
+        let mut qtype=f.type_name.to_owned();
+        if !f.type_name.is_title_case(){
+            qtype= FIELD_MAPPINGS.query_type(f.type_name.as_str());
+        }
+        println!("\t {}: {}/{} ({:?},{})", f.name,
+                 f.type_name, qtype, f.mode,
+                 if f.optional {"optional"} else {"required"});
     }
 
     Ok(())

@@ -55,6 +55,7 @@ pub struct ModelService{
 #[serde(rename_all = "kebab-case")]
 pub struct ModelPermission{
     pub service_name: String,
+    #[serde(default)]
     pub main_action: String,
     #[serde(default)]
     pub resource_description: String,
@@ -68,6 +69,7 @@ pub struct ServiceImplements{
 }
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ServiceAutoAttributes{
+    #[serde(default)]
     pub include: String,
     #[serde(default)]
     pub mode: String,

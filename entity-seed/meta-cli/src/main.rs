@@ -44,8 +44,12 @@ async fn main() -> anyhow::Result<()> {
 
             println!("input params ->");
             for f in params.iter().filter(|p|p.mode==ParamMode::In || p.mode==ParamMode::InOut) {
+                let mut ptype=f.param_type();
+                if let Some(v)=&f.entity_name{
+                    ptype=format!("{}.{}", v.cyan(), ptype);
+                }
                 println!("\t {}: {}/{} ({:?},{})", f.name.black().bold(),
-                         f.type_name, f.param_type(), f.mode,
+                         f.type_name, ptype, f.mode,
                          if f.optional { "optional".yellow() } else { "required".blue().bold() });
             }
             println!("output params ->");

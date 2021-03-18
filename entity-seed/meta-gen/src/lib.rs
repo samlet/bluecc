@@ -16,7 +16,7 @@ extern crate lazy_static;
 extern crate diesel;
 
 pub use requests::{SrvResp, SrvErr, SrvDeles};
-pub use service_gen::{ServiceMeta};
+pub use service_gen::{ServiceMeta, ParamMode, ModelParam};
 
 #[cfg(test)]
 mod tests {

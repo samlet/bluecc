@@ -2,9 +2,10 @@
 
 use std::env;
 use structopt::StructOpt;
-use meta_gen::{SrvDeles, ServiceMeta};
+use meta_gen::{SrvDeles, ServiceMeta, ParamMode, ModelParam};
 use seed::{FIELD_MAPPINGS};
 use inflector::Inflector;
+use colored::*;
 
 #[macro_use]
 extern crate lazy_static;
@@ -41,15 +42,17 @@ async fn main() -> anyhow::Result<()> {
             let mut srvs = ServiceMeta::load()?;
             let params = srvs.srv_params(name.as_str())?;
 
-            println!("all params ->");
-            for f in params {
-                let mut qtype = f.type_name.to_owned();
-                if !f.type_name.is_title_case() {
-                    qtype = FIELD_MAPPINGS.query_type(f.type_name.as_str());
-                }
-                println!("\t {}: {}/{} ({:?},{})", f.name,
-                         f.type_name, qtype, f.mode,
-                         if f.optional { "optional" } else { "required" });
+            println!("input params ->");
+            for f in params.iter().filter(|p|p.mode==ParamMode::In || p.mode==ParamMode::InOut) {
+                println!("\t {}: {}/{} ({:?},{})", f.name.black().bold(),
+                         f.type_name, f.param_type(), f.mode,
+                         if f.optional { "optional".yellow() } else { "required".blue().bold() });
+            }
+            println!("output params ->");
+            for f in params.iter().filter(|p|p.mode==ParamMode::Out || p.mode==ParamMode::InOut) {
+                println!("\t {}: {}/{} ({:?},{})", f.name.black().bold(),
+                         f.type_name, f.param_type(), f.mode,
+                         if f.optional { "optional".yellow() } else { "required".blue().bold() });
             }
         }
 

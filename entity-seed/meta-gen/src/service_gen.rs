@@ -88,10 +88,10 @@ impl ServiceMeta{
             }
 
             debug!("all fields ->");
-            for (mode, _, flds) in &all_flds {
+            for (mode, opt, flds) in &all_flds {
                 debug!("==> {:?}", mode);
                 for f in flds {
-                    debug!("\t {}: {}", f.field_name, f.field_type);
+                    debug!("\t {}: {} opt({})", f.field_name, f.field_type, *opt);
                 }
             }
 
@@ -100,21 +100,6 @@ impl ServiceMeta{
                 let mut fld_mode = mode.to_owned();
                 let mut fld_def_val = "";
                 for f in flds {
-                    // do attributes override
-                    for ov in &srv.overrides {
-                        if ov.name == f.field_name {
-                            if let Some(opt_val) = ov.optional {
-                                fld_opt = opt_val;
-                            }
-                            if let Some(mode_val) = &ov.mode {
-                                fld_mode = mode_val.as_str().into();
-                            }
-                            if let Some(def_val) = &ov.default_value {
-                                fld_def_val = def_val;
-                            }
-                        }
-                    }
-
                     // convert to service-parameters
                     params.push(
                         ModelParam {
@@ -129,6 +114,23 @@ impl ServiceMeta{
                             internal: false,
                             default_value: if fld_def_val.is_empty() { None } else { Some(fld_def_val.to_string()) },
                         });
+                }
+            }
+        }
+
+        for mut param in params.iter_mut() {
+            // do attributes override
+            for ov in &srv.overrides {
+                if ov.name == param.name {
+                    if let Some(opt_val) = ov.optional {
+                        param.optional=opt_val;
+                    }
+                    if let Some(mode_val) = &ov.mode {
+                        param.mode = mode_val.as_str().into();
+                    }
+                    if let Some(def_val) = &ov.default_value {
+                        param.default_value = Some(def_val.to_owned());
+                    }
                 }
             }
         }
@@ -149,8 +151,10 @@ impl ServiceMeta{
             })
             .collect();
 
-        params.extend(attrs);
-        Ok(params)
+        let all_params= params.into_iter()
+            .chain(attrs.into_iter()).collect();
+        // params.extend(attrs);
+        Ok(all_params)
     }
 }
 
@@ -167,7 +171,7 @@ fn extract_auto_attrs<'a>(ent: &'a Entity, filter: &ServiceAutoAttributes) -> Ve
         .collect()
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Copy)]
 pub enum ParamMode{
     In, Out, InOut
 }
@@ -188,6 +192,16 @@ pub struct ModelParam{
     pub default_value: Option<String>,
 }
 
+impl ModelParam{
+    pub fn param_type(&self) -> String{
+        let mut qtype = self.type_name.to_owned();
+        if !self.type_name.is_title_case() {
+            qtype = FIELD_MAPPINGS.query_type(self.type_name.as_str());
+        }
+        qtype
+    }
+}
+
 impl From<&str> for ParamMode {
     fn from(item: &str) -> Self {
         match item {
@@ -204,7 +218,7 @@ fn service_meta_works() -> anyhow::Result<()> {
     let mut srvs =ServiceMeta::load()?;
     // createSecurityGroup, createExampleType, updateExample, testCreateExampleService
     // let srv = srvs.service_reader.get_service_model("testCreateExampleService")?.to_owned();
-    let srv = srvs.service_reader.get_service_model("updateExample")?.to_owned();
+    let srv = srvs.service_reader.get_service_model("createExample")?.to_owned();
     let srv_json = serde_json::to_string_pretty(&srv)?;
     println!("srv {}", srv_json);
 
@@ -238,10 +252,10 @@ fn service_meta_works() -> anyhow::Result<()> {
         }
 
         println!("all fields ->");
-        for (mode, _, flds) in &all_flds {
+        for (mode, opt, flds) in &all_flds {
             println!("==> {:?}", mode);
             for f in flds {
-                println!("\t {}: {}", f.field_name, f.field_type);
+                println!("\t {}: {} opt({})", f.field_name, f.field_type, *opt);
             }
         }
 
@@ -326,9 +340,12 @@ fn service_meta_works() -> anyhow::Result<()> {
 
 #[test]
 fn service_params_works() -> anyhow::Result<()> {
+    std::env::set_var("RUST_LOG", "info,entity_seed=debug,meta_gen=debug");
+    env_logger::init();
+
     let mut srvs = ServiceMeta::load()?;
     // let params=srvs.srv_params("updateExample")?;
-    let params=srvs.srv_params("createPerson")?;
+    let params=srvs.srv_params("createExample")?;
 
     println!("all params ->");
     for f in params{

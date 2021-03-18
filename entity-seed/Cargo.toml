@@ -55,7 +55,7 @@ rand = "0.8.1"
 hex = "0.4.2"
 tera = "1.6.1"
 # doesn't require singularize, pluralize, class, table, demodulize, deconstantize.
-Inflector = {version="*", default-features=false}
+Inflector = {version="0.11.4", default-features=false}
 phf = { version = "0.8", features = ["macros"] }
 
 zip = { version = "0.5.10", default-features = false }

@@ -48,21 +48,17 @@ fn list_recs() -> anyhow::Result<()> {
 
     let conn = establish_connection();
 
-    let total=uom_type
-            .count()
-            .get_result::<i64>(&conn);
+    let total=uom_type.count().get_result::<i64>(&conn);
     println!("total {:?}", total);
 
     println!("list uom_type recs");
-    let rs:Vec<UomType>=uom_type
-                .load(&conn)?;
+    let rs:Vec<UomType>=uom_type.load(&conn)?;
     for r in &rs{
         println!("{:?}", r);
     }
 
     println!("list user_login recs");
-    let rs:Vec<UserLogin>=user_login
-                .load(&conn)?;
+    let rs:Vec<UserLogin>=user_login.load(&conn)?;
     for r in &rs{
         println!("{:?}", r);
     }

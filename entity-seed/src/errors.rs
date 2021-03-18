@@ -15,6 +15,8 @@ pub enum GenericError {
     ParseXml(roxmltree::Error),
     #[error("json parse fail")]
     ParseJson(#[from] serde_json::Error),
+    #[error("request fail")]
+    RequestErr(#[from] reqwest::Error),
     #[error("tera template fail")]
     TeraTemplateErr(#[from] tera::Error),
     #[error("database error")]

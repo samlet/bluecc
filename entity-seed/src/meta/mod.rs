@@ -36,8 +36,6 @@ mod serializer_tests;
 mod regex_tests;
 
 mod seed_gen;
-mod requests;
-
 pub mod app_context;
 mod service_models;
 pub mod resource_loader;

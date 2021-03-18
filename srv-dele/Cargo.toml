@@ -1,5 +1,5 @@
 [package]
-name = "common"
+name = "srv-dele"
 version = "0.1.0"
 authors = ["Samlet Wu <xiaofei.wu@gmail.com>"]
 edition = "2018"
@@ -11,11 +11,7 @@ anyhow = "1.0"
 bytes = "1.0.1"
 uuid = { version = "0.8", features = ["serde", "v4"] }
 url = { version = "2", features = ["serde"] }
-bson = "1.2.0"
 
-# Expr supports deserialization using the serde library to make flexible configuration easy to set up,
-# if the feature serde is enabled (disabled by default).
-meval = {version="0.2", features = ["serde"]}
 serde = { version = "1.0", features = ["derive"] }
 serde_derive = "1.0"
 serde_json = "1.0"

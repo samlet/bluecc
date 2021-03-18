@@ -5,6 +5,7 @@ mod conn;
 mod entity_auto_procs;
 mod custom_types;
 mod service_gen;
+mod requests;
 // mod query_tests;
 
 #[macro_use]

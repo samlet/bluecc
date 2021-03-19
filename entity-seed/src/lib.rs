@@ -35,6 +35,7 @@ pub use self::meta::app_context::{get_entity_model, get_entity_module, FIELD_MAP
 pub use self::snowflake::new_snowflake_id;
 pub use self::meta::resource_loader::{SeedProcessor, StringStore, SerialKey};
 pub use self::meta::model_revisions::{Revisions};
+pub use self::meta::template_builder::EntityGenerator;
 pub use self::models::model_types::{SeedTypes};
 pub use self::meta_model::{Entity, ModelField, ModelRelation, KeyMap};
 

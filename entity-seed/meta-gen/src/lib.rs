@@ -7,6 +7,7 @@ mod custom_types;
 mod service_gen;
 mod requests;
 mod user_login;
+mod value_objs;
 
 #[macro_use]
 extern crate serde_derive;

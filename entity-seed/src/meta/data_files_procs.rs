@@ -283,6 +283,37 @@ fn model_reader_works() -> anyhow::Result<()> {
     Ok(())
 }
 
+pub struct SeedFiles{
+    pub data_files: DataFiles,
+}
+impl SeedFiles{
+    pub fn load() -> Result<Self,GenericError> {
+        let bytes=include_bytes!("pkgs/seed_files.jsonz");
+        let data_files=load_z::<DataFiles>(bytes)?;
+        Ok(SeedFiles { data_files })
+    }
+
+    pub fn entity_seeds(&self, entity_name: &str) -> Result<Vec<HashMap<String,String>>, GenericError> {
+        let mut result=Vec::new();
+        for f in &self.data_files.files {
+            if f.items.contains(&entity_name.to_string()) {
+                let doc = roxmltree::Document::parse(f.content.as_str())?;
+                let nodes = &doc.descendants()
+                    .filter(|e| e.has_tag_name(entity_name))
+                    .collect::<Vec<Node<'_, '_>>>();
+                debug!("doc {} has {} {}", f.uri, nodes.len(), entity_name);
+                for n in nodes {
+                    let m: HashMap<_, _>= n.attributes().into_iter()
+                        .map(|a|(a.name().to_owned(), a.value().to_owned())).collect();
+                    result.push(m);
+                }
+            }
+        }
+
+        Ok(result)
+    }
+}
+
 pub fn load_seed_model_z_file<P>(entity_name: &str, proc: P) -> Result<(), GenericError>
 where P: Fn(&Node<'_,'_>) -> bool,{
     // let bytes =std::fs::read("./.store/seed_files.jsonz")?;

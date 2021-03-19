@@ -47,9 +47,11 @@ pub mod cc_conf;
 mod security_procs;
 mod data_files_procs;
 pub mod model_revisions;
+pub mod template_builder;
 
 pub use resource_loader::{get_items_in_file, skip_nodes, FileTypes};
-pub use data_files_procs::{merge_files, ModelReader, ServiceModelReader, load_seed_model_z_file};
+pub use data_files_procs::{merge_files, ModelReader, ServiceModelReader,
+                           SeedFiles, load_seed_model_z_file};
 pub use cc_conf::{cc_conf};
 pub use service_models::{ModelService, ServiceImplements,
                          ServiceAttribute, ServiceOverride, ModelPermission,

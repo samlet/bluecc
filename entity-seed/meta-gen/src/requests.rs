@@ -3,6 +3,7 @@ use reqwest::{header, StatusCode as Status, Client};
 use seed::{new_snowflake_id, GenericError};
 use serde::{Serialize, Deserialize, de};
 use crate::UserWithPassword;
+use serde_json::{json, Value};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -250,3 +251,26 @@ async fn srv_invoke_works() -> Result<(), GenericError> {
 
     Ok(())
 }
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+struct PartyValue {
+    party_id: String,
+
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
+}
+
+#[test]
+fn party_value_works() -> anyhow::Result<()> {
+    let json = json!({
+          "partyId": "49824073-979f-4814-be10-5ea416ee1c2f",
+          "username": "john_doe",
+          "mascot": "Ferris"
+        });
+    let party:PartyValue=serde_json::from_value(json)?;
+    println!("{:?}", party.extra);
+    Ok(())
+}
+
+

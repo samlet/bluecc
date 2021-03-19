@@ -15,6 +15,7 @@ extern crate lazy_static;
 
 /*
 $ cargo run -- srv createExample
+$ cargo run -- call testScv
  */
 
 #[derive(StructOpt)]
@@ -27,7 +28,10 @@ struct Args {
 enum Command {
     /// Show service parameters
     Srv { name: String},
+    /// Call service
     Call { name: String},
+    /// Find entity records
+    Find { entity_name: String},
     /// Get the default access token
     Token,
 }
@@ -72,6 +76,15 @@ async fn main() -> anyhow::Result<()> {
             let mut dele=SrvDeles::new();
             dele.use_default_token().await?;
             println!("tok -> {}", dele.access_token);
+        }
+
+        Some(Command::Find { entity_name }) => {
+            use seed::delegators::{result_str, Delegator};
+            let delegator=Delegator::new().await?;
+            let result=delegator.find_all(entity_name.as_str()).await?;
+            let cols = result.rs.columns();
+            println!("cols (total {}) {:?}", cols.len(), cols);
+            println!("{}", result_str(result).await);
         }
 
         None => {

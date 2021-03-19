@@ -6,6 +6,7 @@ mod entity_auto_procs;
 mod custom_types;
 mod service_gen;
 mod requests;
+mod user_login;
 
 #[macro_use]
 extern crate serde_derive;
@@ -17,6 +18,8 @@ extern crate diesel;
 
 pub use requests::{SrvResp, SrvErr, SrvDeles};
 pub use service_gen::{ServiceMeta, ParamMode, ModelParam};
+pub use seed::{GenericError};
+pub use user_login::{UserWithPassword};
 
 #[cfg(test)]
 mod tests {

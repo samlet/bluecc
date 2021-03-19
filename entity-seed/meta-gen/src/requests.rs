@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use reqwest::{header, StatusCode as Status, Client};
 use seed::{new_snowflake_id, GenericError};
 use serde::{Serialize, Deserialize, de};
+use crate::UserWithPassword;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -43,19 +44,23 @@ impl SrvResp<TokenData>{
 pub struct SrvDeles{
     client: Client,
     pub access_token: String,
+    pub user_login: UserWithPassword,
 }
 impl SrvDeles{
     pub fn new() -> Self {
         let mut client = reqwest::ClientBuilder::new()
             .danger_accept_invalid_certs(true)
             .build().unwrap();
-        SrvDeles { client: (client), access_token: "".to_string() }
+        SrvDeles { client: (client), access_token: "".to_string(),
+            user_login: UserWithPassword{ user: "admin".to_string(), password: "ofbiz".to_string() } }
     }
 
     pub async fn default_auth(&self) -> Result<SrvResp<TokenData>, GenericError> {
         let res = self.client
             .post("https://localhost:8443/rest/auth/token")
-            .header(header::AUTHORIZATION, "Basic YWRtaW46b2ZiaXo=")
+            // .header(header::AUTHORIZATION, "Basic YWRtaW46b2ZiaXo=")
+            .header(header::AUTHORIZATION,
+                    format!("Basic {}", self.user_login.encode()?))
             .header(header::ACCEPT, "application/json")
             .send()
             .await?;

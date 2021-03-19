@@ -30,4 +30,5 @@ reqwest = { version = "0.11", features = ["json", "blocking"] }
 tokio = { version = "1", features = ["macros", "time"] }
 
 colored = "2"
+dialoguer = "0.8.0"
 

@@ -3,9 +3,14 @@ use quaint::{prelude::*, ast::*, single::Quaint,
              connector::{Queryable, TransactionCapable},
 };
 use crate::GenericError;
+use inflector::Inflector;
 
-struct Delegator{
+pub struct Delegator{
     conn: Quaint
+}
+
+fn table_name(ent: &str) -> String {
+    ent.to_screaming_snake_case()
 }
 
 impl Delegator{
@@ -16,20 +21,53 @@ impl Delegator{
         Ok(Delegator { conn: (Quaint::new(url).await?) })
     }
 
-    pub async fn find(&self, entity_name: &str, conditions: ConditionTree<'_>) -> Result<ResultSet, GenericError> {
-        let query = Select::from_table(entity_name).so_that(conditions);
+    pub async fn find(&self, entity_name: &str, conditions: ConditionTree<'_>) -> Result<GenericValues, GenericError> {
+        let query = Select::from_table(entity_name.to_screaming_snake_case()).so_that(conditions);
         let result = self.conn.select(query).await?;
-        Ok(result)
+        Ok(GenericValues{ entity_name: entity_name.to_string(), rs: result })
     }
 
-    pub async fn find_all(&self, entity_name: &str) -> Result<ResultSet, GenericError> {
-        let query = Select::from_table(entity_name);
+    pub async fn find_all(&self, entity_name: &str) -> Result<GenericValues, GenericError> {
+        let query = Select::from_table(entity_name.to_screaming_snake_case());
         let result = self.conn.select(query).await?;
-        Ok(result)
+        Ok(GenericValues{ entity_name: entity_name.to_string(), rs: result })
     }
 }
 
-pub async fn result_str(rs: ResultSet) -> String {
+pub struct GenericValues{
+    pub entity_name: String,
+    pub rs: ResultSet,
+}
+
+impl From<GenericValues> for serde_json::Value {
+    fn from(rs: GenericValues) -> Self {
+        use serde_json::Map;
+
+        let result_set=rs.rs;
+        let columns: Vec<String> = result_set.columns().iter().map(ToString::to_string).collect();
+        let mut result = Vec::new();
+
+        for row in result_set.into_iter() {
+            let mut object = Map::new();
+
+            for (idx, p_value) in row.into_iter().enumerate() {
+                let column_name: String = columns[idx].clone();
+                let val=serde_json::Value::from(p_value);
+                if let serde_json::Value::Null=val{
+                    continue;
+                }
+                object.insert(column_name.to_camel_case(), val);
+            }
+
+            result.push(serde_json::Value::Object(object));
+        }
+
+        serde_json::Value::Array(result)
+    }
+}
+
+
+pub async fn result_str(rs: GenericValues) -> String {
     let jval=serde_json::Value::from(rs);
     serde_json::to_string_pretty(&jval).expect("pretty json")
 }
@@ -114,7 +152,7 @@ mod lib_tests {
     #[tokio::test]
     async fn serialize_json_works() -> anyhow::Result<()> {
         let delegator=Delegator::new().await?;
-        let rs=delegator.find_all("user_login").await?;
+        let rs=delegator.find_all("UserLogin").await?;
         let jval=serde_json::Value::from(rs);
         let rows=jval.as_array();
         println!("total {}", rows.unwrap().len());
@@ -132,9 +170,9 @@ mod lib_tests {
         let conditions = "product_id"
             .equals("WG-1111")
             .and("unit_price".less_than(100.00));
-        let result=delegator.find("ORDER_ITEM", conditions).await?;
+        let result=delegator.find("OrderItem", conditions).await?;
 
-        let cols = result.columns();
+        let cols = result.rs.columns();
         println!("cols (total {}) {:?}", cols.len(), cols);
 
         println!("{}", result_str(result).await); // 必须加await, 否则会导致测试运行延迟

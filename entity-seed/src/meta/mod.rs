@@ -11,8 +11,6 @@ mod cell_tests;
 #[cfg(test)]
 mod yml_tests;
 #[cfg(test)]
-mod sql_tests;
-#[cfg(test)]
 mod entity_xml_parse_tests;
 #[cfg(test)]
 mod model_tests;

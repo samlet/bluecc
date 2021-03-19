@@ -1,5 +1,5 @@
 [package]
-name = "meta-cli"
+name = "deles"
 version = "0.1.0"
 authors = ["Samlet Wu <xiaofei.wu@gmail.com>"]
 edition = "2018"
@@ -7,9 +7,7 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-seed = { package="entity-seed", version = "0.1.0",  path = "../../entity-seed"}
-meta_gen = {package="meta-gen", version = "0.1.0",  path = "../meta-gen"}
-deles = { package="deles", version = "0.1.0",  path = "../../deles"}
+seed = { package="entity-seed", version = "0.1.0",  path = "../entity-seed"}
 
 log = "0.4"
 env_logger = "0.8.3"
@@ -30,7 +28,10 @@ chrono = { version = "0.4.0", features = ["serde"] }
 reqwest = { version = "0.11", features = ["json", "blocking"] }
 tokio = { version = "1", features = ["macros", "time"] }
 
-colored = "2"
-dialoguer = "0.8.0"
-console = "0.14.1"
+dotenv = "0.10.0"
+
+[dependencies.quaint]
+git = "https://github.com/prisma/quaint"
+branch = "master"
+features=["serde-support", "postgresql", "mysql", "pooled", "bigdecimal", "json"]
 

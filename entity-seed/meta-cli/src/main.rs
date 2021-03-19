@@ -79,7 +79,7 @@ async fn main() -> anyhow::Result<()> {
         }
 
         Some(Command::Find { entity_name }) => {
-            use seed::delegators::{result_str, Delegator};
+            use deles::delegators::{result_str, Delegator};
             let delegator=Delegator::new().await?;
             let result=delegator.find_all(entity_name.as_str()).await?;
             let cols = result.rs.columns();

@@ -2,7 +2,7 @@ use std::env;
 use quaint::{prelude::*, ast::*, single::Quaint,
              connector::{Queryable, TransactionCapable},
 };
-use crate::GenericError;
+use seed::GenericError;
 use inflector::Inflector;
 
 pub struct Delegator{
@@ -44,6 +44,8 @@ impl From<GenericValues> for serde_json::Value {
     fn from(rs: GenericValues) -> Self {
         use serde_json::Map;
 
+        let internal_fields=vec!["created_stamp", "created_tx_stamp",
+                                 "last_updated_stamp", "last_updated_tx_stamp"];
         let result_set=rs.rs;
         let columns: Vec<String> = result_set.columns().iter().map(ToString::to_string).collect();
         let mut result = Vec::new();
@@ -52,12 +54,14 @@ impl From<GenericValues> for serde_json::Value {
             let mut object = Map::new();
 
             for (idx, p_value) in row.into_iter().enumerate() {
-                let column_name: String = columns[idx].clone();
+                let column_name = &columns[idx];
                 let val=serde_json::Value::from(p_value);
                 if let serde_json::Value::Null=val{
                     continue;
                 }
-                object.insert(column_name.to_camel_case(), val);
+                if !internal_fields.contains(&column_name.as_str()) {
+                    object.insert(column_name.to_camel_case(), val);
+                }
             }
 
             result.push(serde_json::Value::Object(object));
@@ -241,4 +245,5 @@ mod lib_tests {
         Ok(())
     }
 }
+
 

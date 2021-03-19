@@ -17,7 +17,7 @@ extern crate lazy_static;
 #[macro_use]
 extern crate diesel;
 
-pub use requests::{SrvResp, SrvErr, SrvDeles};
+pub use requests::{SrvResp, SrvErr, SrvDeles, DynamicValue};
 pub use service_gen::{ServiceMeta, ParamMode, ModelParam};
 pub use seed::{GenericError};
 pub use user_login::{UserWithPassword};

@@ -253,10 +253,9 @@ async fn srv_invoke_works() -> Result<(), GenericError> {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase")]
-struct DynamicValue {
+pub struct DynamicValue {
     #[serde(flatten)]
-    values: HashMap<String, Value>,
+    pub values: HashMap<String, Value>,
 }
 
 #[tokio::test]
@@ -266,7 +265,7 @@ async fn srv_invoke_with_dynamic_works() -> Result<(), GenericError> {
     println!("tok {}", dele.access_token);
 
     let mut values=HashMap::new();
-    values.insert("default_value".to_string(), Value::from(8.8));
+    values.insert("defaultValue".to_string(), Value::from(8.8));
     values.insert("message".to_string(), Value::from("hi"));
     let ret: SrvResp<DynamicValue>=dele.srv("testScv", &DynamicValue{ values: values,}).await?;
     let data_json=serde_json::to_string_pretty(&ret)?;

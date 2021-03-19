@@ -38,6 +38,11 @@ pub use self::meta::model_revisions::{Revisions};
 pub use self::models::model_types::{SeedTypes};
 pub use self::meta_model::{Entity, ModelField, ModelRelation, KeyMap};
 
+pub fn exists(file: &str) -> bool{
+    use std::path::Path;
+    Path::new(file).exists()
+}
+
 #[cfg(test)]
 mod lib_tests {
     use crate::get_entity_model;

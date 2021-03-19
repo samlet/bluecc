@@ -16,18 +16,18 @@ mod sql_tests;
 mod entity_xml_parse_tests;
 #[cfg(test)]
 mod model_tests;
-#[cfg(test)]
-mod redis_tests;
-#[cfg(test)]
-mod scale_tests;
+// #[cfg(test)]
+// mod redis_tests;
+// #[cfg(test)]
+// mod scale_tests;
 #[cfg(test)]
 mod template_tests;
 #[cfg(test)]
 mod functor_tests;
 // #[cfg(test)]
 // mod linq_tests;
-#[cfg(test)]
-mod askama_tests;
+// #[cfg(test)]
+// mod askama_tests;
 #[cfg(test)]
 mod test_helpers;
 #[cfg(test)]

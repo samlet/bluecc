@@ -10,25 +10,26 @@ pub struct Delegator{
 }
 
 fn table_name(ent: &str) -> String {
-    ent.to_screaming_snake_case()
+    ent.to_snake_case()
 }
 
 impl Delegator{
     pub async fn new() -> Result<Self, GenericError> {
-        let url = "mysql://root:root@localhost:3306/ofbiz";
+        // let url = "mysql://root:root@localhost:3306/ofbiz";
+        let url = "postgres://ofbiz:ofbiz@localhost:5432/ofbiz";
         // dotenv::dotenv().ok();
         // let url = env::var("OFBIZ_URL").unwrap();
         Ok(Delegator { conn: (Quaint::new(url).await?) })
     }
 
     pub async fn find(&self, entity_name: &str, conditions: ConditionTree<'_>) -> Result<GenericValues, GenericError> {
-        let query = Select::from_table(entity_name.to_screaming_snake_case()).so_that(conditions);
+        let query = Select::from_table(entity_name.to_snake_case()).so_that(conditions);
         let result = self.conn.select(query).await?;
         Ok(GenericValues{ entity_name: entity_name.to_string(), rs: result })
     }
 
     pub async fn find_all(&self, entity_name: &str) -> Result<GenericValues, GenericError> {
-        let query = Select::from_table(entity_name.to_screaming_snake_case());
+        let query = Select::from_table(entity_name.to_snake_case());
         let result = self.conn.select(query).await?;
         Ok(GenericValues{ entity_name: entity_name.to_string(), rs: result })
     }

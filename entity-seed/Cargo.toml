@@ -19,11 +19,11 @@ decimal = {package="rust_decimal", version="1.10.3", features=["serde-str"]}
 chrono = { version = "0.4.0", features = ["serde"] }
 #lazy-static-include = "3.0.5"
 
-scale = { package = "parity-scale-codec", version = "2.0", default-features = false, features = ["derive", "full"] }
-derive_more = { version = "0.99", default-features = false, features = ["from", "display"] }
-scale-info = { version = "0.6", default-features = false, features = ["derive"], optional = true }
-cfg-if = "1.0"
-array-init = { version = "1.0" }
+#scale = { package = "parity-scale-codec", version = "2.0", default-features = false, features = ["derive", "full"] }
+#derive_more = { version = "0.99", default-features = false, features = ["from", "display"] }
+#scale-info = { version = "0.6", default-features = false, features = ["derive"], optional = true }
+#cfg-if = "1.0"
+#array-init = { version = "1.0" }
 
 #kvdb = "0.9.0"
 #kvdb-rocksdb = { version = "0.11.0", optional = true }
@@ -35,7 +35,7 @@ array-init = { version = "1.0" }
 #serde-xml-rs = "0.4.1"
 serde-xml-rs = { git = "https://github.com/tobz1000/serde-xml-rs", branch = "out-of-order-elements", package = "serde-xml-rs" }
 #askama = { version = "0.10", default-features = false, features = ["with-warp", "mime", "mime_guess"] }
-askama = "0.10"
+#askama = "0.10"
 
 serde_yaml = "0.8"
 log = "0.4"
@@ -50,7 +50,7 @@ thiserror = "1.0"
 lazy_static = "1.4.0"
 # tokio + rustls
 #sqlx = { version = "0.5.1", features = [ "runtime-tokio-rustls","mysql" ] }
-redis = { version = "0.20.0", features = ["tls"] }
+#redis = { version = "0.20.0", features = ["tls"] }
 rand = "0.8.1"
 hex = "0.4.2"
 tera = "1.6.1"

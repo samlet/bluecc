@@ -147,7 +147,7 @@ fn list_user_logins_works() -> anyhow::Result<()> {
     //             .into_iter()
     //             .rev()
     //             .collect::<Vec<UserLoginCc>>();
-    let rs=user_login.select((user_login_id, current_password.nullable()))
+    let _rs=user_login.select((user_login_id, current_password.nullable()))
         .order(user_login_id.desc())
         .load::<(i64, Option<String>)>(&conn)?;
     // for r in &rs{

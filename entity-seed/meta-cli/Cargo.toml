@@ -34,3 +34,4 @@ colored = "2"
 dialoguer = "0.8.0"
 console = "0.14.1"
 
+roxmltree = "0.14.0"

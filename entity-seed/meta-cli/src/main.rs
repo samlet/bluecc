@@ -4,10 +4,12 @@ use std::env;
 use structopt::StructOpt;
 use meta_gen::{SrvDeles, ServiceMeta, ParamMode, ModelParam, GenericError, DynamicValue, SrvResp};
 use seed::{FIELD_MAPPINGS};
+use seed::meta::{load_seed_model_z_file};
 use inflector::Inflector;
 use colored::*;
 use std::collections::HashMap;
 use serde_json::Value;
+use roxmltree::Node;
 
 #[macro_use]
 extern crate lazy_static;
@@ -16,6 +18,8 @@ extern crate lazy_static;
 /*
 $ cargo run -- srv createExample
 $ cargo run -- call testScv
+$ meta-cli seed Person plain
+$ meta-cli seed Person json-init
  */
 
 #[derive(StructOpt)]
@@ -32,6 +36,11 @@ enum Command {
     Call { name: String},
     /// Find entity records
     Find { entity_name: String},
+    Seed {
+        entity_name: String,
+        #[structopt(default_value = "plain")]
+        format: String
+    },
     /// Get the default access token
     Token,
 }
@@ -87,12 +96,70 @@ async fn main() -> anyhow::Result<()> {
             println!("{}", result_str(result).await);
         }
 
+        Some(Command::Seed { entity_name, format  }) => {
+            use seed::meta::ModelReader;
+            let mut entity_reader= ModelReader::load()?;
+            let entity=entity_reader.get_entity_model(entity_name.as_str())?;
+            let var_name=entity_name.to_snake_case();
+
+            load_seed_model_z_file(entity_name.as_str(), |n| {
+                match format.as_str() {
+                    "toml" => {
+                        println!("{} ({:?})", n.tag_name().name(), n.range());
+                        for attr in n.attributes() {
+                            let attr_val=format!("\"{}\"", attr.value());
+                            println!("\t{} = {}", attr.name().to_snake_case(), attr_val);
+                        }
+                    }
+                    "json-init" => {
+                        println!("let {}_json = json!({{", var_name);
+                        json_init_attrs(n, &entity);
+                        println!("}});")
+                    }
+                    _ =>{
+                        println!("{} ({:?})", n.tag_name().name(), n.range());
+                        for attr in n.attributes() {
+                            println!("\t{} = {}", attr.name(), attr.value());
+                        }
+                    }
+                }
+
+                true
+            })?;
+
+            println!("// to initialize =>");
+            println!("let {}:{}=serde_json::from_value({}_json)?;", var_name.blue(),
+                     entity_name.cyan(), var_name);
+        }
+
         None => {
             println!(".. execute => {:?}", Command::from_args());
         }
     }
 
     Ok(())
+}
+
+fn json_init_attrs(n:&Node, ent:&seed::Entity) {
+    for attr in n.attributes() {
+        let fld=ent.get_field(attr.name()).expect("fld");
+        match fld.field_type.as_str() {
+            "currency-amount" | "currency-precise" | "numeric" |
+            "fixed-point" | "floating-point" | "integer"
+            => {
+                println!("\t{} = {},", attr.name().to_snake_case(), attr.value());
+            }
+            "date-time" => {
+                println!("\t{} = NaiveDateTime::parse_from_str(\"{}\", \"%Y-%m-%d %H:%M:%S%.f\"),",
+                    attr.name().to_snake_case(), attr.value());
+            }
+            _ => {
+                let attr_val = format!("\"{}\"", attr.value());
+                println!("\t{} = {},", attr.name().to_snake_case(), attr_val);
+            }
+        }
+
+    }
 }
 
 async fn invoke_srv(srv_name: &str) -> Result<(), GenericError> {

@@ -325,7 +325,7 @@ where P: Fn(&Node<'_,'_>) -> bool,{
             let nodes=doc.descendants()
                 .filter(|e|e.has_tag_name(entity_name))
                 .collect::<Vec<Node<'_,'_>>>();
-            println!("doc {} has {} {}", f.uri, nodes.len(), entity_name);
+            info!("doc {} has {} {}", f.uri, nodes.len(), entity_name);
             for n in nodes{
                 if !proc(&n){
                     return Ok(());

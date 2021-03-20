@@ -72,3 +72,15 @@ async fn list_ent_works() -> Result<(), GenericError> {
     Ok(())
 }
 
+#[test]
+fn seed_toml_works() -> anyhow::Result<()> {
+    let seed_rec=r#"
+        party_id = "TestParty"
+        first_name = "Test"
+        last_name = "Party"
+    "#;
+    let person:Person=toml::from_str(seed_rec)?;
+    println!("{}", pretty(&person));
+    Ok(())
+}
+

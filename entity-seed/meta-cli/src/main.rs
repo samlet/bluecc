@@ -116,6 +116,12 @@ async fn main() -> anyhow::Result<()> {
                         json_init_attrs(n, &entity);
                         println!("}});")
                     }
+                    "insert" => {
+
+                    }
+                    "update" => {
+
+                    }
                     _ =>{
                         println!("{} ({:?})", n.tag_name().name(), n.range());
                         for attr in n.attributes() {

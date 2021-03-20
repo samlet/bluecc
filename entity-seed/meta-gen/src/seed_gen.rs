@@ -1,5 +1,6 @@
 use seed::{SeedProcessor, SeedTypes, GenericError, StringStore, SerialKey,
            get_entity_model};
+use seed::meta::SeedFiles;
 use chrono::NaiveDateTime;
 use roxmltree::Node;
 use std::io::prelude::*;
@@ -110,6 +111,15 @@ mod tests {
                 }
                 _ => ()
             }
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn seed_files_works() -> anyhow::Result<()> {
+        let seeds=SeedFiles::load()?;
+        for f in seeds.data_files.files{
+            println!("{} - {}", f.uri, f.path);
         }
         Ok(())
     }

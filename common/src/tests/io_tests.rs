@@ -3,6 +3,7 @@ use std::fs;
 use std::fs::File;
 use std::error::Error;
 use std::env;
+use std::io::prelude::*;
 
 fn read_username_from_file() -> Result<String, io::Error> {
     fs::read_to_string("Cargo.toml")
@@ -26,3 +27,16 @@ fn current_dir_works() -> std::io::Result<()> {
     println!("The current directory is {}", path.display());
     Ok(())
 }
+
+/// https://doc.rust-lang.org/std/io/trait.Write.html#method.write_fmt
+#[test]
+fn test_write() -> std::io::Result<()> {
+    let mut buffer = File::create(".tmp/foo.txt")?;
+
+    // this call
+    write!(buffer, "{:.*}", 2, 1.234567)?;
+    // turns into this:
+    buffer.write_fmt(format_args!("{:.*}", 2, 1.234567))?;
+    Ok(())
+}
+

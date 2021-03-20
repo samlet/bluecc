@@ -4,6 +4,7 @@ use quaint::{prelude::*, ast::*, single::Quaint,
 };
 use seed::GenericError;
 use inflector::Inflector;
+use serde::de::DeserializeOwned;
 
 pub struct Delegator{
     conn: Quaint
@@ -36,6 +37,36 @@ impl Delegator{
         Ok(GenericValues{ entity_name: entity_name.to_string(), rs: result,
             include_null_fields: include_null_fields,
             include_internal_fields: include_internal_fields })
+    }
+
+    async fn wrap_result<T>(&self, result: ResultSet) -> Result<Vec<T>, GenericError>
+    where T: DeserializeOwned, {
+        let jval = serde_json::Value::from(result);
+        let rows = jval.as_array();
+        debug!("total {}", rows.unwrap().len());
+
+        let mut items = Vec::new();
+        for row in rows.unwrap() {
+            let v = serde_json::from_value::<T>(row.to_owned())?;
+            items.push(v);
+        }
+        Ok(items)
+    }
+
+    pub async fn list<T>(&self, entity_name: &str) -> Result<Vec<T>, GenericError>
+    where T: DeserializeOwned, {
+        let query = Select::from_table(entity_name.to_snake_case());
+        let result = self.conn.select(query).await?;
+        let r=self.wrap_result::<T>(result).await?;
+        Ok(r)
+    }
+
+    pub async fn list_for<T>(&self, entity_name: &str, conditions: ConditionTree<'_>) -> Result<Vec<T>, GenericError>
+    where T: DeserializeOwned, {
+        let query = Select::from_table(entity_name.to_snake_case()).so_that(conditions);
+        let result = self.conn.select(query).await?;
+        let r=self.wrap_result::<T>(result).await?;
+        Ok(r)
     }
 }
 

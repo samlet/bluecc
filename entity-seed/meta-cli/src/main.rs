@@ -81,7 +81,7 @@ async fn main() -> anyhow::Result<()> {
         Some(Command::Find { entity_name }) => {
             use deles::delegators::{result_str, Delegator};
             let delegator=Delegator::new().await?;
-            let result=delegator.find_all(entity_name.as_str()).await?;
+            let result=delegator.find_all(entity_name.as_str(), false,false).await?;
             let cols = result.rs.columns();
             println!("cols (total {}) {:?}", cols.len(), cols);
             println!("{}", result_str(result).await);

@@ -65,6 +65,16 @@ pub struct StatusItem{
     pub description: Option<String>
 }
 
+async fn print_sts(status_type: &str, items: &Vec<StatusItem>) -> anyhow::Result<()> {
+    let ex_sts:Vec<&StatusItem>=items.iter()
+        .filter(|&n|n.status_type_id==Some(status_type.to_string()))
+        .collect();
+    for ex in &ex_sts{
+        println!("{}", ex.description.as_ref().unwrap())
+    }
+    Ok(())
+}
+
 #[tokio::test]
 async fn serialize_json_works() -> anyhow::Result<()> {
     let delegator=Delegator::new().await?;
@@ -84,12 +94,39 @@ async fn serialize_json_works() -> anyhow::Result<()> {
     }
 
     let status_type="EXAMPLE_STATUS";
-    let ex_sts:Vec<&StatusItem>=items.iter()
+    print_sts(status_type, &items).await?;
+
+    Ok(())
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct StatusItemRaw{
+    // keys
+    pub status_id: Option<String>,
+    // fields
+    pub status_type_id: Option<String>,
+    pub status_code: Option<String>,
+    pub sequence_id: Option<String>,
+    pub description: Option<String>
+}
+
+async fn print_raw_sts(status_type: &str, items: &Vec<StatusItemRaw>) -> anyhow::Result<()> {
+    let ex_sts:Vec<&StatusItemRaw>=items.iter()
         .filter(|&n|n.status_type_id==Some(status_type.to_string()))
         .collect();
     for ex in &ex_sts{
         println!("{}", ex.description.as_ref().unwrap())
     }
+    Ok(())
+}
+
+#[tokio::test]
+async fn list_ent_works() -> Result<(), GenericError> {
+    let delegator=Delegator::new().await?;
+    let rs:Vec<StatusItemRaw>=delegator.list("StatusItem").await?;
+    println!("total {}", rs.len());
+    let status_type="EXAMPLE_STATUS";
+    print_raw_sts(status_type, &rs).await?;
     Ok(())
 }
 

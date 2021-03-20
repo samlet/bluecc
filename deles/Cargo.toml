@@ -24,6 +24,7 @@ serde = "1.0"
 serde_json = "1.0.11"
 serde_derive = "1.0"
 chrono = { version = "0.4.0", features = ["serde"] }
+bigdecimal = { version = ">= 0.0.10, < 0.2.0", features=["serde"] }
 
 reqwest = { version = "0.11", features = ["json", "blocking"] }
 tokio = { version = "1", features = ["macros", "time"] }

@@ -24,18 +24,7 @@ fn gen_value_obj(meta:&mut ServiceMeta, ent_name: &str, flds: &Vec<&String>) -> 
     }
 
     let mut generator=EntityGenerator::new(vec![ent_name.to_string()]);
-    generator.tera.add_raw_template("value_obj", r#"
-#[derive(Debug, Deserialize, Serialize, Clone)]
-#[serde(rename_all = "camelCase")]
-pub struct {{ent['entity-name'] -}} {
-{%- for fld in flds %}
-    #[serde(rename = "{{fld.name}}"{% if fld.has_default %}, default{% endif %})]
-    pub {{fld.name | snake_case}}: {{fld['type'] | query_type}},
-{%- endfor %}
-    #[serde(flatten)]
-    extra: HashMap<String, Value>,
-}
-    "#)?;
+    generator.tera.add_raw_template("value_obj", include_str!("incls/value_obj.j2"))?;
     let mut context = Context::new();
     let ent_flds:Vec<&ModelField>= flds.iter().map(|&f|ent.get_field(f).unwrap()).collect();
     context.insert("ent", &ent);
@@ -63,6 +52,8 @@ fn field_count_works() -> anyhow::Result<()> {
         let entry=stats.entry(fld_num).or_insert(1);
         *entry+=1;
     }
+
+    // 找到最常用的字段组合(即这个组合的频次最高)
     let max_item=stats.iter()
         .max_by(|f,s|f.1.cmp(s.1)).unwrap();
     println!("{:?} => {:?}", max_item, stats);
@@ -71,6 +62,8 @@ fn field_count_works() -> anyhow::Result<()> {
     println!("{:?} => {:?}", exflds.keys(), exflds);
     let flds=exflds.keys().into_iter().collect::<Vec<&String>>();
 
+    // 将这个字段组合生成为值对象类, 未列出的字段都收容在extra-map中
+    println!("generate value_obj model => ");
     let mut srvs =ServiceMeta::load()?;
     let result=gen_value_obj(&mut srvs, ent_name, &flds)?;
     println!("{}", result);

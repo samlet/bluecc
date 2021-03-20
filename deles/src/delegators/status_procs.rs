@@ -15,7 +15,7 @@ async fn status_item_works() -> anyhow::Result<()> {
                                  "last_updated_stamp", "last_updated_tx_stamp"];
 
     let delegator = Delegator::new().await?;
-    let result = delegator.find_all("StatusItem").await?;
+    let result = delegator.find_all("StatusItem", false, false).await?;
     let mut rs=Vec::new();
     let cols=result.rs.columns().to_owned();
     for row in result.rs.into_iter() {
@@ -49,3 +49,47 @@ async fn status_item_works() -> anyhow::Result<()> {
     println!("total ex_sts {}", ex_sts.len());
     Ok(())
 }
+
+// generate by: $ cargo run --bin seed gen StatusItem dto_orig
+// 使用camelCase是因为GenericValues在转换时将列名由snake_case转换成了camelCase,
+// 为了与模型字段名保持统一
+#[derive(Debug, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct StatusItem{
+    // keys
+    pub status_id: Option<String>,
+    // fields
+    pub status_type_id: Option<String>,
+    pub status_code: Option<String>,
+    pub sequence_id: Option<String>,
+    pub description: Option<String>
+}
+
+#[tokio::test]
+async fn serialize_json_works() -> anyhow::Result<()> {
+    let delegator=Delegator::new().await?;
+    let rs=delegator.find_all("StatusItem", true, true).await?;
+    let jval=serde_json::Value::from(rs);
+    let rows=jval.as_array();
+    println!("total {}", rows.unwrap().len());
+
+    let mut items=Vec::new();
+    for row in rows.unwrap() {
+        // println!("{:?}", row);
+        let v=serde_json::from_value::<StatusItem>(row.to_owned())?;
+        let rec_json= serde_json::to_string_pretty(&v)?;
+        println!("{}", rec_json);
+
+        items.push(v);
+    }
+
+    let status_type="EXAMPLE_STATUS";
+    let ex_sts:Vec<&StatusItem>=items.iter()
+        .filter(|&n|n.status_type_id==Some(status_type.to_string()))
+        .collect();
+    for ex in &ex_sts{
+        println!("{}", ex.description.as_ref().unwrap())
+    }
+    Ok(())
+}
+

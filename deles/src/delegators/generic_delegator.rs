@@ -25,19 +25,25 @@ impl Delegator{
     pub async fn find(&self, entity_name: &str, conditions: ConditionTree<'_>) -> Result<GenericValues, GenericError> {
         let query = Select::from_table(entity_name.to_snake_case()).so_that(conditions);
         let result = self.conn.select(query).await?;
-        Ok(GenericValues{ entity_name: entity_name.to_string(), rs: result })
+        Ok(GenericValues{ entity_name: entity_name.to_string(), rs: result,
+            include_null_fields: false, include_internal_fields: false })
     }
 
-    pub async fn find_all(&self, entity_name: &str) -> Result<GenericValues, GenericError> {
+    pub async fn find_all(&self, entity_name: &str, include_null_fields:bool,
+                          include_internal_fields:bool) -> Result<GenericValues, GenericError> {
         let query = Select::from_table(entity_name.to_snake_case());
         let result = self.conn.select(query).await?;
-        Ok(GenericValues{ entity_name: entity_name.to_string(), rs: result })
+        Ok(GenericValues{ entity_name: entity_name.to_string(), rs: result,
+            include_null_fields: include_null_fields,
+            include_internal_fields: include_internal_fields })
     }
 }
 
 pub struct GenericValues{
     pub entity_name: String,
     pub rs: ResultSet,
+    include_null_fields: bool,
+    include_internal_fields: bool,
 }
 
 impl From<GenericValues> for serde_json::Value {
@@ -59,9 +65,10 @@ impl From<GenericValues> for serde_json::Value {
                 if let serde_json::Value::Null=val{
                     continue;
                 }
-                if !internal_fields.contains(&column_name.as_str()) {
-                    object.insert(column_name.to_camel_case(), val);
+                if internal_fields.contains(&column_name.as_str()) {
+                    continue;
                 }
+                object.insert(column_name.to_camel_case(), val);
             }
 
             result.push(serde_json::Value::Object(object));
@@ -83,7 +90,7 @@ mod lib_tests {
     use serde_json::to_string_pretty;
     use chrono::{DateTime, Utc};
 
-    // source from: $ cargo run --bin seed gen security UserLogin dto_orig
+    // source from: $ cargo run --bin seed gen UserLogin dto_orig
     #[derive(Debug, Deserialize, Serialize, Clone)]
     #[serde(rename_all(serialize = "SCREAMING_SNAKE_CASE", deserialize = "SCREAMING_SNAKE_CASE"))]
     pub struct UserLogin{
@@ -157,7 +164,7 @@ mod lib_tests {
     #[tokio::test]
     async fn serialize_json_works() -> anyhow::Result<()> {
         let delegator=Delegator::new().await?;
-        let rs=delegator.find_all("UserLogin").await?;
+        let rs=delegator.find_all("UserLogin", true, true).await?;
         let jval=serde_json::Value::from(rs);
         let rows=jval.as_array();
         println!("total {}", rows.unwrap().len());

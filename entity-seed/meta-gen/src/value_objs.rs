@@ -15,23 +15,31 @@ fn print_seeds(name: &str) -> Result<(), GenericError>{
     Ok(())
 }
 
-fn gen_value_obj(meta:&mut ServiceMeta, ent_name: &str, flds: &Vec<&String>) -> Result<String, GenericError>{
-    let ent=meta.entity_reader.get_entity_model(ent_name)?;
-    debug!("{} => ", ent_name);
-    for &f in flds{
-        let fld=ent.get_field(f.as_str()).expect("fld");
-        debug!("\t{}: {}", fld.field_name, fld.field_type);
+pub trait Generator{
+    fn generate(&mut self, template: &str, ent_name: &str, flds: &Vec<&String>)
+        -> Result<String, GenericError>;
+}
+
+impl Generator for ServiceMeta {
+    fn generate(&mut self, template: &str, ent_name: &str, flds: &Vec<&String>) -> Result<String, GenericError> {
+        let ent = self.entity_reader.get_entity_model(ent_name)?;
+        debug!("{} => ", ent_name);
+        for &f in flds {
+            let fld = ent.get_field(f.as_str()).expect("fld");
+            debug!("\t{}: {}", fld.field_name, fld.field_type);
+        }
+
+        let mut generator = EntityGenerator::new(vec![ent_name.to_string()]);
+        generator.tera.add_raw_template("value_obj", include_str!("incls/value_obj.j2"))?;
+
+        let mut context = Context::new();
+        let ent_flds: Vec<&ModelField> = flds.iter().map(|&f| ent.get_field(f).unwrap()).collect();
+        context.insert("ent", &ent);
+        context.insert("flds", &ent_flds);
+        let result = generator.tera.render(template, &context)?;
+
+        Ok(result)
     }
-
-    let mut generator=EntityGenerator::new(vec![ent_name.to_string()]);
-    generator.tera.add_raw_template("value_obj", include_str!("incls/value_obj.j2"))?;
-    let mut context = Context::new();
-    let ent_flds:Vec<&ModelField>= flds.iter().map(|&f|ent.get_field(f).unwrap()).collect();
-    context.insert("ent", &ent);
-    context.insert("flds", &ent_flds);
-    let result = generator.tera.render("value_obj", &context)?;
-
-    Ok(result)
 }
 
 #[test]
@@ -65,7 +73,7 @@ fn field_count_works() -> anyhow::Result<()> {
     // 将这个字段组合生成为值对象类, 未列出的字段都收容在extra-map中
     println!("generate value_obj model => ");
     let mut srvs =ServiceMeta::load()?;
-    let result=gen_value_obj(&mut srvs, ent_name, &flds)?;
+    let result=srvs.generate("value_obj", ent_name, &flds)?;
     println!("{}", result);
 
     Ok(())

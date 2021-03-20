@@ -21,6 +21,7 @@ pub use requests::{SrvResp, SrvErr, SrvDeles, DynamicValue};
 pub use service_gen::{ServiceMeta, ParamMode, ModelParam};
 pub use seed::{GenericError};
 pub use user_login::{UserWithPassword};
+pub use value_objs::{Generator};
 
 #[cfg(test)]
 mod tests {

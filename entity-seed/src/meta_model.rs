@@ -249,7 +249,9 @@ pub struct FieldTypeDef{
     #[serde(rename = "insert-type", default)]
     pub insert_type: String,
     #[serde(rename = "orig-type", default)]
-    pub orig_type: String
+    pub orig_type: String,
+    #[serde(rename = "quaint-type", default)]
+    pub quaint_type: String
 }
 
 #[derive(Debug, Deserialize)]
@@ -305,5 +307,14 @@ impl FieldTypes{
         }
     }
 
+    /// default type is 'text'
+    pub fn quaint_type(&self, field_type:&str) -> String{
+        let fld=self.get_field(field_type);
+        if fld.quaint_type.is_empty(){
+            "text".to_string()
+        }else{
+            fld.quaint_type.to_owned()
+        }
+    }
 }
 

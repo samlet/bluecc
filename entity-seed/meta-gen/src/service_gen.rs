@@ -196,7 +196,7 @@ impl ModelParam{
     pub fn param_type(&self) -> String{
         let mut qtype = self.type_name.to_owned();
         if !self.type_name.is_title_case() {
-            qtype = FIELD_MAPPINGS.query_type(self.type_name.as_str());
+            qtype = FIELD_MAPPINGS.orig_type(self.type_name.as_str());
         }
         qtype
     }

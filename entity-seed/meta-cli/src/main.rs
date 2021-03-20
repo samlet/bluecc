@@ -36,6 +36,7 @@ enum Command {
     Call { name: String},
     /// Find entity records
     Find { entity_name: String},
+    /// Show entity seed-data
     Seed {
         entity_name: String,
         #[structopt(default_value = "plain")]
@@ -133,9 +134,11 @@ async fn main() -> anyhow::Result<()> {
                 true
             })?;
 
-            println!("// to initialize =>");
-            println!("let {}:{}=serde_json::from_value({}_json)?;", var_name.blue(),
-                     entity_name.cyan(), var_name);
+            if format=="json-init".to_string() {
+                println!("// to initialize =>");
+                println!("let {}:{}=serde_json::from_value({}_json)?;", var_name.blue(),
+                         entity_name.cyan(), var_name);
+            }
         }
 
         None => {
@@ -144,6 +147,13 @@ async fn main() -> anyhow::Result<()> {
     }
 
     Ok(())
+}
+
+fn quaint_insert_attrs(n:&Node, ent:&seed::Entity) {
+    for attr in n.attributes() {
+        let fld=ent.get_field(attr.name()).expect("fld");
+        let _fld_type=FIELD_MAPPINGS.quaint_type(fld.field_type.as_str());
+    }
 }
 
 fn json_init_attrs(n:&Node, ent:&seed::Entity) {

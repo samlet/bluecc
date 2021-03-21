@@ -4,32 +4,32 @@
   <!-- ===================== field-type-def ==================== -->
     <!-- General Types -->
     <field-type-def type="blob" sql-type="BYTEA" java-type="java.sql.Blob"
-                    query-type="Vec&lt;u8&gt;" quaint-type="bytes"/>
+                    query-type="Vec&lt;u8&gt;" quaint-type="bytes" ink-type="Vec&lt;u8&gt;"/>
     <field-type-def type="byte-array" sql-type="BYTEA" java-type="byte[]"
-                    query-type="Vec&lt;u8&gt;" quaint-type="bytes"/>
+                    query-type="Vec&lt;u8&gt;" quaint-type="bytes" ink-type="Vec&lt;u8&gt;"/>
     <field-type-def type="object" sql-type="BYTEA" java-type="Object"
-                    query-type="Vec&lt;u8&gt;" quaint-type="bytes"/>
+                    query-type="Vec&lt;u8&gt;" quaint-type="bytes" ink-type="Vec&lt;u8&gt;"/>
 
     <field-type-def type="date-time" sql-type="TIMESTAMPTZ" java-type="java.sql.Timestamp"
                     query-type="chrono::NaiveDateTime"
-                    orig-type="DateTime&lt;Utc&gt;" quaint-type="datetime"/>
+                    orig-type="DateTime&lt;Utc&gt;" quaint-type="datetime" ink-type="Timestamp"/>
     <field-type-def type="date" sql-type="DATE" java-type="java.sql.Date"
-                    query-type="chrono::NaiveDate" quaint-type="date"/>
+                    query-type="chrono::NaiveDate" quaint-type="date" ink-type="Timestamp"/>
     <field-type-def type="time" sql-type="TIME" java-type="java.sql.Time"
-                    query-type="chrono::NaiveTime" quaint-type="time"/>
+                    query-type="chrono::NaiveTime" quaint-type="time" ink-type="Timestamp"/>
 
     <field-type-def type="currency-amount" sql-type="NUMERIC(18,2)" java-type="java.math.BigDecimal"
-                    query-type="bigdecimal::BigDecimal" quaint-type="numeric"/>
+                    query-type="bigdecimal::BigDecimal" quaint-type="numeric" ink-type="Balance"/>
     <field-type-def type="currency-precise" sql-type="NUMERIC(18,3)" java-type="java.math.BigDecimal"
-                    query-type="bigdecimal::BigDecimal" quaint-type="numeric"/>
+                    query-type="bigdecimal::BigDecimal" quaint-type="numeric" ink-type="Balance"/>
     <field-type-def type="fixed-point" sql-type="NUMERIC(18,6)" java-type="java.math.BigDecimal"
-                    query-type="bigdecimal::BigDecimal" quaint-type="numeric"/>
+                    query-type="bigdecimal::BigDecimal" quaint-type="numeric" ink-type="Balance"/>
     <field-type-def type="floating-point" sql-type="NUMERIC(18,3)" java-type="Double"
-                    query-type="bigdecimal::BigDecimal" quaint-type="double"/>
+                    query-type="bigdecimal::BigDecimal" quaint-type="double" ink-type="f64"/>
     <field-type-def type="integer" sql-type="INTEGER" java-type="Integer"
-                    query-type="i32" quaint-type="integer"/>
+                    query-type="i32" quaint-type="integer" ink-type="i32"/>
     <field-type-def type="numeric" sql-type="BIGINT" java-type="Long"
-                    query-type="i64" insert-type="i64" quaint-type="integer"/>
+                    query-type="i64" insert-type="i64" quaint-type="integer" ink-type="i64"/>
     
     <field-type-def type="id" sql-type="BIGINT" java-type="Integer"
                     query-type="i64" orig-type="String" quaint-type="text"/>
@@ -37,9 +37,9 @@
     <field-type-def type="id-vlong" sql-type="BIGINT" java-type="Long" query-type="i64" orig-type="String"/>
     
     <field-type-def type="indicator" sql-type="BOOLEAN" sql-type-alias="BOOLEAN" java-type="String"
-                    query-type="bool" orig-type="String"/>
+                    query-type="bool" orig-type="String" ink-type="u8"/>
     <field-type-def type="very-short" sql-type="VARCHAR(10)" java-type="String"
-                    query-type="Option&lt;String&gt;" insert-type="Option&lt;&amp;'a str&gt;"/>
+                    query-type="Option&lt;String&gt;" insert-type="Option&lt;&amp;'a str&gt;" ink-type="[u8; 4]"/>
     <field-type-def type="short-varchar" sql-type="VARCHAR(60)" java-type="String" query-type="Option&lt;String&gt;" insert-type="Option&lt;&amp;'a str&gt;"/>
     <field-type-def type="long-varchar" sql-type="VARCHAR(255)" java-type="String" query-type="Option&lt;String&gt;" insert-type="Option&lt;&amp;'a str&gt;"/>
     <field-type-def type="very-long" sql-type="TEXT" java-type="String" query-type="Option&lt;String&gt;" insert-type="Option&lt;&amp;'a str&gt;"/>

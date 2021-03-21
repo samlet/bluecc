@@ -1,6 +1,12 @@
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(scale::Encode, scale::Decode, SpreadLayout, PackedLayout)]
+#[cfg_attr(feature = "std",
+    derive(Debug,PartialEq,Eq,
+        scale_info::TypeInfo,
+        ink_storage::traits::StorageLayout
+    )
+)]
 pub struct {{ent['entity-name'] -}} {
 {%- for fld in flds %}
-    pub {{fld.name | snake_case}}: {{fld['type'] | plain_type}},  // {{fld['type']}}
+    pub {{fld.name | snake_case}}: {{fld['type'] | ink_type}},  // {{fld['type']}}
 {%- endfor %}
 }

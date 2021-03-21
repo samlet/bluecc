@@ -1,3 +1,6 @@
 token:
 	cargo run -- token
+# ink OrderItem
+ink ent:
+    cargo run -- entity {{ent}} ink
 

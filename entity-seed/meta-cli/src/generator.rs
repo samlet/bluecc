@@ -20,6 +20,11 @@ fn plain_type(value: &Value, _args: &HashMap<String, Value>) -> tera::Result<Val
     Ok(Value::String(format!("{}", val)))
 }
 
+fn ink_type(value: &Value, _args: &HashMap<String, Value>) -> tera::Result<Value> {
+    let val:String = FIELD_MAPPINGS.ink_type(value.as_str().unwrap());
+    Ok(Value::String(format!("{}", val)))
+}
+
 impl MetaGenerator for ServiceMeta {
     fn generate_for(&mut self, template: &str, ent_name: &str) -> Result<String, GenericError> {
         let ent = self.entity_reader.get_entity_model(ent_name)?;
@@ -27,6 +32,7 @@ impl MetaGenerator for ServiceMeta {
 
         let mut generator = EntityGenerator::new(vec![ent_name.to_string()]);
         generator.tera.register_filter("plain_type", plain_type);
+        generator.tera.register_filter("ink_type", ink_type);
 
         generator.tera.add_raw_template("value_obj",
                                         include_str!("incls/value_obj.j2"))?;

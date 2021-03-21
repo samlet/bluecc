@@ -5,16 +5,17 @@ use warp::http::StatusCode;
 use futures::TryStreamExt;
 use warp::Filter;
 
-fn with_ctx(db: Delegator) -> impl Filter<Extract = (Delegator,), Error = std::convert::Infallible> + Clone {
+pub fn with_ctx(db: Delegator) -> impl Filter<Extract = (Delegator,), Error = std::convert::Infallible> + Clone {
     warp::any().map(move || db.clone())
 }
+
 fn json_body() -> impl Filter<Extract = (Person,), Error = warp::Rejection> + Clone {
     // When accepting a body, we want a JSON body
     // (and to reject huge payloads)...
     warp::body::content_length_limit(1024 * 16).and(warp::body::json())
 }
 
-fn respond<T: Serialize>(result: Result<T, GenericError>, status: warp::http::StatusCode) -> Result<impl warp::Reply, warp::Rejection> {
+pub fn respond<T: Serialize>(result: Result<T, GenericError>, status: warp::http::StatusCode) -> Result<impl warp::Reply, warp::Rejection> {
     match result {
         Ok(response) => {
             Ok(warp::reply::with_status(warp::reply::json(&response), status))

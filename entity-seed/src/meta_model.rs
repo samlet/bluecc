@@ -251,7 +251,9 @@ pub struct FieldTypeDef{
     #[serde(rename = "orig-type", default)]
     pub orig_type: String,
     #[serde(rename = "quaint-type", default)]
-    pub quaint_type: String
+    pub quaint_type: String,
+     #[serde(rename = "ink-type", default)]
+    pub ink_type: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -314,6 +316,16 @@ impl FieldTypes{
             "text".to_string()
         }else{
             fld.quaint_type.to_owned()
+        }
+    }
+
+    /// default type is 'Vec<u8>'
+    pub fn ink_type(&self, field_type:&str) -> String{
+        let fld=self.get_field(field_type);
+        if fld.ink_type.is_empty(){
+            "Vec<u8>".to_string()
+        }else{
+            fld.ink_type.to_owned()
         }
     }
 }

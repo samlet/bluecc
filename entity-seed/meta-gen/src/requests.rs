@@ -42,6 +42,7 @@ impl SrvResp<TokenData>{
     }
 }
 
+#[derive(Clone)]
 pub struct SrvDeles{
     client: Client,
     pub access_token: String,

@@ -51,6 +51,19 @@ pub struct ModelService{
     pub attributes: Vec<ServiceAttribute>,
 }
 
+impl ModelService{
+    pub fn include_auto_attrs(&self) -> String{
+        if !self.default_entity_name.is_empty(){
+            let incls:Vec<String>=self.auto_attributes.iter()
+                .filter(|a|a.mode=="IN")
+                .map(|a|a.include.to_owned())
+                .collect();
+            return incls.join(",")
+        }
+        "".to_string()
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "kebab-case")]
 pub struct ModelPermission{

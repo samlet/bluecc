@@ -40,3 +40,10 @@ fn test_write() -> std::io::Result<()> {
     Ok(())
 }
 
+#[test]
+fn write_to_stdout_works() -> anyhow::Result<()> {
+    let stdout = io::stdout();
+    let mut handle = stdout.lock();
+    writeln!(handle, "{}, {}", 2, 1.234567)?;
+    Ok(())
+}

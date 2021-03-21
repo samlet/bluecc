@@ -2,9 +2,10 @@
 
 use std::env;
 use structopt::StructOpt;
-use meta_gen::{SrvDeles, ServiceMeta, ParamMode, ModelParam, GenericError, DynamicValue, SrvResp};
+use meta_gen::{SrvDeles, ServiceMeta, ParamMode, ModelParam,
+               GenericError, DynamicValue, SrvResp};
 use seed::{FIELD_MAPPINGS};
-use seed::meta::{load_seed_model_z_file};
+use seed::meta::{load_seed_model_z_file, ModelService, SeedFiles};
 use inflector::Inflector;
 use colored::*;
 use std::collections::HashMap;
@@ -17,6 +18,8 @@ extern crate lazy_static;
 
 /*
 $ cargo run -- srv createExample
+$ meta-cli srv -c createPerson
+$ meta-cli srv -c -e updatePerson
 $ cargo run -- call testScv
 $ meta-cli seed Person plain
 $ meta-cli seed Person json-init
@@ -31,7 +34,13 @@ struct Args {
 #[derive(StructOpt, Debug)]
 enum Command {
     /// Show service parameters
-    Srv { name: String},
+    Srv {
+        #[structopt(short)]
+        collapse: bool,
+        #[structopt(short)]
+        example: bool,
+        name: String
+    },
     /// Call service
     Call { name: String},
     /// Find entity records
@@ -49,21 +58,30 @@ enum Command {
 #[tokio::main]
 #[paw::main]
 async fn main() -> anyhow::Result<()> {
-    std::env::set_var("RUST_LOG", "info,entity_seed=debug,meta_gen=info");
+    std::env::set_var("RUST_LOG", "info,entity_seed=info,meta_gen=info");
     env_logger::init();
 
     let args = Args::from_args();
     match args.cmd {
-        Some(Command::Srv { name }) => {
+        Some(Command::Srv { collapse, example, name }) => {
             println!("srv-meta {}", name);
             let mut srvs = ServiceMeta::load()?;
+            let srv= srvs.srv(name.as_str())?.to_owned();
+            let srv_ent=&srv.default_entity_name;
+            let srv_ent_incs=srv.include_auto_attrs();
             let params = srvs.srv_params(name.as_str())?;
 
             println!("input params ->");
+            if collapse && !srv_ent.is_empty(){
+                println!("\t default entity {} ({})", srv_ent.red().bold(), srv_ent_incs.yellow());
+            }
             for f in params.iter().filter(|p|p.mode==ParamMode::In || p.mode==ParamMode::InOut) {
                 let mut ptype=f.param_type();
                 if let Some(v)=&f.entity_name{
                     ptype=format!("{}.{}", v.cyan(), ptype);
+                    if collapse && !f.overload{
+                        continue; // skip the parameter if collapse
+                    }
                 }
                 println!("\t {}: {}/{} ({:?},{})", f.name.black().bold(),
                          f.type_name, ptype, f.mode,
@@ -75,6 +93,11 @@ async fn main() -> anyhow::Result<()> {
                 println!("\t {}: {}/{} ({:?},{})", f.name.black().bold(),
                          f.type_name, f.param_type(), f.mode,
                          if f.optional { "optional".yellow() } else { "required".blue().bold() });
+            }
+
+            if example{
+                println!("example ->");
+                output_invoke_example(&srv)?;
             }
         }
 
@@ -144,6 +167,32 @@ async fn main() -> anyhow::Result<()> {
         None => {
             println!(".. execute => {:?}", Command::from_args());
         }
+    }
+
+    Ok(())
+}
+
+fn output_invoke_example(srv:&ModelService) -> Result<(), GenericError>{
+    let ent_name = &srv.default_entity_name;
+    if !ent_name.is_empty() {
+        let seeds = SeedFiles::load()?;
+
+        let rs = seeds.entity_seeds(ent_name)?;
+        let mut stats = HashMap::new();
+        for r in &rs {
+            let fld_num = r.len();
+            let entry = stats.entry(fld_num).or_insert(1);
+            *entry += 1;
+        }
+
+        // 找到最常用的字段组合(即这个组合的频次最高)
+        let max_item = stats.iter()
+            .max_by(|f, s| f.1.cmp(s.1)).unwrap();
+        // println!("{:?} => {:?}", max_item, stats);
+        let exflds = rs.iter().filter(|&r| r.len() == *max_item.0)
+            .nth(0).unwrap();
+        let exflds_str = serde_json::to_string_pretty(&exflds)?;
+        println!("let p: {} = serde_json::from_value(json!({}))?;", ent_name, exflds_str);
     }
 
     Ok(())

@@ -113,6 +113,7 @@ impl ServiceMeta{
                             optional: fld_opt,
                             internal: false,
                             default_value: if fld_def_val.is_empty() { None } else { Some(fld_def_val.to_string()) },
+                            overload: false
                         });
                 }
             }
@@ -131,6 +132,7 @@ impl ServiceMeta{
                     if let Some(def_val) = &ov.default_value {
                         param.default_value = Some(def_val.to_owned());
                     }
+                    param.overload=true;
                 }
             }
         }
@@ -147,7 +149,8 @@ impl ServiceMeta{
                 field_name: None,
                 optional: att.optional,
                 internal: false,
-                default_value: None
+                default_value: None,
+                overload: false
             })
             .collect();
 
@@ -190,6 +193,8 @@ pub struct ModelParam{
     #[serde(default)]
     pub internal: bool,
     pub default_value: Option<String>,
+    #[serde(default)]
+    pub overload: bool,
 }
 
 impl ModelParam{
@@ -265,6 +270,7 @@ fn service_meta_works() -> anyhow::Result<()> {
             let mut fld_def_val = "";
             for f in flds {
                 // do attributes override
+                let mut overload=false;
                 for ov in &srv.overrides {
                     if ov.name == f.field_name {
                         if let Some(opt_val) = ov.optional {
@@ -276,6 +282,7 @@ fn service_meta_works() -> anyhow::Result<()> {
                         if let Some(def_val) = &ov.default_value {
                             fld_def_val = def_val;
                         }
+                        overload=true;
                     }
                 }
 
@@ -292,6 +299,7 @@ fn service_meta_works() -> anyhow::Result<()> {
                         optional: fld_opt,
                         internal: false,
                         default_value: if fld_def_val.is_empty() { None } else { Some(fld_def_val.to_string()) },
+                        overload: overload
                     });
             }
         }
@@ -309,7 +317,8 @@ fn service_meta_works() -> anyhow::Result<()> {
             field_name: None,
             optional: att.optional,
             internal: false,
-            default_value: None
+            default_value: None,
+            overload: false
         })
         .collect();
 

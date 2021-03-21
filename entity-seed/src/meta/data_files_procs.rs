@@ -160,7 +160,7 @@ where
     let mut d = ZlibDecoder::new(bytes);
     let mut s = String::new();
     d.read_to_string(&mut s).unwrap();
-    info!("size {}", &s.len());
+    debug!("size {}", &s.len());
     let data_files:T=serde_json::from_str(&s)?;
 
     Ok(data_files)

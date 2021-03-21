@@ -68,6 +68,14 @@ impl From<roxmltree::Error> for GenericError {
     }
 }
 
+// impl fmt::Display for GenericError {
+//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+//         write!(f, "{}", self.message)
+//     }
+// }
+
+impl warp::reject::Reject for GenericError {}
+
 #[derive(Debug)]
 pub enum ErrorType {
     NotFound,

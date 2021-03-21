@@ -1,0 +1,10 @@
+#[derive(Debug, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct {{ent['entity-name'] -}} {
+{%- for fld in flds %}
+    #[serde(rename = "{{fld.name}}"{% if fld.has_default %}, default{% endif %})]
+    pub {{fld.name | snake_case}}: {{fld['type'] | query_type}},
+{%- endfor %}
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
+}

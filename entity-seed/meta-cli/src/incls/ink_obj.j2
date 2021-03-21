@@ -1,0 +1,6 @@
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct {{ent['entity-name'] -}} {
+{%- for fld in flds %}
+    pub {{fld.name | snake_case}}: {{fld['type'] | plain_type}},  // {{fld['type']}}
+{%- endfor %}
+}

@@ -31,3 +31,10 @@ fn enumerate_works() {
     println!("write count {}: {:?}", write_count, buf.to_vec());
 }
 
+#[test]
+fn u8_works() -> anyhow::Result<()> {
+    let c:u8=b'Y';
+    println!("{}", c);
+    assert_eq!(b'Y', c);
+    Ok(())
+}

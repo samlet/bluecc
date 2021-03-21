@@ -6,6 +6,14 @@ use seed::GenericError;
 use inflector::Inflector;
 use serde::de::DeserializeOwned;
 
+// The query parameters
+#[derive(Debug, Deserialize)]
+pub struct ListOptions {
+    pub offset: Option<usize>,
+    pub limit: Option<usize>,
+}
+
+#[derive(Clone)]
 pub struct Delegator{
     conn: Quaint
 }
@@ -56,6 +64,15 @@ impl Delegator{
     pub async fn list<T>(&self, entity_name: &str) -> Result<Vec<T>, GenericError>
     where T: DeserializeOwned, {
         let query = Select::from_table(entity_name.to_snake_case());
+        let result = self.conn.select(query).await?;
+        let r=self.wrap_result::<T>(result).await?;
+        Ok(r)
+    }
+
+    pub async fn list_with_options<T>(&self, entity_name: &str, options:ListOptions) -> Result<Vec<T>, GenericError>
+    where T: DeserializeOwned, {
+        let query = Select::from_table(entity_name.to_snake_case())
+            .limit(options.limit.unwrap_or(100)).offset(options.offset.unwrap_or(0));
         let result = self.conn.select(query).await?;
         let r=self.wrap_result::<T>(result).await?;
         Ok(r)

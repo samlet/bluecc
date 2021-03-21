@@ -1,0 +1,4 @@
+persons:
+	curl -s "localhost:3030/persons?offset=3&limit=5" | json
+
+

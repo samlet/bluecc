@@ -1,5 +1,7 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
+mod generator;
+
 use std::env;
 use structopt::StructOpt;
 use meta_gen::{SrvDeles, ServiceMeta, ParamMode, ModelParam,
@@ -11,6 +13,7 @@ use colored::*;
 use std::collections::HashMap;
 use serde_json::Value;
 use roxmltree::Node;
+use crate::generator::MetaGenerator;
 
 #[macro_use]
 extern crate lazy_static;
@@ -23,6 +26,7 @@ $ meta-cli srv -c -e updatePerson
 $ cargo run -- call testScv
 $ meta-cli seed Person plain
 $ meta-cli seed Person json-init
+$ meta-cli entity Person ink
  */
 
 #[derive(StructOpt)]
@@ -40,6 +44,10 @@ enum Command {
         #[structopt(short)]
         example: bool,
         name: String
+    },
+    Entity {
+        name: String,
+        template: String,
     },
     /// Call service
     Call { name: String},
@@ -162,6 +170,12 @@ async fn main() -> anyhow::Result<()> {
                 println!("let {}:{}=serde_json::from_value({}_json)?;", var_name.blue(),
                          entity_name.cyan(), var_name);
             }
+        }
+
+        Some(Command::Entity { name, template  }) => {
+            let mut srvs = ServiceMeta::load()?;
+            let result=srvs.generate_for(template.as_str(), name.as_str())?;
+            println!("{}", result);
         }
 
         None => {

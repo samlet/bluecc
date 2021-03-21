@@ -1,8 +1,18 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports, unused_mut))]
+
+#[macro_use] extern crate log;
+#[macro_use]
+extern crate serde_derive;
+// #[macro_use]
+// extern crate lazy_static;
+
+mod handlers;
 
 use std::env;
 use structopt::StructOpt;
 use warp::Filter;
+use crate::handlers::party;
+use deles::delegators::Delegator;
 
 #[derive(StructOpt)]
 struct Args {
@@ -19,8 +29,8 @@ enum Command {
 
 /**
 ```bash
-$ cargo run --bin meta-srv add hello
-$ cargo run --bin meta-srv
+$ cargo run -- add hello
+$ cargo run
 $ curl localhost:3030/hi
 ```
 */
@@ -28,7 +38,8 @@ $ curl localhost:3030/hi
 #[tokio::main]
 #[paw::main]
 async fn main() -> anyhow::Result<()> {
-    pretty_env_logger::init();
+    std::env::set_var("RUST_LOG", "info,entity_seed=info,meta_gen=info");
+    env_logger::init();
 
     let args = Args::from_args();
     match args.cmd {
@@ -43,19 +54,10 @@ async fn main() -> anyhow::Result<()> {
         }
         None => {
             println!(".. srv listening on 3030 ..");
-
-            // GET /
-            let hello_world = warp::path::end().map(|| "Hello, World at root!");
-            // GET /hi
-            let hi = warp::path("hi").map(|| "Hello, World!");
-            let routes = warp::get().and(
-                hello_world
-                    .or(hi),
-            );
-
-            // Note that composing filters for many routes may increase compile times (because it uses a lot of generics).
-            // If you wish to use dynamic dispatch instead and speed up compile times while
-            // making it slightly slower at runtime, you can use Filter::boxed().
+            let delegator = Delegator::new().await?;
+            let api = party(delegator);
+            // View access logs by setting `RUST_LOG=todos`.
+            let routes = api.with(warp::log("party"));
 
             warp::serve(routes).run(([0, 0, 0, 0], 3030)).await;
         }

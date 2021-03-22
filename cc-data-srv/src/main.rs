@@ -7,11 +7,12 @@ extern crate serde_derive;
 // extern crate lazy_static;
 
 mod handlers;
+mod common;
 
 use std::env;
 use structopt::StructOpt;
 use warp::Filter;
-use crate::handlers::party;
+use crate::handlers::{api_filters};
 use deles::delegators::Delegator;
 
 #[derive(StructOpt)]
@@ -55,7 +56,7 @@ async fn main() -> anyhow::Result<()> {
         None => {
             println!(".. srv listening on 3030 ..");
             let delegator = Delegator::new().await?;
-            let api = party(delegator);
+            let api = api_filters(delegator);
             // View access logs by setting `RUST_LOG=todos`.
             let routes = api.with(warp::log("party"));
 

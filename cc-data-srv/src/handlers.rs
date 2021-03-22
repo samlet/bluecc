@@ -1,18 +1,18 @@
-use deles::delegators::{Person, Delegator, ListOptions};
+use deles::delegators::{Person, Party, Delegator, ListOptions};
 use serde::Serialize;
 use deles::GenericError;
 use warp::http::StatusCode;
 use futures::TryStreamExt;
 use warp::Filter;
+use serde::de::DeserializeOwned;
+use std::collections::HashMap;
+
+use quaint::{prelude::*, ast::*, single::Quaint,
+             connector::{Queryable, TransactionCapable},
+};
 
 pub fn with_ctx(db: Delegator) -> impl Filter<Extract = (Delegator,), Error = std::convert::Infallible> + Clone {
     warp::any().map(move || db.clone())
-}
-
-fn json_body() -> impl Filter<Extract = (Person,), Error = warp::Rejection> + Clone {
-    // When accepting a body, we want a JSON body
-    // (and to reject huge payloads)...
-    warp::body::content_length_limit(1024 * 16).and(warp::body::json())
 }
 
 pub fn respond<T: Serialize>(result: Result<T, GenericError>, status: warp::http::StatusCode) -> Result<impl warp::Reply, warp::Rejection> {
@@ -27,13 +27,16 @@ pub fn respond<T: Serialize>(result: Result<T, GenericError>, status: warp::http
     }
 }
 
-pub fn party(
+pub fn api_filters(
     ctx: Delegator,
 ) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
-    persons_list(ctx.clone())
-        // .or(todos_create(db.clone()))
-        // .or(todos_update(db.clone()))
-        // .or(todos_delete(db))
+    warp::path!("api" / "v1" / ..)   // Add path prefix /api/v1 to all our routes
+        .and(
+            persons_list(ctx.clone())
+                .or(party_list(ctx.clone()))
+            // .or(todos_update(ctx.clone()))
+            // .or(todos_delete(ctx))
+        )
 }
 
 /// GET /persons?offset=3&limit=5
@@ -47,9 +50,32 @@ pub fn persons_list(
         .and_then(list_persons)
 }
 
+pub fn party_list(
+    ctx: Delegator,
+) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
+    warp::path!("parties")
+        .and(warp::get())
+        .and(warp::query::<HashMap<String, String>>())
+        .and(with_ctx(ctx))
+        .and_then(list_parties)
+}
+
 pub async fn list_persons(opts: ListOptions, ctx: Delegator) -> Result<impl warp::Reply, warp::Rejection> {
     respond( ctx.list_with_options::<Person>("Person", opts).await,
              warp::http::StatusCode::OK)
+}
+
+pub async fn list_parties(opts: HashMap<String, String>, ctx: Delegator) -> Result<impl warp::Reply, warp::Rejection> {
+    if opts.contains_key("party_type_id"){
+        let conditions = "party_type_id"
+            .equals(opts.get("party_type_id").unwrap().as_str());
+        respond( ctx.list_for::<Party>("Party", conditions.into()).await,
+             warp::http::StatusCode::OK)
+    }else{
+        respond(ctx.list_with_options::<Party>(
+            "Party", ListOptions{ offset: Some(0), limit: Some(10) }).await,
+                warp::http::StatusCode::OK)
+    }
 }
 
 #[cfg(test)]

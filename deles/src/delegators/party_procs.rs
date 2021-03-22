@@ -6,7 +6,9 @@ use seed::GenericError;
 use inflector::Inflector;
 use std::collections::HashMap;
 use serde::Serialize;
+use chrono::{DateTime, Utc};
 
+// $ cargo run --bin seed gen Person dto_orig
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Person{
     // keys
@@ -46,6 +48,25 @@ pub struct Person{
     pub card_id: Option<String>
 }
 
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct Party{
+    // keys
+    pub party_id: Option<String>,
+    // fields
+    pub party_type_id: Option<String>,
+    pub external_id: Option<String>,
+    pub preferred_currency_uom_id: Option<String>,
+    pub description: Option<String>,
+    pub status_id: Option<String>,
+    pub created_date: Option<DateTime<Utc>>,
+    pub created_by_user_login: Option<String>,
+    pub last_modified_date: Option<DateTime<Utc>>,
+    pub last_modified_by_user_login: Option<String>,
+    pub data_source_id: Option<String>,
+    pub is_unread: Option<String>
+}
+
+
 fn pretty<T>(val:&T) -> String
 where
     T: ?Sized + Serialize,{
@@ -69,6 +90,18 @@ async fn list_ent_works() -> Result<(), GenericError> {
     let rs:Vec<Person>=delegator.list("Person").await?;
     println!("total {}", rs.len());
     print_person("SCRUMADMIN", &rs).await?;
+    Ok(())
+}
+
+#[tokio::test]
+async fn list_parties_works() -> Result<(), GenericError> {
+    let delegator=Delegator::new().await?;
+    let conditions = "party_type_id".equals("PARTY_GROUP");
+    let rs:Vec<Party>=delegator.list_for("Party", conditions.into()).await?;
+    println!("total {}", rs.len());
+    for r in &rs{
+        println!("{}", pretty(r));
+    }
     Ok(())
 }
 

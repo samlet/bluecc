@@ -31,7 +31,9 @@ impl Delegator{
         Ok(Delegator { conn: (Quaint::new(url).await?) })
     }
 
-    pub async fn find(&self, entity_name: &str, conditions: ConditionTree<'_>) -> Result<GenericValues, GenericError> {
+    pub async fn find<'a, T>(&self, entity_name: &str, conditions: T) -> Result<GenericValues, GenericError>
+    where
+        T: Into<ConditionTree<'a>>,{
         let query = Select::from_table(entity_name.to_snake_case()).so_that(conditions);
         let result = self.conn.select(query).await?;
         Ok(GenericValues{ entity_name: entity_name.to_string(), rs: result,

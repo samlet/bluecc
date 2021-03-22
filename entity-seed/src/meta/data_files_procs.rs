@@ -369,7 +369,8 @@ impl ServiceModelReader{
         if !self.cached_srvs.contains_key(srv_name) {
             for f in &self.data_files.files {
                 if f.items.contains(&srv_name.to_string()) {
-                    let model: ServiceModel = load_xml(f.content.as_bytes());
+                    // let model: ServiceModel = load_xml(f.content.as_bytes());
+                    let model: ServiceModel = serde_xml_rs::from_reader(f.content.as_bytes())?;
                     // let item = model.services.iter()
                     //     .filter(|e| e.name == srv_name)
                     //     .nth(0);

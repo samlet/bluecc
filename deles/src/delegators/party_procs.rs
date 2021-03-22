@@ -12,57 +12,102 @@ use chrono::{DateTime, Utc};
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Person{
     // keys
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub party_id: Option<String>,
     // fields
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub salutation: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub first_name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub middle_name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub last_name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub personal_title: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub suffix: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub nickname: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub first_name_local: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub middle_name_local: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub last_name_local: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub other_local: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub member_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub gender: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub birth_date: Option<chrono::NaiveDate>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub deceased_date: Option<chrono::NaiveDate>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub height: Option<bigdecimal::BigDecimal>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub weight: Option<bigdecimal::BigDecimal>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub mothers_maiden_name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub old_marital_status: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub marital_status_enum_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub social_security_number: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub passport_number: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub passport_expire_date: Option<chrono::NaiveDate>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub total_years_work_experience: Option<bigdecimal::BigDecimal>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub comments: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub employment_status_enum_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub residence_status_enum_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub occupation: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub years_with_employer: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub months_with_employer: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub existing_customer: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub card_id: Option<String>
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Party{
     // keys
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub party_id: Option<String>,
     // fields
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub party_type_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub external_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub preferred_currency_uom_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub status_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub created_date: Option<DateTime<Utc>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub created_by_user_login: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub last_modified_date: Option<DateTime<Utc>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub last_modified_by_user_login: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub data_source_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub is_unread: Option<String>
 }
 

@@ -40,7 +40,8 @@ pub struct ModelService{
     #[serde(default)]
     pub description: String,
 
-    pub implements: Option<ServiceImplements>,
+    #[serde(default)]
+    pub implements: Vec<ServiceImplements>,
     #[serde(rename = "permission-service", default)]
     pub permission_service: Option<ModelPermission>,
     #[serde(rename = "auto-attributes", default)]

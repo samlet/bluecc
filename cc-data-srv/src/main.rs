@@ -14,6 +14,7 @@ use structopt::StructOpt;
 use warp::Filter;
 use crate::handlers::{api_filters};
 use deles::delegators::Delegator;
+use crate::common::handle_rejection;
 
 #[derive(StructOpt)]
 struct Args {
@@ -56,7 +57,9 @@ async fn main() -> anyhow::Result<()> {
         None => {
             println!(".. srv listening on 3030 ..");
             let delegator = Delegator::new().await?;
-            let api = api_filters(delegator);
+            // let api = api_filters(delegator);
+            let api = api_filters(delegator)
+                .recover(handle_rejection);
             // View access logs by setting `RUST_LOG=todos`.
             let routes = api.with(warp::log("party"));
 

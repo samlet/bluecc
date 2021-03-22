@@ -2,10 +2,12 @@
 pub struct {{ent['entity-name'] -}} {
     // keys
 {%- for fld in keys %}
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub {{fld.name | snake_case}}: {{fld['type'] | orig_type}},
 {%- endfor %}
     // fields
 {%- for fld in flds %}
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub {{fld.name | snake_case}}: {{fld['type'] | orig_type}}{% if not loop.last %},{% endif %}
 {%- endfor %}
 }

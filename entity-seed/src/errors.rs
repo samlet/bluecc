@@ -14,7 +14,9 @@ pub enum GenericError {
     #[error("xml parse fail")]
     ParseXml(roxmltree::Error),
     #[error("json parse fail")]
-    ParseJson(#[from] serde_json::Error),
+    JsonSerialize(#[from] serde_json::Error),
+    #[error("json parse fail")]
+    XmlSerialize(#[from] serde_xml_rs::Error),
     #[error("request fail")]
     RequestErr(#[from] reqwest::Error),
     #[error("tera template fail")]

@@ -14,3 +14,5 @@ Cargo.lock
 **/.history/**
 /.idea/
 /workspace/.ipynb_checkpoints/
+**/.store/**
+

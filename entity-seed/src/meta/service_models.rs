@@ -14,9 +14,11 @@ struct Item {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ServiceModel{
+    #[serde(default)]
     pub description: String,
+    #[serde(default)]
     pub vendor: String,
-    pub version: Decimal,
+    pub version: Option<Decimal>,
     #[serde(rename = "service", default)]
     pub services: Vec<ModelService>
 }
@@ -62,6 +64,18 @@ impl ModelService{
             return incls.join(",")
         }
         "".to_string()
+    }
+
+    pub fn has_interface(&self) -> bool{
+        !self.implements.is_empty()
+    }
+
+    pub fn is_group(&self) -> bool{
+        self.engine=="group"
+    }
+
+    pub fn is_interface(&self) -> bool{
+        self.engine=="interface"
     }
 }
 

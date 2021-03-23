@@ -27,6 +27,7 @@ $ cargo run -- call testScv
 $ meta-cli seed Person plain
 $ meta-cli seed Person json-init
 $ meta-cli entity Person ink
+$ meta-cli dump spec-srv > .store/spec-srvs.txt
  */
 
 #[derive(StructOpt)]
@@ -61,6 +62,7 @@ enum Command {
     },
     /// Get the default access token
     Token,
+    Dump {spec: String},
 }
 
 #[tokio::main]
@@ -176,6 +178,33 @@ async fn main() -> anyhow::Result<()> {
             let mut srvs = ServiceMeta::load()?;
             let result=srvs.generate_for(template.as_str(), name.as_str())?;
             println!("{}", result);
+        }
+
+        Some(Command::Dump { spec  }) => {
+            match spec.as_str() {
+                "spec-srv" => {
+                    let mut srvs = ServiceMeta::load()?;
+                    let mut skip_srvs=Vec::new();
+                    // notice: take about 4s
+                    let mut total=0;
+                    for srv_name in srvs.service_reader.get_all_service_names() {
+                        let params = srvs.srv_params(srv_name.as_str()).unwrap_or(Default::default());
+                        if params.is_empty(){
+                            skip_srvs.push(srv_name.to_owned());
+                        }
+                        let spec_flds = params.iter().filter(|f| f.type_name == "List" || f.type_name == "Map")
+                            .map(|f| (&f.name, &f.type_name)).collect::<Vec<(&String, &String)>>();
+                        if !spec_flds.is_empty() {
+                            println!("{} spec flds: {:?}", srv_name, spec_flds);
+                            total+=1;
+                        }
+                    }
+                    println!("total spec-srvs: {}", total);
+                    let skips=serde_json::to_string_pretty(&skip_srvs)?;
+                    println!("skip srvs: {}", skips);
+                }
+                _ => ()
+            }
         }
 
         None => {

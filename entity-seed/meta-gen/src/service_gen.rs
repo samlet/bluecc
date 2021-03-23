@@ -1,7 +1,7 @@
 use seed::meta::{ServiceModelReader, ServiceModel,
                  ModelReader, ServiceAutoAttributes,
                  ModelService, ServiceImplements};
-use seed::{new_snowflake_id, GenericError, Entity, ModelField, FIELD_MAPPINGS};
+use seed::{new_snowflake_id, load_xml, GenericError, Entity, ModelField, FIELD_MAPPINGS};
 use std::collections::HashSet;
 use inflector::Inflector;
 
@@ -35,6 +35,7 @@ impl ServiceMeta{
     }
 
     pub fn srv_params(&mut self, srv_name: &str) -> Result<Vec<ModelParam>, GenericError> {
+        debug!("get srv {} meta ..", srv_name);
         let srv = self.service_reader.get_service_model(srv_name)?.to_owned();
         let srv_json = serde_json::to_string_pretty(&srv)?;
         debug!("srv {}", srv_json);
@@ -189,17 +190,27 @@ impl From<&str> for ParamMode {
 #[cfg(test)]
 mod lib_tests {
     use super::*;
+    use serde::Deserialize;
+    use std::io::{Read, BufReader};
+    use std::fs::File;
 
     fn ex_service_models() -> ServiceModel {
         let bytes: &[u8] = include_bytes!("fixtures/services.xml");
         serde_xml_rs::from_reader(bytes).expect("ex srvs")
     }
+    fn party_service_models() -> ServiceModel {
+        let bytes: &[u8] = include_bytes!("fixtures/party_services.xml");
+        // serde_xml_rs::from_reader(bytes).expect("ex srvs")
+        let model:ServiceModel=load_xml(bytes);
+        model
+    }
 
     #[test]
     fn service_model_works() {
-        let model: ServiceModel = ex_service_models();
-        println!("{}", model.version);
-        assert_eq!("1.0", model.version.to_string());
+        // let model: ServiceModel = ex_service_models();
+        let model: ServiceModel = party_service_models();
+        println!("{}", model.version.unwrap());
+        assert_eq!("1.0", model.version.unwrap().to_string());
         for srv in model.services {
             println!("{}({:?}): {}", srv.name,
                      srv.implements.iter().map(|i| &i.service).collect::<Vec<&String>>(),
@@ -379,6 +390,52 @@ mod lib_tests {
                      if f.optional { "optional" } else { "required" });
         }
 
+        Ok(())
+    }
+
+    #[test]
+    fn service_params_check_works() -> anyhow::Result<()> {
+        std::env::set_var("RUST_LOG", "debug,entity_seed=debug,meta_gen=debug,serde_xml_rs=info");
+        env_logger::init();
+
+        let mut srvs = ServiceMeta::load()?;
+        // let params = srvs.srv_params("storeOrder")?;
+        let params = srvs.srv_params("createPartyContent")?;
+        println!("total params {}", params.len());
+        let spec_flds=params.iter().filter(|f|f.type_name=="List" || f.type_name=="Map")
+            .map(|f|&f.name).collect::<Vec<&String>>();
+        println!("spec flds: {:?}", spec_flds);
+        Ok(())
+    }
+
+    #[test]
+    fn all_service_params_check_works() -> anyhow::Result<()> {
+        use std::io::Write;
+
+        let mut srvs = ServiceMeta::load()?;
+        // notice: take about 4s
+        let mut total=0;
+        let mut skip_srvs=Vec::new();
+        let output=".store/spec-srvs.txt";
+        let mut buffer = File::create(output)?;
+        for srv_name in srvs.service_reader.get_all_service_names() {
+            let model=srvs.service_reader.get_service_model(srv_name.as_str())?.to_owned();
+            let params = srvs.srv_params(srv_name.as_str()).unwrap_or(Default::default());
+            if params.is_empty(){
+                if !srv_name.starts_with("test") && !model.has_interface(){
+                    skip_srvs.push(srv_name.to_owned());
+                }
+            }
+            let spec_flds = params.iter()
+                .filter(|f| f.type_name == "List" || f.type_name == "Map")
+                .map(|f| (&f.name, &f.type_name)).collect::<Vec<(&String,&String)>>();
+            if !spec_flds.is_empty() {
+                writeln!(buffer, "{} spec flds: {:?}", srv_name, spec_flds)?;
+                total+=1;
+            }
+        }
+        writeln!(buffer, "total spec-srvs {}, skip {}", total, skip_srvs.len())?;
+        std::fs::write(".store/skip-srvs.txt", serde_json::to_string_pretty(&skip_srvs)?)?;
         Ok(())
     }
 }

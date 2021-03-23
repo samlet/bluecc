@@ -28,6 +28,7 @@ $ meta-cli seed Person plain
 $ meta-cli seed Person json-init
 $ meta-cli entity Person ink
 $ meta-cli dump spec-srv > .store/spec-srvs.txt
+$ meta-cli rels ProductKeyword
  */
 
 #[derive(StructOpt)]
@@ -63,6 +64,8 @@ enum Command {
     /// Get the default access token
     Token,
     Dump {spec: String},
+    /// Get entity related services
+    Rels { entity_name: String},
 }
 
 #[tokio::main]
@@ -205,6 +208,13 @@ async fn main() -> anyhow::Result<()> {
                 }
                 _ => ()
             }
+        }
+
+        Some(Command::Rels { entity_name  }) => {
+            let mut srvs = ServiceMeta::load()?;
+            let result = srvs.get_related_srvs(entity_name.as_str())?;
+            let rels = serde_json::to_string_pretty(&result)?;
+            println!("{}", rels);
         }
 
         None => {

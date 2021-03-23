@@ -12,6 +12,7 @@ use crate::meta_model::{EntityModel, Entity};
 use roxmltree::Node;
 use crate::meta::service_models::{ServiceModel, ModelService};
 use std::collections::HashMap;
+use std::iter::FromIterator;
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct DataFile{
@@ -363,6 +364,17 @@ impl ServiceModelReader{
 
     pub fn get_all_service_names(&self)->Vec<String>{
         self.data_files.files.iter().flat_map(|f|f.items.clone()).collect::<Vec<String>>()
+    }
+
+    pub fn load_all_srvs(&mut self) -> Result<Vec<&ModelService>, GenericError> {
+        for f in &self.data_files.files {
+            let model: ServiceModel = load_xml(f.content.as_bytes());
+            for s in model.services{
+                self.cached_srvs.insert(s.name.to_string(), s);
+            }
+        }
+        let vals=Vec::from_iter(self.cached_srvs.values());
+        Ok(vals)
     }
 
     pub fn get_service_model(&mut self, srv_name: &str) -> Result<&ModelService, GenericError> {

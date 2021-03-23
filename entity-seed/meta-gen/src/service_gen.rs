@@ -4,6 +4,7 @@ use seed::meta::{ServiceModelReader, ServiceModel,
 use seed::{new_snowflake_id, load_xml, GenericError, Entity, ModelField, FIELD_MAPPINGS};
 use std::collections::HashSet;
 use inflector::Inflector;
+use std::io::Write;
 
 pub struct ServiceMeta{
     pub service_reader: ServiceModelReader,
@@ -128,6 +129,18 @@ impl ServiceMeta{
         // params.extend(attrs);
         Ok(all_params)
     }
+
+    pub fn get_related_srvs(&mut self, ent: &str) -> Result<Vec<String>, GenericError> {
+        let all_names = self.service_reader.get_all_service_names();
+        let mut result=Vec::new();
+        for srv_name in &all_names {
+            let model = self.service_reader.get_service_model(srv_name.as_str())?.to_owned();
+            if model.default_entity_name==ent{
+                result.push(model.name.to_owned());
+            }
+        }
+        Ok(result)
+    }
 }
 
 fn extract_auto_attrs<'a>(ent: &'a Entity, filter: &ServiceAutoAttributes) -> Vec<&'a ModelField>{
@@ -185,6 +198,41 @@ impl From<&str> for ParamMode {
             _ => ParamMode::InOut
         }
     }
+}
+
+fn write_service_params_check_result() -> anyhow::Result<()> {
+    use std::io::Write;
+    use std::fs::File;
+
+    let mut srvs = ServiceMeta::load()?;
+    // notice: take about 4s
+    let mut total=0;
+    let mut skip_srvs=Vec::new();
+    let output=".store/spec-srvs.txt";
+    let mut buffer = File::create(output)?;
+    let all_names=srvs.service_reader.get_all_service_names();
+    for srv_name in &all_names {
+        let model=srvs.service_reader.get_service_model(srv_name.as_str())?.to_owned();
+        let params = srvs.srv_params(srv_name.as_str()).unwrap_or(Default::default());
+        if params.is_empty(){
+            if !srv_name.starts_with("test") && !model.has_interface(){
+                skip_srvs.push(srv_name.to_owned());
+            }
+        }
+        let spec_flds = params.iter()
+            .filter(|f| f.type_name == "List"
+                || f.type_name == "Map"
+                || f.type_name.contains(".")
+            )
+            .map(|f| (&f.name, &f.type_name)).collect::<Vec<(&String,&String)>>();
+        if !spec_flds.is_empty() {
+            writeln!(buffer, "{} spec flds: {:?}", srv_name, spec_flds)?;
+            total+=1;
+        }
+    }
+    writeln!(buffer, "total services {}, spec-srvs {}, skip {}", all_names.len(), total, skip_srvs.len())?;
+    std::fs::write(".store/skip-srvs.txt", serde_json::to_string_pretty(&skip_srvs)?)?;
+    Ok(())
 }
 
 #[cfg(test)]
@@ -410,34 +458,42 @@ mod lib_tests {
 
     #[test]
     fn all_service_params_check_works() -> anyhow::Result<()> {
-        use std::io::Write;
-
-        let mut srvs = ServiceMeta::load()?;
-        // notice: take about 4s
-        let mut total=0;
-        let mut skip_srvs=Vec::new();
-        let output=".store/spec-srvs.txt";
-        let mut buffer = File::create(output)?;
-        for srv_name in srvs.service_reader.get_all_service_names() {
-            let model=srvs.service_reader.get_service_model(srv_name.as_str())?.to_owned();
-            let params = srvs.srv_params(srv_name.as_str()).unwrap_or(Default::default());
-            if params.is_empty(){
-                if !srv_name.starts_with("test") && !model.has_interface(){
-                    skip_srvs.push(srv_name.to_owned());
-                }
-            }
-            let spec_flds = params.iter()
-                .filter(|f| f.type_name == "List" || f.type_name == "Map")
-                .map(|f| (&f.name, &f.type_name)).collect::<Vec<(&String,&String)>>();
-            if !spec_flds.is_empty() {
-                writeln!(buffer, "{} spec flds: {:?}", srv_name, spec_flds)?;
-                total+=1;
-            }
-        }
-        writeln!(buffer, "total spec-srvs {}, skip {}", total, skip_srvs.len())?;
-        std::fs::write(".store/skip-srvs.txt", serde_json::to_string_pretty(&skip_srvs)?)?;
+        write_service_params_check_result()?;
         Ok(())
     }
+
+    #[test]
+    fn rel_services_works() -> anyhow::Result<()> {
+        let ent="Person";
+        let mut srvs = ServiceMeta::load()?;
+        let result=srvs.get_related_srvs(ent)?;
+        let rels=serde_json::to_string_pretty(&result)?;
+        println!("{}", rels);
+        Ok(())
+    }
+
+    #[test]
+    fn load_all_srvs_works() -> anyhow::Result<()> {
+        let mut meta = ServiceMeta::load()?;
+        let srvs=meta.service_reader.load_all_srvs()?;
+        let mut buffer = File::create(".store/ent-srv-rels.txt")?;
+        writeln!(buffer, "{}", srvs.len())?;
+        let ents:HashSet<&String>=srvs.iter().filter(|s|!s.default_entity_name.is_empty())
+            .map(|&s|&s.default_entity_name)
+            .collect::<HashSet<&String>>();
+        for (i, &e) in ents.iter().enumerate(){
+            writeln!(buffer, "{} - {}", i, e)?;
+            let rels=srvs.iter()
+                .filter(|&s|s.default_entity_name==e.as_str())
+                .map(|&s|&s.name)
+                .collect::<Vec<&String>>();
+            for r in rels{
+                writeln!(buffer, "\t - {}", r)?;
+            }
+        }
+        Ok(())
+    }
+
 }
 
 

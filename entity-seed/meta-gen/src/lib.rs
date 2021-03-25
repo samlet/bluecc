@@ -23,6 +23,7 @@ pub use service_gen::{ServiceMeta, ParamMode, ModelParam};
 pub use seed::{GenericError};
 pub use user_login::{UserWithPassword};
 pub use value_objs::{Generator};
+pub use component_descriptor::{ComponentDescriptor, ComponentModel};
 
 #[cfg(test)]
 mod tests {

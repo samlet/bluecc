@@ -2,7 +2,7 @@ use seed::meta::{ServiceModelReader, ServiceModel,
                  ModelReader, ServiceAutoAttributes,
                  ModelService, ServiceImplements};
 use seed::{new_snowflake_id, load_xml, GenericError, Entity, ModelField, FIELD_MAPPINGS};
-use std::collections::HashSet;
+use std::collections::{HashSet, HashMap};
 use inflector::Inflector;
 use std::io::Write;
 
@@ -38,6 +38,16 @@ impl ServiceMeta{
     pub fn srv_params(&mut self, srv_name: &str) -> Result<Vec<ModelParam>, GenericError> {
         debug!("get srv {} meta ..", srv_name);
         let srv = self.service_reader.get_service_model(srv_name)?.to_owned();
+        let mut ents=HashMap::new();
+        if !srv.default_entity_name.is_empty() {
+            debug!("srv ent {:?}", srv.default_entity_name);
+            let ent = self.srv_ent(srv.name.as_str())?;
+            ents.insert(srv.default_entity_name.to_owned(), ent);
+        }
+        ServiceMeta::srv_model_params(&srv, &ents)
+    }
+
+    pub fn srv_model_params(srv: &ModelService, ents: &HashMap<String, Entity>) -> Result<Vec<ModelParam>, GenericError> {
         let srv_json = serde_json::to_string_pretty(&srv)?;
         debug!("srv {}", srv_json);
 
@@ -48,11 +58,12 @@ impl ServiceMeta{
         if !srv.default_entity_name.is_empty() {
             debug!("srv ent {:?}", srv.default_entity_name);
 
-            let ent = self.srv_ent(srv.name.as_str())?;
+            // let ent = self.srv_ent(srv.name.as_str())?;
+            let ent= ents.get(srv.default_entity_name.as_str()).expect("ent");
             debug!("srv ent {}: {}", ent.entity_name, ent.title);
 
             for auto_attr in &srv.auto_attributes {
-                let flds = extract_auto_attrs(&ent, auto_attr);
+                let flds = extract_auto_attrs(ent, auto_attr);
                 let mode: ParamMode = auto_attr.mode.as_str().into();
                 all_flds.push((mode, auto_attr.optional, flds));
             }

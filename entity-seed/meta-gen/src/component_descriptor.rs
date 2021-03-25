@@ -1,8 +1,9 @@
 use serde::{Serialize, Deserialize, de};
 use std::collections::HashMap;
 use crate::GenericError;
-use seed::{load_xml, EntityModel, Entity};
+use seed::{load_xml, EntityModel, Entity, FIELD_MAPPINGS};
 use seed::meta::{ModelService, ServiceModel, CcConfig, CC_CONF};
+use seed::{EntityGenerator, ModelField};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ComponentModel{
@@ -97,6 +98,10 @@ impl ComponentDescriptor{
 mod lib_tests {
     use super::*;
     use envmnt::{ExpandOptions, ExpansionType};
+    use crate::{ServiceMeta, ParamMode, ModelParam};
+    use tera::Context;
+    use itertools::Itertools;
+    use inflector::Inflector;
 
     #[test]
     fn model_works() -> anyhow::Result<()> {
@@ -156,6 +161,54 @@ mod lib_tests {
         println!("{:?}", comps.model.entity_resources);
         let ents=comps.load_all_entities()?;
         println!("{:?}", ents.keys());
+        Ok(())
+    }
+
+    fn get_srv(comp_name:&str, srv_name:&str) -> Result<(ModelService, HashMap<String, Entity>), GenericError> {
+        let conf=CcConfig{
+            ofbiz_loc: CC_CONF.ofbiz_loc.to_owned(),
+            srv_root: comp_name.to_string() };
+        let comps=ComponentDescriptor::load(&conf)?;
+        let srvs=comps.load_all_services()?;
+        let ents=comps.load_all_entities()?;
+        let srv=srvs.get(srv_name).expect("srv-model").to_owned();
+        Ok( (srv, ents))
+    }
+
+    fn srv_param_type(value: &tera::Value, _args: &HashMap<String, tera::Value>) -> tera::Result<tera::Value> {
+        let mut type_name:String = value.as_str().unwrap().to_string();
+        if !type_name.is_pascal_case() {
+            type_name = FIELD_MAPPINGS.orig_type(type_name.as_str());
+        }
+        Ok(tera::Value::String(type_name))
+    }
+
+    #[test]
+    fn srv_gen_works() -> anyhow::Result<()> {
+        let (srv,ents)=get_srv("plugins/example", "createExample")?;
+        println!("srv name {} with {}, ents: {:?}", srv.name, srv.default_entity_name, ents.keys());
+        let params=ServiceMeta::srv_model_params(&srv, &ents)?;
+        let inputs=params.iter()
+            .filter(|p|p.mode==ParamMode::In || p.mode==ParamMode::InOut)
+            .collect::<Vec<&ModelParam>>();
+        let outputs=params.iter()
+            .filter(|p|p.mode==ParamMode::Out || p.mode==ParamMode::InOut)
+            .collect::<Vec<&ModelParam>>();
+
+        // generate
+        let mut generator = EntityGenerator::new(ents.keys().cloned().collect());
+        // generator.tera.register_filter("param_type", srv_param_type);
+        generator.tera.add_raw_template("srv_create", include_str!("incls/srv_create.j2"))?;
+
+        let mut context = Context::new();
+        context.insert("srv", &srv);
+        if !srv.default_entity_name.is_empty(){
+            context.insert("ent", ents.get(srv.default_entity_name.as_str()).unwrap());
+        }
+        context.insert("inputs", &inputs);
+        context.insert("outputs", &outputs);
+        let result = generator.tera.render("srv_create", &context)?;
+        println!("result => \n{}", result);
         Ok(())
     }
 }

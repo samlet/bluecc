@@ -1,0 +1,7 @@
+#[derive(Debug, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct Create{{ent['entity-name'] -}} {
+{%- for fld in inputs %}
+    pub {{fld.name | snake_case}}: {% if fld.optional %}Option<{% endif %}{{fld['type_name'] | plain_type}}{% if fld.optional %}>{% endif %},
+{%- endfor %}
+}

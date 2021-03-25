@@ -10,16 +10,6 @@ pub trait MetaGenerator{
         -> Result<String, GenericError>;
 }
 
-fn plain_type(value: &Value, _args: &HashMap<String, Value>) -> tera::Result<Value> {
-    let mut val:String = FIELD_MAPPINGS.orig_type(value.as_str().unwrap());
-    if val.starts_with("Option") {
-        val=val.chars().skip_while(|&c|c!='<')
-            .skip(1)
-            .take_while(|&c|c!='>').collect();
-    }
-    Ok(Value::String(format!("{}", val)))
-}
-
 fn ink_type(value: &Value, _args: &HashMap<String, Value>) -> tera::Result<Value> {
     let val:String = FIELD_MAPPINGS.ink_type(value.as_str().unwrap());
     Ok(Value::String(format!("{}", val)))
@@ -31,7 +21,6 @@ impl MetaGenerator for ServiceMeta {
         let flds=&ent.fields;
 
         let mut generator = EntityGenerator::new(vec![ent_name.to_string()]);
-        generator.tera.register_filter("plain_type", plain_type);
         generator.tera.register_filter("ink_type", ink_type);
 
         generator.tera.add_raw_template("value_obj",

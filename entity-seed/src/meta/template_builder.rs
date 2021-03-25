@@ -69,6 +69,15 @@ impl EntityGenerator {
                 Ok(value.clone())
             }
         }
+        fn plain_type(value: &Value, _args: &HashMap<String, Value>) -> tera::Result<Value> {
+            let mut val:String = FIELD_MAPPINGS.orig_type(value.as_str().unwrap());
+            if val.starts_with("Option") {
+                val=val.chars().skip_while(|&c|c!='<')
+                    .skip(1)
+                    .take_while(|&c|c!='>').collect();
+            }
+            Ok(Value::String(format!("{}", val)))
+        }
 
         self.tera.add_raw_template("ent", include_str!("incls/ent.j2"))?;
         self.tera.add_raw_template("ent_rel", include_str!("incls/ent_rel.j2"))?;
@@ -95,6 +104,7 @@ impl EntityGenerator {
         self.tera.register_filter("insert_type", insert_type);
         self.tera.register_filter("snake_case", snake_case);
         self.tera.register_filter("fk", fk_name);
+        self.tera.register_filter("plain_type", plain_type);
 
         Ok(())
     }

@@ -1,7 +1,10 @@
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct {{ srv.name | action }}{{ent['entity-name'] -}} {
 {%- for fld in inputs %}
+    {% if fld.optional -%}
+    #[serde(skip_serializing_if = "Option::is_none")]
+    {% endif -%}
     pub {{fld.name | snake_case}}: {% if fld.optional %}Option<{% endif %}{{fld['type_name'] | plain_type}}{% if fld.optional %}>{% endif %},
 {%- endfor %}
 }

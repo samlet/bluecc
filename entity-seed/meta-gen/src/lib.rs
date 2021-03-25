@@ -9,6 +9,7 @@ mod requests;
 mod user_login;
 mod value_objs;
 mod component_descriptor;
+mod params;
 
 #[macro_use]
 extern crate serde_derive;

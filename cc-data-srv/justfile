@@ -1,8 +1,16 @@
 persons:
-	curl -s "http://localhost:3030/api/v1/persons?offset=3&limit=5" | json
+    curl -s "http://localhost:3030/api/v1/persons?offset=3&limit=5" | json
 parties:
     curl -s "http://localhost:3030/api/v1/parties?party_type_id=PERSON" | json
 srv:
     cargo run
+graphql:
+    npx postgraphile -c ofbiz
+
+graphql-db:
+    npx postgraphile -c ofbiz --watch
+schema-json:
+    apollo client:download-schema --endpoint=http://localhost:5000/graphql
+
 
 

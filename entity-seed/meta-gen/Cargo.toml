@@ -40,3 +40,4 @@ bstr = "0.2.15"
 serde_repr = "0.1.6"
 
 tera = "1.6.1"
+envmnt = "0.9.0"

@@ -1,2 +1,4 @@
-ofbiz_loc="./ofbiz"
+ofbiz_loc="${HOME}/ofbiz"
+srv_root="plugins/adapters"
+
 

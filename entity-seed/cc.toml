@@ -1,2 +1,2 @@
-ofbiz_loc="/Users/xiaofeiwu/jcloud/assets/langs/workspace/ofbiz/ofbiz-framework"
-
+ofbiz_loc="${HOME}/ofbiz"
+srv_root="plugins/adapters"

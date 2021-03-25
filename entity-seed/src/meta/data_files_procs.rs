@@ -128,7 +128,7 @@ fn merge_data_files_works() -> anyhow::Result<()> {
 
 #[test]
 fn merge_seed_data_files_works() -> anyhow::Result<()> {
-    let dir=&cc_conf()?.ofbiz_loc;
+    let dir=&cc_conf()?.get_ofbiz_root();
     let zout=merge_files(dir, "**/data/*.xml",
                 "./.store/seed_files.json", &FileTypes::Data)?;
     println!("save to {}", zout);
@@ -145,7 +145,7 @@ fn merge_entity_models_works() -> anyhow::Result<()> {
 
 #[test]
 fn merge_service_models_works() -> anyhow::Result<()> {
-    let dir=&cc_conf()?.ofbiz_loc;
+    let dir=&cc_conf()?.get_ofbiz_root();
     let zout=merge_files(dir, "**/servicedef/*.xml",
                 "./.store/service_model_files.json", &FileTypes::ServiceModel)?;
     println!("save to {}", zout);

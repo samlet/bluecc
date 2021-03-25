@@ -188,7 +188,7 @@ mod tests {
     #[test]
     fn service_model_works() {
         let model:ServiceModel=ex_service_models();
-        println!("{}", model.version);
+        println!("{}", model.version.unwrap());
         assert_eq!("1.0", model.version.to_string());
         for srv in model.services {
             println!("{}({}): {}", srv.name,
@@ -211,7 +211,7 @@ mod tests {
     fn list_service_conf_works() -> anyhow::Result<()> {
         let cnt=std::fs::read_to_string("cc.toml")?;
         let config: CcConfig = toml::from_str(cnt.as_str())?;
-        println!("ofbiz location: {}", config.ofbiz_loc);
+        println!("ofbiz location: {}", config.get_ofbiz_root());
 
         let options = MatchOptions {
             case_sensitive: false,
@@ -219,7 +219,7 @@ mod tests {
         };
 
         for entry in glob_with(
-            format!("{}/**/servicedef/services*.xml", config.ofbiz_loc).as_str(), options)? {
+            format!("{}/**/servicedef/services*.xml", config.get_ofbiz_root()).as_str(), options)? {
             println!("{}", entry?.display());
         }
 

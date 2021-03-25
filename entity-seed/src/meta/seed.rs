@@ -95,7 +95,7 @@ async fn main(args: Args) -> anyhow::Result<()> {
     std::env::set_var("RUST_LOG", "info,entity_seed=info,seed=debug");
     env_logger::init();
 
-    let dir=&cc_conf()?.ofbiz_loc;
+    let dir=&cc_conf()?.get_ofbiz_root();
     match args.cmd {
         Some(Command::Gen { entity, type_name }) => {
             let generator=EntityGenerator::new(vec![entity.to_owned()]);

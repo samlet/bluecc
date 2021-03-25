@@ -555,7 +555,7 @@ fn as_string_map_works() {
 
 pub fn list_data_files() -> anyhow::Result<()> {
     let config=cc_conf()?;
-    println!("ofbiz location: {}", config.ofbiz_loc);
+    println!("ofbiz location: {}", config.get_ofbiz_root());
 
     let options = MatchOptions {
         case_sensitive: false,
@@ -563,7 +563,7 @@ pub fn list_data_files() -> anyhow::Result<()> {
     };
 
     for entry in glob_with(
-        format!("{}/**/data/*.xml", config.ofbiz_loc).as_str(), options)? {
+        format!("{}/**/data/*.xml", config.get_ofbiz_root()).as_str(), options)? {
         let path=entry?;
         println!("{}", path.display());
         let ents= get_items_in_file(path.to_str().unwrap(), &FileTypes::Data)?;

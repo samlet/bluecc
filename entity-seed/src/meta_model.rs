@@ -5,6 +5,7 @@ use phf::{phf_map};
 use std::collections::HashMap;
 use inflector::cases::snakecase::to_snake_case;
 use crate::topo::TopologicalSort;
+use crate::{GenericError, load_xml};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Entity{
@@ -173,6 +174,13 @@ pub struct BelongsTo{
 }
 
 impl EntityModel {
+    pub fn load(xml_file: &str) -> Result<Self, GenericError>{
+        let cnt=std::fs::read_to_string(xml_file)?;
+        let mut model: EntityModel = load_xml(cnt.as_bytes());
+        model.build();
+        Ok(model)
+    }
+
     pub fn get_entity(&self, name: &str) -> &Entity {
         self.entities.iter().find(|n|n.entity_name==name)
             .expect(format!("find entity {}", name).as_str())

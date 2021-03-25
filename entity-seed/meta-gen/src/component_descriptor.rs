@@ -1,8 +1,8 @@
 use serde::{Serialize, Deserialize, de};
 use std::collections::HashMap;
 use crate::GenericError;
-use seed::load_xml;
-use seed::meta::{ModelService, ServiceModel, CC_CONF};
+use seed::{load_xml, EntityModel, Entity};
+use seed::meta::{ModelService, ServiceModel, CcConfig, CC_CONF};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ComponentModel{
@@ -41,19 +41,27 @@ pub struct ModelResource{
     pub location: String,
 }
 
-impl ComponentModel{
-    pub fn load() -> Result<Self, GenericError>{
-        let conf_path= CC_CONF.get_component_conf_path();
+pub struct ComponentDescriptor{
+    pub conf: CcConfig,
+    pub model: ComponentModel,
+}
+
+impl ComponentDescriptor{
+    pub fn load(conf: &CcConfig) -> Result<Self, GenericError>{
+        let conf_path= conf.get_component_conf_path();
         debug!("read from {}", conf_path);
         let content=std::fs::read(conf_path)?;
         let model:ComponentModel=load_xml(&*content);
-        Ok(model)
+        Ok(ComponentDescriptor{ conf: conf.clone(), model })
     }
 
     pub fn load_all_services(&self) -> Result<HashMap<String,ModelService>, GenericError>{
         let mut srvs=HashMap::new();
-        let root=CC_CONF.get_srv_root();
-        for srv_res in &self.service_resources {
+        let root=self.conf.get_srv_root();
+        let model_res=self.model.service_resources.iter()
+            .filter(|r|r.type_name=="model")
+            .collect::<Vec<&ModelResource>>();
+        for srv_res in &model_res {
             let srv_path=format!("{}/{}", root, srv_res.location);
             let cnt=std::fs::read_to_string(srv_path)?;
             let model: ServiceModel = load_xml(cnt.as_bytes());
@@ -63,6 +71,25 @@ impl ComponentModel{
             }
         }
         Ok(srvs)
+    }
+
+    pub fn load_all_entities(&self) -> Result<HashMap<String, Entity>, GenericError>{
+        let mut ents=HashMap::new();
+        let root=self.conf.get_srv_root();
+        let model_res=self.model.entity_resources.iter()
+            .filter(|r|r.type_name=="model")
+            .collect::<Vec<&ModelResource>>();
+        for res in &model_res {
+            let srv_path=format!("{}/{}", root, res.location);
+            info!("load resource file {}", srv_path);
+            let cnt=std::fs::read_to_string(srv_path)?;
+            let model: EntityModel = load_xml(cnt.as_bytes());
+
+            for e in model.entities {
+                ents.insert(e.entity_name.to_string(), e);
+            }
+        }
+        Ok(ents)
     }
 }
 
@@ -92,9 +119,43 @@ mod lib_tests {
 
     #[test]
     fn service_resources_works() -> anyhow::Result<()> {
-        let comps=ComponentModel::load()?;
+        let comps=ComponentDescriptor::load(&CC_CONF)?;
         let srvs=comps.load_all_services()?;
         println!("{:?}", srvs.keys());
+        Ok(())
+    }
+
+    #[test]
+    fn ex_service_resources_works() -> anyhow::Result<()> {
+        let conf=CcConfig{
+            ofbiz_loc: CC_CONF.ofbiz_loc.to_owned(),
+            srv_root: "plugins/example".to_string() };
+        let comps=ComponentDescriptor::load(&conf)?;
+        let srvs=comps.load_all_services()?;
+        println!("{:?}", srvs.keys());
+        Ok(())
+    }
+
+    #[test]
+    fn entity_resources_works() -> anyhow::Result<()> {
+        let comps=ComponentDescriptor::load(&CC_CONF)?;
+        let ents=comps.load_all_entities()?;
+        println!("{:?}", ents.keys());
+        Ok(())
+    }
+
+    #[test]
+    fn ex_entity_resources_works() -> anyhow::Result<()> {
+        std::env::set_var("RUST_LOG", "info,entity_seed=debug");
+        env_logger::init();
+
+        let conf=CcConfig{
+            ofbiz_loc: CC_CONF.ofbiz_loc.to_owned(),
+            srv_root: "plugins/example".to_string() };
+        let comps=ComponentDescriptor::load(&conf)?;
+        println!("{:?}", comps.model.entity_resources);
+        let ents=comps.load_all_entities()?;
+        println!("{:?}", ents.keys());
         Ok(())
     }
 }

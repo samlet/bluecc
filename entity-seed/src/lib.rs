@@ -36,7 +36,7 @@ pub use self::meta::resource_loader::{SeedProcessor, StringStore, SerialKey};
 pub use self::meta::model_revisions::{Revisions};
 pub use self::meta::template_builder::EntityGenerator;
 pub use self::models::model_types::{SeedTypes};
-pub use self::meta_model::{Entity, ModelField, ModelRelation, KeyMap};
+pub use self::meta_model::{Entity, EntityModel, ModelField, ModelRelation, KeyMap};
 
 pub fn exists(file: &str) -> bool{
     use std::path::Path;

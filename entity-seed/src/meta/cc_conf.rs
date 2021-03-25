@@ -25,7 +25,7 @@ impl CcConfig{
     }
 
     pub fn get_srv_root(&self) -> String {
-        format!("{}/{}", self.get_ofbiz_root(), CC_CONF.srv_root)
+        format!("{}/{}", self.get_ofbiz_root(), self.srv_root)
     }
 
     pub fn get_component_conf_path(&self) -> String{

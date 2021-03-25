@@ -4,6 +4,7 @@ use crate::GenericError;
 use seed::{load_xml, EntityModel, Entity, FIELD_MAPPINGS};
 use seed::meta::{ModelService, ServiceModel, CcConfig, CC_CONF};
 use seed::{EntityGenerator, ModelField};
+use crate::ParamMode;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ComponentModel{
@@ -83,8 +84,9 @@ impl ComponentDescriptor{
         for res in &model_res {
             let srv_path=format!("{}/{}", root, res.location);
             info!("load resource file {}", srv_path);
-            let cnt=std::fs::read_to_string(srv_path)?;
-            let model: EntityModel = load_xml(cnt.as_bytes());
+            // let cnt=std::fs::read_to_string(srv_path)?;
+            // let model: EntityModel = load_xml(cnt.as_bytes());
+            let model: EntityModel = EntityModel::load(srv_path.as_str())?;
 
             for e in model.entities {
                 ents.insert(e.entity_name.to_string(), e);
@@ -183,22 +185,43 @@ mod lib_tests {
         Ok(tera::Value::String(type_name))
     }
 
+    fn guess_action(value: &tera::Value, _args: &HashMap<String, tera::Value>) -> tera::Result<tera::Value> {
+        let mut type_name:String = value.as_str().unwrap().to_string();
+        let mut action=type_name.to_pascal_case();
+        if type_name.starts_with("create") {
+            action="Create".to_string();
+        }else if type_name.starts_with("update") {
+            action="Update".to_string();
+        }else if type_name.starts_with("delete") || type_name.starts_with("remove") {
+            action="Delete".to_string();
+        }
+        Ok(tera::Value::String(action))
+    }
+
     #[test]
     fn srv_gen_works() -> anyhow::Result<()> {
         let (srv,ents)=get_srv("plugins/example", "createExample")?;
         println!("srv name {} with {}, ents: {:?}", srv.name, srv.default_entity_name, ents.keys());
         let params=ServiceMeta::srv_model_params(&srv, &ents)?;
+
+        for p in &params{
+            println!("{} {:?} {}", p.name, p.mode, p.optional);
+        }
+
         let inputs=params.iter()
             .filter(|p|p.mode==ParamMode::In || p.mode==ParamMode::InOut)
             .collect::<Vec<&ModelParam>>();
         let outputs=params.iter()
             .filter(|p|p.mode==ParamMode::Out || p.mode==ParamMode::InOut)
             .collect::<Vec<&ModelParam>>();
+        println!("outputs: {}", outputs.len());
 
         // generate
         let mut generator = EntityGenerator::new(ents.keys().cloned().collect());
         // generator.tera.register_filter("param_type", srv_param_type);
+        generator.tera.register_filter("action", guess_action);
         generator.tera.add_raw_template("srv_create", include_str!("incls/srv_create.j2"))?;
+        generator.tera.add_raw_template("srv_resp", include_str!("incls/srv_resp.j2"))?;
 
         let mut context = Context::new();
         context.insert("srv", &srv);
@@ -207,7 +230,11 @@ mod lib_tests {
         }
         context.insert("inputs", &inputs);
         context.insert("outputs", &outputs);
+
         let result = generator.tera.render("srv_create", &context)?;
+        println!("result => \n{}", result);
+
+        let result = generator.tera.render("srv_resp", &context)?;
         println!("result => \n{}", result);
         Ok(())
     }

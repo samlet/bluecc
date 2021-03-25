@@ -4,6 +4,7 @@ use crate::meta_model::BelongsTo;
 use tera::Tera;
 use tera::{Context, Filter, Function};
 use serde_json::{json, Value};
+use inflector::Inflector;
 
 pub struct EntityGenerator{
     entities: Vec<String>,
@@ -34,6 +35,10 @@ impl EntityGenerator {
         }
         fn snake_case(value: &Value, _args: &HashMap<String, Value>) -> Result<Value> {
             let val = inflector::cases::snakecase::to_snake_case(value.as_str().unwrap());
+            Ok(Value::String(format!("{}", val)))
+        }
+        fn pascal_case(value: &Value, _args: &HashMap<String, Value>) -> Result<Value> {
+            let val = value.as_str().unwrap().to_pascal_case();
             Ok(Value::String(format!("{}", val)))
         }
         fn query_type(value: &Value, _args: &HashMap<String, Value>) -> Result<Value> {
@@ -86,6 +91,7 @@ impl EntityGenerator {
         self.tera.add_raw_template("dto", include_str!("incls/dto.j2"))?;
         self.tera.add_raw_template("dto_seed", include_str!("incls/dto_seed.j2"))?;
         self.tera.add_raw_template("dto_orig", include_str!("incls/dto_orig.j2"))?;
+        self.tera.add_raw_template("dto_keys", include_str!("incls/dto_keys.j2"))?;
 
         /*
         #[serde(rename_all = "camelCase")]
@@ -96,6 +102,8 @@ impl EntityGenerator {
         },
          */
         self.tera.add_raw_template("enum", include_str!("incls/enum.j2"))?;
+
+        self.tera.register_filter("pascal", pascal_case);
 
         self.tera.register_filter("sqltype", SqlType);
         self.tera.register_filter("query_type", query_type);

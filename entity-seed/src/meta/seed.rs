@@ -33,6 +33,7 @@ $ bluecc entity all
 $ bluecc seed Person
 $ bluecc list-services | grep Person
 $ bluecc list-services -s | grep payment
+$ bluecc gen Example dto_keys
 ```
 */
 

@@ -1,0 +1,7 @@
+#[derive(Debug, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct {{ent['entity-name'] -}}Id {
+{%- for fld in keys %}
+    pub {{fld.name | snake_case}}: {{fld['type'] | plain_type}},
+{%- endfor %}
+}

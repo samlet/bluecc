@@ -1,7 +1,7 @@
 #[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct {{ srv.name | action }}{{ent['entity-name'] -}} {
-{%- for fld in inputs %}
+pub struct {{srv.name | pascal -}}Resp {
+{%- for fld in outputs %}
     pub {{fld.name | snake_case}}: {% if fld.optional %}Option<{% endif %}{{fld['type_name'] | plain_type}}{% if fld.optional %}>{% endif %},
 {%- endfor %}
 }

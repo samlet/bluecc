@@ -185,6 +185,14 @@ mod lib_tests {
         Ok(tera::Value::String(type_name))
     }
 
+    fn cstr_type(value: &tera::Value, _args: &HashMap<String, tera::Value>) -> tera::Result<tera::Value> {
+        let mut type_name:String = value.as_str().unwrap().to_string();
+        if type_name=="String" {
+            type_name="&'a str".to_string();
+        }
+        Ok(tera::Value::String(type_name.to_owned()))
+    }
+
     fn guess_action(value: &tera::Value, _args: &HashMap<String, tera::Value>) -> tera::Result<tera::Value> {
         let mut type_name:String = value.as_str().unwrap().to_string();
         let mut action=type_name.to_pascal_case();
@@ -220,6 +228,7 @@ mod lib_tests {
         let mut generator = EntityGenerator::new(ents.keys().cloned().collect());
         // generator.tera.register_filter("param_type", srv_param_type);
         generator.tera.register_filter("action", guess_action);
+        generator.tera.register_filter("cstr", cstr_type);
         generator.tera.add_raw_template("srv_create", include_str!("incls/srv_create.j2"))?;
         generator.tera.add_raw_template("srv_resp", include_str!("incls/srv_resp.j2"))?;
 
@@ -229,6 +238,18 @@ mod lib_tests {
             context.insert("ent", ents.get(srv.default_entity_name.as_str()).unwrap());
         }
         context.insert("inputs", &inputs);
+        context.insert("opts", &inputs.iter()
+            .filter(|&p|p.optional)
+            .collect::<Vec<&&ModelParam>>()
+        );
+        let reqs=inputs.iter()
+            .filter(|&p|!p.optional)
+            .map(|p| format!("{}: {}",
+                             p.name.to_snake_case(),
+                             p.param_value_type()))
+            .collect::<Vec<String>>();
+        let reqs_str=reqs.join(", ");
+        context.insert("reqs", &reqs_str);
         context.insert("outputs", &outputs);
 
         let result = generator.tera.render("srv_create", &context)?;

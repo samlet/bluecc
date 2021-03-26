@@ -198,6 +198,18 @@ impl ModelParam{
         }
         qtype
     }
+
+    pub fn param_value_type(&self) -> String {
+        let raw_type= &self.type_name;
+        let mut val:String = FIELD_MAPPINGS.orig_type(raw_type);
+        if val.starts_with("Option") {
+            val=val.chars().skip_while(|&c|c!='<')
+                .skip(1)
+                .take_while(|&c|c!='>').collect();
+        }
+
+        if val=="String" { "&'a str".to_string() } else {val}
+    }
 }
 
 impl From<&str> for ParamMode {

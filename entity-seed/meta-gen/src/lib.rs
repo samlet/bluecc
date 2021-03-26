@@ -10,6 +10,9 @@ mod user_login;
 mod value_objs;
 mod component_descriptor;
 mod params;
+mod functions;
+mod resource_gen;
+mod srv_example;
 
 #[macro_use]
 extern crate serde_derive;

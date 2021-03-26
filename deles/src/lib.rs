@@ -7,6 +7,8 @@ extern crate serde_derive;
 extern crate lazy_static;
 
 pub mod delegators;
+mod resources;
+
 pub use seed::{GenericError};
 
 #[cfg(test)]

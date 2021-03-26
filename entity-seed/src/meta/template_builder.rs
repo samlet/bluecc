@@ -41,6 +41,10 @@ impl EntityGenerator {
             let val = value.as_str().unwrap().to_pascal_case();
             Ok(Value::String(format!("{}", val)))
         }
+        fn static_var(value: &Value, _args: &HashMap<String, Value>) -> Result<Value> {
+            let val = value.as_str().unwrap().to_screaming_snake_case();
+            Ok(Value::String(format!("{}", val)))
+        }
         fn query_type(value: &Value, _args: &HashMap<String, Value>) -> Result<Value> {
             let val = FIELD_MAPPINGS.query_type(value.as_str().unwrap());
             Ok(Value::String(format!("{}", val)))
@@ -111,6 +115,7 @@ impl EntityGenerator {
         self.tera.register_filter("orig_type", orig_type);
         self.tera.register_filter("insert_type", insert_type);
         self.tera.register_filter("snake_case", snake_case);
+        self.tera.register_filter("static_var", static_var);
         self.tera.register_filter("fk", fk_name);
         self.tera.register_filter("plain_type", plain_type);
 

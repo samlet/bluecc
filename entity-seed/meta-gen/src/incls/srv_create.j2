@@ -1,3 +1,9 @@
+use chrono::{DateTime, Utc};
+use crate::params::Object;
+use crate::{SrvDeles, SrvResp, GenericError, DynamicValue};
+use std::collections::HashMap;
+use serde_json::json;
+
 /// The parameters for `{{ent['entity-name'] -}}::{{ srv.name | action | snake_case }}`.
 #[derive(Debug, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -24,3 +30,4 @@ impl<'a> {{ srv.name | action }}{{ent['entity-name'] -}}<'a> {
     }
 }
 
+const {{ srv.name | static_var }}: &'static str = "{{ srv.name }}";

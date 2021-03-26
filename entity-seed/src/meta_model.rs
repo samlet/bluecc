@@ -295,10 +295,13 @@ impl FieldTypes{
         }
     }
     pub fn orig_type(&self, field_type: &str) -> String{
-        if field_type=="org.apache.ofbiz.entity.GenericValue"{
+        if field_type=="org.apache.ofbiz.entity.GenericValue" ||
+            field_type=="java.util.Map"{
             return "HashMap<String, serde_json::Value>".to_string();
         }else if field_type=="List"{
             return "Vec<serde_json::Value>".to_string();
+        }else if field_type=="Timestamp"{
+            return "DateTime<Utc>".to_string();
         }else if field_type.contains("."){
             return field_type.to_string();
         }else if field_type.is_pascal_case(){

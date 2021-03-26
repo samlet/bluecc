@@ -14,6 +14,7 @@ mod functions;
 mod resource_gen;
 mod srv_example;
 mod srv_finders;
+mod resources;
 
 #[macro_use]
 extern crate serde_derive;
@@ -23,7 +24,7 @@ extern crate lazy_static;
 #[macro_use]
 extern crate diesel;
 
-pub use requests::{SrvResp, SrvErr, SrvDeles, DynamicValue};
+pub use requests::{SrvResp, SrvErr, SrvDeles, DynamicValue, extract_val};
 pub use service_gen::{ServiceMeta, ParamMode, ModelParam};
 pub use seed::{GenericError};
 pub use user_login::{UserWithPassword};

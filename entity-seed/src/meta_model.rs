@@ -6,6 +6,7 @@ use std::collections::HashMap;
 use inflector::cases::snakecase::to_snake_case;
 use crate::topo::TopologicalSort;
 use crate::{GenericError, load_xml};
+use inflector::Inflector;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Entity{
@@ -271,15 +272,16 @@ pub struct FieldTypes{
 }
 
 impl FieldTypes{
-
     fn get_field(&self, field_type:&str) -> &FieldTypeDef{
         self.field_types.iter()
             .find(|x| x.field_type==field_type)
             .expect(format!("not found field type {}", field_type).as_str())
     }
+
     pub fn sql_type(&self, field_type: &str) -> String{
         self.get_field(field_type).sql_type.clone()
     }
+
     pub fn query_type(&self, field_type:&str) -> String{
         let fld=self.get_field(field_type);
         if fld.query_type.is_empty(){
@@ -293,6 +295,9 @@ impl FieldTypes{
         }
     }
     pub fn orig_type(&self, field_type: &str) -> String{
+        if field_type.is_pascal_case(){
+            return field_type.to_string();
+        }
         let typ=&self.get_field(field_type).orig_type;
         if typ.is_empty(){
             self.query_type(field_type)

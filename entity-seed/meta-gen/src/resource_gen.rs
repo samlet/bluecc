@@ -89,9 +89,11 @@ pub fn generate_srv_invoker(writer: &mut dyn std::io::Write, srv: &ModelService,
     // println!("result => \n{}", result);
     writeln!(writer, "{}", result)?;
 
-    let result = generator.tera.render("srv_resp", &context)?;
-    // println!("result => \n{}", result);
-    writeln!(writer, "{}", result)?;
+    if !outputs.is_empty() {
+        let result = generator.tera.render("srv_resp", &context)?;
+        // println!("result => \n{}", result);
+        writeln!(writer, "{}", result)?;
+    }
 
     Ok(())
 }

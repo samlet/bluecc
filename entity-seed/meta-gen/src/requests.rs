@@ -36,9 +36,12 @@ pub struct TokenData{
     pub expires_in: String,
 }
 
-impl SrvResp<TokenData>{
+impl<T: Serialize> SrvResp<T>{
     pub fn is_ok(&self) -> bool {
         self.status_code==200
+    }
+    pub fn pretty_str(&self) -> serde_json::Result<String> {
+        serde_json::to_string_pretty(self)
     }
 }
 

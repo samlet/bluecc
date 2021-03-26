@@ -64,6 +64,7 @@ pub fn generate_srv_invoker(writer: &mut dyn std::io::Write, srv: &ModelService,
     generator.tera.register_filter("cstr", cstr_type);
     generator.tera.add_raw_template("srv_create", include_str!("incls/srv_create.j2"))?;
     generator.tera.add_raw_template("srv_resp", include_str!("incls/srv_resp.j2"))?;
+    generator.tera.add_raw_template("srv_req", include_str!("incls/srv_req.j2"))?;
 
     let mut context = Context::new();
     context.insert("srv", &srv);
@@ -85,9 +86,14 @@ pub fn generate_srv_invoker(writer: &mut dyn std::io::Write, srv: &ModelService,
     context.insert("reqs", &reqs_str);
     context.insert("outputs", &outputs);
 
-    let result = generator.tera.render("srv_create", &context)?;
-    // println!("result => \n{}", result);
-    writeln!(writer, "{}", result)?;
+    if !srv.default_entity_name.is_empty() {
+        let result = generator.tera.render("srv_create", &context)?;
+        // println!("result => \n{}", result);
+        writeln!(writer, "{}", result)?;
+    }else{
+        let result = generator.tera.render("srv_req", &context)?;
+        writeln!(writer, "{}", result)?;
+    }
 
     if !outputs.is_empty() {
         let result = generator.tera.render("srv_resp", &context)?;

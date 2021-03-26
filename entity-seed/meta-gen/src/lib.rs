@@ -13,6 +13,7 @@ mod params;
 mod functions;
 mod resource_gen;
 mod srv_example;
+mod srv_finders;
 
 #[macro_use]
 extern crate serde_derive;

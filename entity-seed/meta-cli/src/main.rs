@@ -29,6 +29,7 @@ $ meta-cli entity Person ink
 $ meta-cli dump spec-srv > .store/spec-srvs.txt
 $ meta-cli rels ProductKeyword
 $ meta-cli resource createExample
+$ meta-cli resource findProductByIdCc plugins/adapters
  */
 
 #[derive(StructOpt)]

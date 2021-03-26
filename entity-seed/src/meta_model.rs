@@ -295,9 +295,16 @@ impl FieldTypes{
         }
     }
     pub fn orig_type(&self, field_type: &str) -> String{
-        if field_type.is_pascal_case(){
+        if field_type=="org.apache.ofbiz.entity.GenericValue"{
+            return "HashMap<String, serde_json::Value>".to_string();
+        }else if field_type=="List"{
+            return "Vec<serde_json::Value>".to_string();
+        }else if field_type.contains("."){
+            return field_type.to_string();
+        }else if field_type.is_pascal_case(){
             return field_type.to_string();
         }
+
         let typ=&self.get_field(field_type).orig_type;
         if typ.is_empty(){
             self.query_type(field_type)

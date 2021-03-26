@@ -27,7 +27,9 @@ pub use service_gen::{ServiceMeta, ParamMode, ModelParam};
 pub use seed::{GenericError};
 pub use user_login::{UserWithPassword};
 pub use value_objs::{Generator};
-pub use component_descriptor::{ComponentDescriptor, ComponentModel};
+pub use component_descriptor::{ComponentDescriptor, ComponentModel,
+                               get_srv};
+pub use resource_gen::{generate_srv_invoker, generate_srv_ent};
 
 #[cfg(test)]
 mod tests {

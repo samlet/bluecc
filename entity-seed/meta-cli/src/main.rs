@@ -4,8 +4,7 @@ mod generator;
 
 use std::env;
 use structopt::StructOpt;
-use meta_gen::{SrvDeles, ServiceMeta, ParamMode, ModelParam,
-               GenericError, DynamicValue, SrvResp};
+use meta_gen::{SrvDeles, ServiceMeta, ParamMode, ModelParam, GenericError, DynamicValue, SrvResp, get_srv, generate_srv_invoker, generate_srv_ent};
 use seed::{FIELD_MAPPINGS};
 use seed::meta::{load_seed_model_z_file, ModelService, SeedFiles};
 use inflector::Inflector;
@@ -29,6 +28,7 @@ $ meta-cli seed Person json-init
 $ meta-cli entity Person ink
 $ meta-cli dump spec-srv > .store/spec-srvs.txt
 $ meta-cli rels ProductKeyword
+$ meta-cli resource createExample
  */
 
 #[derive(StructOpt)]
@@ -66,6 +66,12 @@ enum Command {
     Dump {spec: String},
     /// Get entity related services
     Rels { entity_name: String},
+    /// Generate service invoke wrapper
+    Resource {
+        srv_name: String,
+        #[structopt(default_value = "_")]
+        component: String
+    },
 }
 
 #[tokio::main]
@@ -215,6 +221,24 @@ async fn main() -> anyhow::Result<()> {
             let result = srvs.get_related_srvs(entity_name.as_str())?;
             let rels = serde_json::to_string_pretty(&result)?;
             println!("{}", rels);
+        }
+
+        Some(Command::Resource { srv_name, component  }) => {
+            // let (srv,ents)=get_srv("plugins/example", "createExample")?;
+            let (srv, ents) =
+                if component == "_" {
+                    let mut meta = ServiceMeta::load()?;
+                    meta.srv_and_ent(srv_name.as_str())?
+                } else {
+                    get_srv(component.as_str(), srv_name.as_str())?
+                };
+            let stdout = std::io::stdout();
+            let mut handle = stdout.lock();
+            if !srv.default_entity_name.is_empty() {
+                let entity = ents.get(srv.default_entity_name.as_str()).unwrap();
+                generate_srv_ent(&mut handle, &entity)?;
+            }
+            generate_srv_invoker(&mut handle, &srv, &ents)?;
         }
 
         None => {

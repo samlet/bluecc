@@ -1,4 +1,4 @@
-use crate::{GenericError, new_snowflake_id, get_entity_model, FIELD_MAPPINGS};
+use crate::{GenericError, new_snowflake_id, get_entity_model, FIELD_MAPPINGS, Entity};
 use std::collections::HashMap;
 use crate::meta_model::BelongsTo;
 use tera::Tera;
@@ -119,16 +119,19 @@ impl EntityGenerator {
 
     pub fn entity_gen_works(&self, entity_name: &str, template_name: &str)
                         -> Result<String, GenericError> {
-
-        let mut context = Context::new();
-
         // let model=&APP_CONTEXT.get_model(module);
         let ent = get_entity_model(entity_name)?;
         assert_eq!(entity_name, ent.entity_name);
+        self.entity_gen_with(&ent, template_name)
+    }
+
+    pub fn entity_gen_with(&self, ent: &Entity, template_name: &str)
+                        -> Result<String, GenericError> {
         // for f in &ent.fields {
         //     println!("* {}: {}", f.field_name, f.is_primary);
         // }
 
+        let mut context = Context::new();
         context.insert("ent", &ent);
         context.insert("flds", &ent.fields.iter()
             .filter(|f| !f.is_primary).collect::<Vec<_>>());

@@ -23,6 +23,17 @@ impl ServiceMeta{
         self.service_reader.get_service_model(srv_name)
     }
 
+    pub fn srv_and_ent(&mut self, srv_name: &str) -> Result<(ModelService, HashMap<String, Entity>), GenericError> {
+        let mut ents=HashMap::new();
+        let srv=self.service_reader.get_service_model(srv_name)?;
+        if !srv.default_entity_name.is_empty() {
+            let ent=self.entity_reader.get_entity_model(srv.default_entity_name.as_str())?;
+            ents.insert(ent.entity_name.to_owned(), ent.clone());
+        }
+
+        Ok((srv.clone(), ents))
+    }
+
     pub fn srv_ent(&mut self, srv_name: &str) -> Result<Entity, GenericError> {
         let srv=self.service_reader.get_service_model(srv_name)?;
         if !srv.default_entity_name.is_empty() {

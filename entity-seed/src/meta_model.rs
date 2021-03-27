@@ -12,6 +12,10 @@ use inflector::Inflector;
 pub struct Entity{
     #[serde(rename = "entity-name", default)]
     pub entity_name: String,
+    #[serde(rename = "package-name", default)]
+    pub package_name: String,
+    #[serde(rename = "default-resource-name", default)]
+    pub default_resource_name: String,
     #[serde(default)]
     pub title: String,
     #[serde(rename = "field", default)]

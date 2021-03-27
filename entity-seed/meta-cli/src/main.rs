@@ -48,6 +48,7 @@ enum Command {
         example: bool,
         name: String
     },
+    /// Generate values and ink objects
     Entity {
         name: String,
         template: String,
@@ -64,6 +65,7 @@ enum Command {
     },
     /// Get the default access token
     Token,
+    /// Dump services info, available specs: spec-srv(include list/map as parameters)
     Dump {spec: String},
     /// Get entity related services
     Rels { entity_name: String},

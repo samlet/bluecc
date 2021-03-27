@@ -159,7 +159,16 @@ async fn main(args: Args) -> anyhow::Result<()> {
                         let ent_json = serde_json::to_string_pretty(&ent)?;
                         println!("{}", ent_json);
                     }
-                    _ => ()
+                    _ => {
+                        println!("Cannot find entity model {}", name);
+                        println!("Available entities which includes {} => ", name);
+                        let names=reader.get_all_entity_names();
+                        let items=names.iter()
+                            .filter(|&e|e.contains(name.as_str()))
+                            .collect::<Vec<&String>>();
+                        let ents=serde_json::to_string_pretty(&items)?;
+                        println!("{}", ents);
+                    }
                 }
             }
 

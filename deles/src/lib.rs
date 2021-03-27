@@ -8,6 +8,7 @@ extern crate lazy_static;
 
 pub mod delegators;
 mod resources;
+mod ds;
 
 pub use seed::{GenericError};
 

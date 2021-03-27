@@ -137,7 +137,6 @@ impl<'a> UpdateExample<'a> {
     }
 }
 
-
 #[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(rename_all(serialize = "camelCase", deserialize = "camelCase"))]
 pub struct UpdateExampleResp {

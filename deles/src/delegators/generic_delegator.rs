@@ -15,7 +15,7 @@ pub struct ListOptions {
 
 #[derive(Clone)]
 pub struct Delegator{
-    conn: Quaint
+    pub conn: Quaint
 }
 
 fn table_name(ent: &str) -> String {
@@ -49,7 +49,7 @@ impl Delegator{
             include_internal_fields: include_internal_fields })
     }
 
-    async fn wrap_result<T>(&self, result: ResultSet) -> Result<Vec<T>, GenericError>
+    pub async fn wrap_result<T>(&self, result: ResultSet) -> Result<Vec<T>, GenericError>
     where T: DeserializeOwned, {
         let jval = serde_json::Value::from(result);
         let rows = jval.as_array();

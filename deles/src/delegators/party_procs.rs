@@ -150,6 +150,39 @@ async fn list_parties_works() -> Result<(), GenericError> {
     Ok(())
 }
 
+#[tokio::test]
+async fn list_parties_table_works() -> Result<(), GenericError> {
+    use comfy_table::presets::UTF8_FULL;
+    use comfy_table::modifiers::UTF8_ROUND_CORNERS;
+
+    let entity_name="Party";
+
+    let delegator=Delegator::new().await?;
+    let conditions = "party_type_id".equals("PARTY_GROUP");
+    let query = Select::from_table(entity_name.to_snake_case()).so_that(conditions).limit(10);
+    let result = delegator.conn.select(query).await?;
+    println!("cols {:?}", result.columns());
+    let rs:Vec<Party>=delegator.wrap_result::<Party>(result).await?;
+    println!("total {}", rs.len());
+
+    let mut table = comfy_table::Table::new();
+    table
+        .load_preset(UTF8_FULL)
+        .apply_modifier(UTF8_ROUND_CORNERS)
+        .set_content_arrangement(comfy_table::ContentArrangement::Dynamic)
+        .set_table_width(140);
+    table.set_header(vec!["party id", "type", "status"]);
+
+    for r in &rs{
+        // println!("{}", pretty(r));
+        table.add_row(vec![r.party_id.as_ref().unwrap(),
+            r.party_type_id.as_ref().unwrap(),
+            r.status_id.as_ref().unwrap()]);
+    }
+    println!("{}", table);
+    Ok(())
+}
+
 #[test]
 fn seed_toml_works() -> anyhow::Result<()> {
     let seed_rec=r#"

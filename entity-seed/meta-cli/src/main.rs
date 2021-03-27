@@ -95,13 +95,13 @@ async fn main() -> anyhow::Result<()> {
     let args = Args::from_args();
     match args.cmd {
         Some(Command::Srv { collapse, example, name }) => {
-            println!("srv-meta {}", name);
             let mut srvs = ServiceMeta::load()?;
             let srv= srvs.srv(name.as_str())?.to_owned();
             let srv_ent=&srv.default_entity_name;
             let srv_ent_incs=srv.include_auto_attrs();
             let params = srvs.srv_params(name.as_str())?;
 
+            println!("srv-meta {} ({})", name, &srv.engine.yellow());
             println!("input params ->");
             if collapse && !srv_ent.is_empty(){
                 println!("\t default entity {} ({})", srv_ent.red().bold(), srv_ent_incs.yellow());

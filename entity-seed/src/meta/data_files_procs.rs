@@ -71,13 +71,16 @@ fn list_files_works() -> anyhow::Result<()> {
     Ok(())
 }
 
-pub fn merge_files(dir: &str, filter: &str, json_output: &str, file_type: &FileTypes)
+pub fn merge_files(dir: &str, filters: Vec<&str>, json_output: &str, file_type: &FileTypes)
     -> Result<String,GenericError>{
 
     use std::io::prelude::*;
 
     let mut data_files=DataFiles{ files: vec![] };
-    let files=list_files(dir, filter)?;
+    let mut files:Vec<PathBuf>=Vec::new();
+    for filter in &filters {
+        files.append(&mut list_files(dir, filter)?);
+    }
     for f in &files{
         debug!(".. read {} start", f.as_display());
         let cnt=std::fs::read_to_string(f)?;

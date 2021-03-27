@@ -13,6 +13,7 @@ use std::collections::HashMap;
 use serde_json::Value;
 use roxmltree::Node;
 use crate::generator::MetaGenerator;
+use itertools::Itertools;
 
 #[macro_use]
 extern crate lazy_static;
@@ -28,6 +29,8 @@ $ meta-cli seed Person json-init
 $ meta-cli entity Person ink
 $ meta-cli dump spec-srv > .store/spec-srvs.txt
 $ meta-cli rels ProductKeyword
+$ meta-cli rels -i Budget
+$ meta-cli rels -i -s Position
 $ meta-cli resource createExample
 $ meta-cli resource findProductByIdCc plugins/adapters
  */
@@ -68,7 +71,13 @@ enum Command {
     /// Dump services info, available specs: spec-srv(include list/map as parameters)
     Dump {spec: String},
     /// Get entity related services
-    Rels { entity_name: String},
+    Rels {
+        #[structopt(short)]
+        include_keys: bool,
+        #[structopt(short)]
+        search_all_entity: bool,
+        entity_name: String
+    },
     /// Generate service invoke wrapper
     Resource {
         srv_name: String,
@@ -219,11 +228,25 @@ async fn main() -> anyhow::Result<()> {
             }
         }
 
-        Some(Command::Rels { entity_name  }) => {
+        Some(Command::Rels { include_keys, search_all_entity, entity_name  }) => {
             let mut srvs = ServiceMeta::load()?;
             let result = srvs.get_related_srvs(entity_name.as_str())?;
             let rels = serde_json::to_string_pretty(&result)?;
             println!("{}", rels);
+
+            if include_keys {
+                let names=srvs.service_reader.get_all_service_names();
+                let sets=names.iter().filter(|s|s.contains(&entity_name))
+                    .collect_vec();
+                println!("{}", serde_json::to_string_pretty(&sets)?);
+            }
+
+            if search_all_entity{
+                let names=srvs.entity_reader.get_all_entity_names();
+                let sets=names.iter().filter(|s|s.contains(&entity_name))
+                    .collect_vec();
+                println!("{}", serde_json::to_string_pretty(&sets)?);
+            }
         }
 
         Some(Command::Resource { srv_name, component  }) => {

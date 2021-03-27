@@ -46,6 +46,7 @@ mod tests {
         // user-login
         let mut login = UserWithPassword::default();
         println!("{:?}", login.decode("YWRtaW46b2ZiaXo=")?);
+
         Ok(())
     }
 }

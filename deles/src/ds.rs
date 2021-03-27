@@ -8,7 +8,7 @@ mod lib_tests {
     use std::fs::File;
     use serde::Deserialize;
 
-    #[derive(Debug, Deserialize)]
+    #[derive(Debug, Deserialize, Serialize)]
     struct Record {
         city: String,
         region: String,
@@ -32,6 +32,29 @@ mod lib_tests {
     #[test]
     fn example_file_works() -> anyhow::Result<()> {
         example_file("./fixtures/smallpop.csv")?;
+
+        Ok(())
+    }
+
+    #[test]
+    fn serialize_works() -> anyhow::Result<()> {
+        let mut wtr = csv::Writer::from_writer(io::stdout());
+
+        // When writing records with Serde using structs, the header row is written
+        // automatically.
+        wtr.serialize(Record {
+            city: "Southborough".to_string(),
+            region: "MA".to_string(),
+            country: "United States".to_string(),
+            population: Some(9686),
+        })?;
+        wtr.serialize(Record {
+            city: "Northbridge".to_string(),
+            region: "MA".to_string(),
+            country: "United States".to_string(),
+            population: Some(14061),
+        })?;
+        wtr.flush()?;
 
         Ok(())
     }

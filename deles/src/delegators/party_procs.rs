@@ -1,4 +1,4 @@
-use crate::delegators::Delegator;
+use crate::delegators::{Delegator, pretty};
 use quaint::{prelude::*, ast::*, single::Quaint,
              connector::{Queryable, TransactionCapable},
 };
@@ -111,13 +111,6 @@ pub struct Party{
     pub is_unread: Option<String>
 }
 
-
-fn pretty<T>(val:&T) -> String
-where
-    T: ?Sized + Serialize,{
-    serde_json::to_string_pretty(val).unwrap()
-}
-
 async fn print_person(party_id: &str, items: &Vec<Person>) -> anyhow::Result<()> {
     let ex_sts:Vec<&Person>=items.iter()
         .filter(|&n|n.party_id==Some(party_id.to_string()))
@@ -129,69 +122,74 @@ async fn print_person(party_id: &str, items: &Vec<Person>) -> anyhow::Result<()>
     Ok(())
 }
 
-#[tokio::test]
-async fn list_ent_works() -> Result<(), GenericError> {
-    let delegator=Delegator::new().await?;
-    let rs:Vec<Person>=delegator.list("Person").await?;
-    println!("total {}", rs.len());
-    print_person("SCRUMADMIN", &rs).await?;
-    Ok(())
-}
+#[cfg(test)]
+mod lib_tests {
+    use super::*;
 
-#[tokio::test]
-async fn list_parties_works() -> Result<(), GenericError> {
-    let delegator=Delegator::new().await?;
-    let conditions = "party_type_id".equals("PARTY_GROUP");
-    let rs:Vec<Party>=delegator.list_for("Party", conditions.into()).await?;
-    println!("total {}", rs.len());
-    for r in &rs{
-        println!("{}", pretty(r));
+    #[tokio::test]
+    async fn list_ent_works() -> Result<(), GenericError> {
+        let delegator = Delegator::new().await?;
+        let rs: Vec<Person> = delegator.list("Person").await?;
+        println!("total {}", rs.len());
+        print_person("SCRUMADMIN", &rs).await?;
+        Ok(())
     }
-    Ok(())
-}
 
-#[tokio::test]
-async fn list_parties_table_works() -> Result<(), GenericError> {
-    use comfy_table::presets::UTF8_FULL;
-    use comfy_table::modifiers::UTF8_ROUND_CORNERS;
-
-    let entity_name="Party";
-
-    let delegator=Delegator::new().await?;
-    let conditions = "party_type_id".equals("PARTY_GROUP");
-    let query = Select::from_table(entity_name.to_snake_case()).so_that(conditions).limit(10);
-    let result = delegator.conn.select(query).await?;
-    println!("cols {:?}", result.columns());
-    let rs:Vec<Party>=delegator.wrap_result::<Party>(result).await?;
-    println!("total {}", rs.len());
-
-    let mut table = comfy_table::Table::new();
-    table
-        .load_preset(UTF8_FULL)
-        .apply_modifier(UTF8_ROUND_CORNERS)
-        .set_content_arrangement(comfy_table::ContentArrangement::Dynamic)
-        .set_table_width(140);
-    table.set_header(vec!["party id", "type", "status"]);
-
-    for r in &rs{
-        // println!("{}", pretty(r));
-        table.add_row(vec![r.party_id.as_ref().unwrap(),
-            r.party_type_id.as_ref().unwrap(),
-            r.status_id.as_ref().unwrap()]);
+    #[tokio::test]
+    async fn list_parties_works() -> Result<(), GenericError> {
+        let delegator = Delegator::new().await?;
+        let conditions = "party_type_id".equals("PARTY_GROUP");
+        let rs: Vec<Party> = delegator.list_for("Party", conditions.into()).await?;
+        println!("total {}", rs.len());
+        for r in &rs {
+            println!("{}", pretty(r));
+        }
+        Ok(())
     }
-    println!("{}", table);
-    Ok(())
-}
 
-#[test]
-fn seed_toml_works() -> anyhow::Result<()> {
-    let seed_rec=r#"
-        party_id = "TestParty"
-        first_name = "Test"
-        last_name = "Party"
-    "#;
-    let person:Person=toml::from_str(seed_rec)?;
-    println!("{}", pretty(&person));
-    Ok(())
+    #[tokio::test]
+    async fn list_parties_table_works() -> Result<(), GenericError> {
+        use comfy_table::presets::UTF8_FULL;
+        use comfy_table::modifiers::UTF8_ROUND_CORNERS;
+
+        let entity_name = "Party";
+
+        let delegator = Delegator::new().await?;
+        let conditions = "party_type_id".equals("PARTY_GROUP");
+        let query = Select::from_table(entity_name.to_snake_case()).so_that(conditions).limit(10);
+        let result = delegator.conn.select(query).await?;
+        println!("cols {:?}", result.columns());
+        let rs: Vec<Party> = delegator.wrap_result::<Party>(result).await?;
+        println!("total {}", rs.len());
+
+        let mut table = comfy_table::Table::new();
+        table
+            .load_preset(UTF8_FULL)
+            .apply_modifier(UTF8_ROUND_CORNERS)
+            .set_content_arrangement(comfy_table::ContentArrangement::Dynamic)
+            .set_table_width(140);
+        table.set_header(vec!["party id", "type", "status"]);
+
+        for r in &rs {
+            // println!("{}", pretty(r));
+            table.add_row(vec![r.party_id.as_ref().unwrap(),
+                               r.party_type_id.as_ref().unwrap(),
+                               r.status_id.as_ref().unwrap()]);
+        }
+        println!("{}", table);
+        Ok(())
+    }
+
+    #[test]
+    fn seed_toml_works() -> anyhow::Result<()> {
+        let seed_rec = r#"
+            party_id = "TestParty"
+            first_name = "Test"
+            last_name = "Party"
+        "#;
+        let person: Person = toml::from_str(seed_rec)?;
+        println!("{}", pretty(&person));
+        Ok(())
+    }
 }
 

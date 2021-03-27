@@ -71,7 +71,11 @@ enum Command {
     /// Show entity meta-info
     Entity {name: String},
     /// Show entity seed data
-    Seed {name: String},
+    Seed {
+        #[structopt(short)]
+        snake_case: bool,
+        name: String
+    },
     /// Show service meta-info
     Service {name: String},
     /// List all service names
@@ -174,11 +178,14 @@ async fn main(args: Args) -> anyhow::Result<()> {
 
         }
 
-        Some(Command::Seed { name  }) => {
+        Some(Command::Seed { snake_case, name  }) => {
             load_seed_model_z_file(name.as_str(), |n| {
                 println!("{} ({:?})", n.tag_name().name(), n.range());
                 for attr in n.attributes() {
-                    println!("\t{} = {}", attr.name(), attr.value());
+                    println!("\t{} = {}",
+                             if !snake_case {attr.name().to_string()}
+                             else {attr.name().to_snake_case()},
+                             attr.value());
                 }
                 true
             })?;

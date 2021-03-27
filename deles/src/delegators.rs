@@ -7,5 +7,6 @@ mod util;
 
 pub use generic_delegator::{Delegator, GenericValues, ListOptions, result_str};
 pub use party_procs::{Person, Party};
+pub use util::{pretty, render};
 
 

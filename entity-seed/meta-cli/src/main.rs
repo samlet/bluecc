@@ -72,8 +72,10 @@ enum Command {
     Dump {spec: String},
     /// Get entity related services
     Rels {
+        /// 查找名称中包含此关键字的服务
         #[structopt(short)]
         include_keys: bool,
+        /// 查找名称中包含此关键字的实体
         #[structopt(short)]
         search_all_entity: bool,
         entity_name: String

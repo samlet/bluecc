@@ -1,0 +1,12 @@
+Behaves(
+    create_example: (
+        example_type_id: "CONTRIVED",
+        status_id: "EXST_IN_DESIGN",
+        example_name: "Example 2",
+        ),
+    update_example: (
+        example_id: "$example_id",
+        example_name: "changed",
+        ),
+)
+

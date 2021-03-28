@@ -4,3 +4,8 @@ token:
 ink ent:
     cargo run -- entity {{ent}} ink
 
+# Cargo会将自己限制在本地下载的板条箱中，即使索引的本地副本中可能有较新的版本也是如此
+install:
+	cargo install --path . --offline
+
+

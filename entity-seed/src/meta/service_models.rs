@@ -189,10 +189,10 @@ mod tests {
     fn service_model_works() {
         let model:ServiceModel=ex_service_models();
         println!("{}", model.version.unwrap());
-        assert_eq!("1.0", model.version.to_string());
+        assert_eq!("1.0", model.version.unwrap().to_string());
         for srv in model.services {
-            println!("{}({}): {}", srv.name,
-                     srv.implements.unwrap_or(ServiceImplements{ service: "none".to_string() }).service,
+            println!("{}: {}", srv.name,
+                     // srv.implements.unwrap_or(ServiceImplements{ service: "none".to_string() }).service,
                      srv.description);
         }
     }

@@ -150,6 +150,7 @@ mod lib_tests {
             .json::<HashMap<String, String>>()
             .await?;
         println!("{:#?}", resp);
+
         Ok(())
     }
 

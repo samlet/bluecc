@@ -43,34 +43,6 @@ pub fn list_files(dir: &str, pattern: &str) -> Result<Vec<PathBuf>, GenericError
     Ok(rs)
 }
 
-#[test]
-fn json_object_works() -> anyhow::Result<()> {
-    use crate::models::security_types::SecurityGroup;
-    let json = json!(
-        {
-          "groupId": 212118821551607808_i64,
-          "groupName": "Full Admin",
-          "description": "Full Admin group, has all general permissions."
-        }
-    );
-    let rec = serde_json::from_value::<SecurityGroup>(json)?;
-    println!("{:?}", rec);
-    Ok(())
-}
-
-#[test]
-fn list_files_works() -> anyhow::Result<()> {
-    let files=list_files("./data", "**/*.xml")?;
-    for f in &files{
-        println!("{:?}: {}", f.file_name().unwrap().to_string_lossy(), f.as_display());
-    }
-
-    let f=files.get(0).unwrap();
-    let cnt=std::fs::read_to_string(f)?;
-    println!("{}", cnt);
-    Ok(())
-}
-
 pub fn merge_files(dir: &str, filters: Vec<&str>, json_output: &str, file_type: &FileTypes)
     -> Result<String,GenericError>{
 
@@ -121,39 +93,6 @@ where
     Ok(zout)
 }
 
-#[test]
-fn merge_data_files_works() -> anyhow::Result<()> {
-    let zout=merge_files("./data", "**/*.xml",
-                "./.store/data_files.json", &FileTypes::Data)?;
-    println!("save to {}", zout);
-    Ok(())
-}
-
-#[test]
-fn merge_seed_data_files_works() -> anyhow::Result<()> {
-    let dir=&cc_conf()?.get_ofbiz_root();
-    let zout=merge_files(dir, "**/data/*.xml",
-                "./.store/seed_files.json", &FileTypes::Data)?;
-    println!("save to {}", zout);
-    Ok(())
-}
-
-#[test]
-fn merge_entity_models_works() -> anyhow::Result<()> {
-    let zout=merge_files("./entitydef", "**/*.xml",
-                "./.store/entity_model_files.json", &FileTypes::EntityModel)?;
-    println!("save to {}", zout);
-    Ok(())
-}
-
-#[test]
-fn merge_service_models_works() -> anyhow::Result<()> {
-    let dir=&cc_conf()?.get_ofbiz_root();
-    let zout=merge_files(dir, "**/servicedef/*.xml",
-                "./.store/service_model_files.json", &FileTypes::ServiceModel)?;
-    println!("save to {}", zout);
-    Ok(())
-}
 
 pub fn load_z<T>(bytes:&[u8]) -> Result<T, GenericError>
 where
@@ -170,25 +109,62 @@ where
     Ok(data_files)
 }
 
-#[test]
-fn load_z_works() -> anyhow::Result<()> {
-    let bytes:&[u8] =include_bytes!("fixtures/data_files.jsonz");
-    let data_files=load_z::<DataFiles>(bytes)?;
-    for f in &data_files.files{
-        println!("{}: {}", f.uri, f.path);
-    }
-    Ok(())
+pub struct ServiceModelReader{
+    data_files: DataFiles,
+    cached_srvs: HashMap<String, ModelService>,
 }
-
-#[test]
-fn load_z_file_works() -> anyhow::Result<()> {
-    let bytes =std::fs::read("./.store/data_files.jsonz")?;
-    let data_files=load_z::<DataFiles>(&bytes)?;
-    for f in &data_files.files{
-        println!("{}: {}", f.uri, f.path);
-        println!("\t{:?}", f.items);
+impl ServiceModelReader{
+    pub fn new() -> Result<Self, GenericError> {
+        // let bytes =std::fs::read("./.store/service_model_files.jsonz")?;
+        let bytes=include_bytes!("pkgs/service_model_files.jsonz");
+        let data_files=load_z::<DataFiles>(bytes)?;
+        Ok(ServiceModelReader { data_files: (data_files), cached_srvs:HashMap::new() })
     }
-    Ok(())
+
+    pub fn get_all_service_names(&self)->Vec<String>{
+        self.data_files.files.iter().flat_map(|f|f.items.clone()).collect::<Vec<String>>()
+    }
+
+    pub fn load_all_srvs(&mut self) -> Result<Vec<&ModelService>, GenericError> {
+        for f in &self.data_files.files {
+            let model: ServiceModel = load_xml(f.content.as_bytes());
+            for s in model.services{
+                self.cached_srvs.insert(s.name.to_string(), s);
+            }
+        }
+        let vals=Vec::from_iter(self.cached_srvs.values());
+        Ok(vals)
+    }
+
+    pub fn get_service_model(&mut self, srv_name: &str) -> Result<&ModelService, GenericError> {
+        if !self.cached_srvs.contains_key(srv_name) {
+            for f in &self.data_files.files {
+                if f.items.contains(&srv_name.to_string()) {
+                    // let model: ServiceModel = load_xml(f.content.as_bytes());
+                    let model: ServiceModel = load_xml(f.content.as_bytes());
+                    // let item = model.services.iter()
+                    //     .filter(|e| e.name == srv_name)
+                    //     .nth(0);
+                    // self.cached_srvs.insert(srv_name.to_string(), item.unwrap().clone());
+
+                    // put all services which defined in this service-model-file into cache
+                    for s in model.services{
+                        self.cached_srvs.insert(s.name.to_string(), s);
+                    }
+                    break;
+                }
+            }
+        }
+
+        if !self.cached_srvs.contains_key(srv_name) {
+            Err(GenericError::NotFound {
+                item_name: srv_name.to_string(),
+                info: "no such service".to_string()
+            })
+        }else{
+            Ok(self.cached_srvs.get(srv_name).unwrap())
+        }
+    }
 }
 
 pub struct ModelReader{
@@ -258,35 +234,6 @@ impl ModelReader{
     }
 }
 
-#[test]
-fn load_entity_model_z_file_works() -> anyhow::Result<()> {
-    // let bytes =std::fs::read("./.store/entity_model_files.jsonz")?;
-    let bytes=include_bytes!("pkgs/entity_model_files.jsonz");
-    let data_files=load_z::<DataFiles>(bytes)?;
-    let entity_name="Example";
-    for f in &data_files.files{
-        if f.items.contains(&entity_name.to_string()){
-            let mut model:EntityModel=load_xml(f.content.as_bytes());
-            model.build();
-            let ent=model.entities.iter()
-                .filter(|e| e.entity_name==entity_name)
-                .nth(0);
-            let ent_json=serde_json::to_string_pretty(ent.unwrap())?;
-            println!("{}",  ent_json);
-        }
-    }
-    Ok(())
-}
-
-#[test]
-fn model_reader_works() -> anyhow::Result<()> {
-    let mut reader=ModelReader::load()?;
-    let ent=reader.get_entity_model("Example")?;
-    let ent_json=serde_json::to_string_pretty(&ent)?;
-    println!("{}",  ent_json);
-    Ok(())
-}
-
 pub struct SeedFiles{
     pub data_files: DataFiles,
 }
@@ -340,84 +287,141 @@ where P: Fn(&Node<'_,'_>) -> bool,{
     Ok(())
 }
 
+#[cfg(test)]
+mod lib_tests {
+    use super::*;
 
-#[test]
-fn load_seed_model_z_file_works() -> Result<(), GenericError> {
-    load_seed_model_z_file("Person", |n|{
-        println!("{} ({:?})", n.tag_name().name(), n.range());
-        for attr in n.attributes(){
-            println!("\t{} = {}", attr.name(), attr.value());
+    #[test]
+    fn json_object_works() -> anyhow::Result<()> {
+        use crate::models::security_types::SecurityGroup;
+        let json = json!(
+            {
+              "groupId": 212118821551607808_i64,
+              "groupName": "Full Admin",
+              "description": "Full Admin group, has all general permissions."
+            }
+        );
+        let rec = serde_json::from_value::<SecurityGroup>(json)?;
+        println!("{:?}", rec);
+        Ok(())
+    }
+
+    #[test]
+    fn list_files_works() -> anyhow::Result<()> {
+        let files = list_files("./data", "**/*.xml")?;
+        for f in &files {
+            println!("{:?}: {}", f.file_name().unwrap().to_string_lossy(), f.as_display());
         }
-        true
-    })?;
-    Ok(())
-}
 
-pub struct ServiceModelReader{
-    data_files: DataFiles,
-    cached_srvs: HashMap<String, ModelService>,
-}
-impl ServiceModelReader{
-    pub fn new() -> Result<Self, GenericError> {
-        // let bytes =std::fs::read("./.store/service_model_files.jsonz")?;
-        let bytes=include_bytes!("pkgs/service_model_files.jsonz");
-        let data_files=load_z::<DataFiles>(bytes)?;
-        Ok(ServiceModelReader { data_files: (data_files), cached_srvs:HashMap::new() })
+        let f = files.get(0).unwrap();
+        let cnt = std::fs::read_to_string(f)?;
+        println!("{}", cnt);
+        Ok(())
     }
 
-    pub fn get_all_service_names(&self)->Vec<String>{
-        self.data_files.files.iter().flat_map(|f|f.items.clone()).collect::<Vec<String>>()
+    #[test]
+    fn merge_data_files_works() -> anyhow::Result<()> {
+        let zout = merge_files("./data", vec!["**/*.xml"],
+                               "./.store/data_files.json", &FileTypes::Data)?;
+        println!("save to {}", zout);
+        Ok(())
     }
 
-    pub fn load_all_srvs(&mut self) -> Result<Vec<&ModelService>, GenericError> {
-        for f in &self.data_files.files {
-            let model: ServiceModel = load_xml(f.content.as_bytes());
-            for s in model.services{
-                self.cached_srvs.insert(s.name.to_string(), s);
+    #[test]
+    fn merge_seed_data_files_works() -> anyhow::Result<()> {
+        let dir = &cc_conf()?.get_ofbiz_root();
+        let zout = merge_files(dir, vec!["**/data/*.xml"],
+                               "./.store/seed_files.json", &FileTypes::Data)?;
+        println!("save to {}", zout);
+        Ok(())
+    }
+
+    #[test]
+    fn merge_entity_models_works() -> anyhow::Result<()> {
+        let zout = merge_files("./entitydef", vec!["**/*.xml"],
+                               "./.store/entity_model_files.json", &FileTypes::EntityModel)?;
+        println!("save to {}", zout);
+        Ok(())
+    }
+
+    #[test]
+    fn merge_service_models_works() -> anyhow::Result<()> {
+        let dir = &cc_conf()?.get_ofbiz_root();
+        let zout = merge_files(dir, vec!["**/servicedef/*.xml"],
+                               "./.store/service_model_files.json", &FileTypes::ServiceModel)?;
+        println!("save to {}", zout);
+        Ok(())
+    }
+
+    #[test]
+    fn load_z_works() -> anyhow::Result<()> {
+        let bytes: &[u8] = include_bytes!("fixtures/data_files.jsonz");
+        let data_files = load_z::<DataFiles>(bytes)?;
+        for f in &data_files.files {
+            println!("{}: {}", f.uri, f.path);
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn load_z_file_works() -> anyhow::Result<()> {
+        let bytes = std::fs::read("./.store/data_files.jsonz")?;
+        let data_files = load_z::<DataFiles>(&bytes)?;
+        for f in &data_files.files {
+            println!("{}: {}", f.uri, f.path);
+            println!("\t{:?}", f.items);
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn load_entity_model_z_file_works() -> anyhow::Result<()> {
+        // let bytes =std::fs::read("./.store/entity_model_files.jsonz")?;
+        let bytes = include_bytes!("pkgs/entity_model_files.jsonz");
+        let data_files = load_z::<DataFiles>(bytes)?;
+        let entity_name = "Example";
+        for f in &data_files.files {
+            if f.items.contains(&entity_name.to_string()) {
+                let mut model: EntityModel = load_xml(f.content.as_bytes());
+                model.build();
+                let ent = model.entities.iter()
+                    .filter(|e| e.entity_name == entity_name)
+                    .nth(0);
+                let ent_json = serde_json::to_string_pretty(ent.unwrap())?;
+                println!("{}", ent_json);
             }
         }
-        let vals=Vec::from_iter(self.cached_srvs.values());
-        Ok(vals)
+        Ok(())
     }
 
-    pub fn get_service_model(&mut self, srv_name: &str) -> Result<&ModelService, GenericError> {
-        if !self.cached_srvs.contains_key(srv_name) {
-            for f in &self.data_files.files {
-                if f.items.contains(&srv_name.to_string()) {
-                    // let model: ServiceModel = load_xml(f.content.as_bytes());
-                    let model: ServiceModel = load_xml(f.content.as_bytes());
-                    // let item = model.services.iter()
-                    //     .filter(|e| e.name == srv_name)
-                    //     .nth(0);
-                    // self.cached_srvs.insert(srv_name.to_string(), item.unwrap().clone());
+    #[test]
+    fn model_reader_works() -> anyhow::Result<()> {
+        let mut reader = ModelReader::load()?;
+        let ent = reader.get_entity_model("Example")?;
+        let ent_json = serde_json::to_string_pretty(&ent)?;
+        println!("{}", ent_json);
+        Ok(())
+    }
 
-                    // put all services which defined in this service-model-file into cache
-                    for s in model.services{
-                        self.cached_srvs.insert(s.name.to_string(), s);
-                    }
-                    break;
-                }
+    #[test]
+    fn load_seed_model_z_file_works() -> Result<(), GenericError> {
+        load_seed_model_z_file("Person", |n| {
+            println!("{} ({:?})", n.tag_name().name(), n.range());
+            for attr in n.attributes() {
+                println!("\t{} = {}", attr.name(), attr.value());
             }
-        }
+            true
+        })?;
+        Ok(())
+    }
 
-        if !self.cached_srvs.contains_key(srv_name) {
-            Err(GenericError::NotFound {
-                item_name: srv_name.to_string(),
-                info: "no such service".to_string()
-            })
-        }else{
-            Ok(self.cached_srvs.get(srv_name).unwrap())
-        }
+    #[test]
+    fn load_service_model_z_file_works() -> anyhow::Result<()> {
+        let srv_name = "createExample";
+        let mut sr = ServiceModelReader::new()?;
+        let item = sr.get_service_model(srv_name)?;
+        let json_str = serde_json::to_string_pretty(&item)?;
+        println!("{} => {}", srv_name, json_str);
+        Ok(())
     }
 }
-
-#[test]
-fn load_service_model_z_file_works() -> anyhow::Result<()> {
-    let srv_name = "createExample";
-    let mut sr = ServiceModelReader::new()?;
-    let item = sr.get_service_model(srv_name)?;
-    let json_str = serde_json::to_string_pretty(&item)?;
-    println!("{} => {}", srv_name, json_str);
-    Ok(())
-}
-

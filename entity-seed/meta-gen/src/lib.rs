@@ -24,6 +24,8 @@ extern crate lazy_static;
 #[macro_use] extern crate log;
 #[macro_use]
 extern crate diesel;
+#[macro_use]
+extern crate error_chain;
 
 pub use requests::{SrvResp, SrvErr, SrvDeles, DynamicValue, extract_val};
 pub use service_gen::{ServiceMeta, ParamMode, ModelParam};
@@ -33,6 +35,22 @@ pub use value_objs::{Generator};
 pub use component_descriptor::{ComponentDescriptor, ComponentModel,
                                get_srv};
 pub use resource_gen::{generate_srv_invoker, generate_srv_ent};
+
+error_chain!{
+    types {
+        Error, ErrorKind, ResultExt, Result;
+    }
+    links {}
+    foreign_links {
+        Io(std::io::Error);
+        ParseInt(::std::num::ParseIntError);
+        ParseJson(serde_json::Error);
+        ParseYaml(serde_yaml::Error);
+        GenericErr(seed::GenericError);
+        RequestErr(reqwest::Error);
+        // ConfigTomlErr(toml::de::Error);
+    }
+}
 
 #[cfg(test)]
 mod tests {

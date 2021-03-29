@@ -5,6 +5,7 @@ use tera::{Context, Tera};
 use crate::{DynamicValue, GenericError, SrvResp};
 use deles::delegators::pretty;
 use itertools::Itertools;
+use reqwest::Client;
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Cases{
@@ -65,6 +66,45 @@ impl Cases{
             .map(|&n|n.name.as_ref().unwrap_or(&empty).to_owned())
             .collect::<Vec<String>>();
         child_names
+    }
+}
+
+impl CaseResource{
+    pub async fn request(&self, client:&Client, vars:&str) -> crate::Result<SrvResp<DynamicValue>> {
+        use reqwest::{header, StatusCode as Status};
+
+        // setup vars
+        let mut values:HashMap<String, String>= serde_json::from_str(vars)?;
+        let orders=vec!["ofbiz_base", "ofbiz_rest", "ofbiz_srvs"];
+
+        expand_vars(&mut values, &orders)?;
+        let expand_var=|val| {
+            let mut context = Context::new();
+            context.insert("_", &values);
+            let t = Tera::one_off(val, &context, false).unwrap();
+            t
+        };
+
+        // expand vars and do request
+        let body=self.body.as_ref().unwrap().text.as_str();
+        let req_data:DynamicValue=serde_json::from_str(&expand_var(body))?;
+        debug!("{}", pretty(&req_data));
+
+        let url=self.url.as_ref().unwrap();
+        let token=&expand_var(self.authentication.as_ref().unwrap().token.as_str());
+        debug!("token {}", token);
+        let res = client
+            .post(&expand_var(url.as_str()))
+            .header(header::AUTHORIZATION, format!("Bearer {}", token))
+            .header(header::ACCEPT, "application/json")
+            .json(&req_data)
+            .send()
+            .await?;
+
+        // process response
+        debug!("result -> {} {:?}", res.status(), res);
+        let data = res.json::<SrvResp<DynamicValue>>().await?;
+        Ok(data)
     }
 }
 
@@ -210,8 +250,9 @@ mod lib_tests {
         let item=cases.resources.get(0).unwrap();
         println!("{}", pretty(item));
 
-        // setup vars
         let vars=include_str!("cases/env_vars.json");
+
+        // setup vars
         let mut values:HashMap<String, String>= serde_json::from_str(vars)?;
         let orders=vec!["ofbiz_base", "ofbiz_rest", "ofbiz_srvs"];
 
@@ -229,8 +270,8 @@ mod lib_tests {
         println!("{}", pretty(&req_data));
 
         let mut client = reqwest::ClientBuilder::new()
-        .danger_accept_invalid_certs(true)
-        .build().unwrap();
+            .danger_accept_invalid_certs(true)
+            .build().unwrap();
 
         let url=item.url.as_ref().unwrap();
         let token=&expand_var(item.authentication.as_ref().unwrap().token.as_str());
@@ -249,6 +290,25 @@ mod lib_tests {
         let data = res.json::<SrvResp<DynamicValue>>().await?;
         let data_json = serde_json::to_string_pretty(&data)?;
         println!("data -> {}", data_json);
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn resource_request_works() -> crate::Result<()> {
+        let cases_data=include_str!("cases/Insomnia_2021-03-29.yaml");
+        let cases:Cases=serde_yaml::from_str(cases_data)?;
+        let item=cases.resources.get(0).unwrap();
+        // println!("{}", pretty(item));
+
+        let vars=include_str!("cases/env_vars.json");
+
+        let mut client = reqwest::ClientBuilder::new()
+            .danger_accept_invalid_certs(true)
+            .build().unwrap();
+
+        let resp=item.request(&client, vars).await?;
+        println!("{}", pretty(&resp));
 
         Ok(())
     }

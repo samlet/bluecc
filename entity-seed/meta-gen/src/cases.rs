@@ -15,10 +15,14 @@ pub struct Cases{
 #[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct CaseResource{
+    /// Id representing the resource
     #[serde(rename = "_id", default)]
     pub id: String,
+    /// Resource ID of parent object (folder or workspace)
     pub parent_id: String,
+    /// When the resource was last modified
     pub modified: u64,
+    /// When the resource was created
     pub created: u64,
     pub url: Option<String>,
     pub name: Option<String>,
@@ -78,11 +82,10 @@ impl CaseResource{
         let orders=vec!["ofbiz_base", "ofbiz_rest", "ofbiz_srvs"];
 
         expand_vars(&mut values, &orders)?;
+        let mut context = Context::new();
+        context.insert("_", &values);
         let expand_var=|val| {
-            let mut context = Context::new();
-            context.insert("_", &values);
-            let t = Tera::one_off(val, &context, false).unwrap();
-            t
+            Tera::one_off(val, &context, false).unwrap()
         };
 
         // expand vars and do request
@@ -116,6 +119,19 @@ fn expand_vars(values:&mut HashMap<String, String>, orders:&Vec<&str>) -> Result
         let t = Tera::one_off(val, &context, false)?;
         values.insert(key.to_string(), t.to_owned());
         context.insert("_", &values);  // refresh context
+    }
+    Ok(())
+}
+
+pub fn list_related_srvs(srv_name:&str) -> anyhow::Result<()> {
+    let cases_data = include_str!("cases/cases_ofbiz.yaml");
+    let cases: Cases = serde_yaml::from_str(cases_data)?;
+    let rels=cases.resources.iter()
+        .filter(|r|r.url.is_some() && r.url.as_ref().unwrap().ends_with(srv_name))
+        .collect_vec();
+    for rel in rels{
+        println!("{}", rel.id);
+        println!("{}", rel.body.as_ref().unwrap().text);
     }
     Ok(())
 }
@@ -238,6 +254,21 @@ mod lib_tests {
         let cases_data=include_str!("cases/Insomnia_2021-03-29.yaml");
         let cases:Cases=serde_yaml::from_str(cases_data)?;
         println!("{:?}", cases.get_children_names("ofbiz-srvs"));
+        Ok(())
+    }
+
+    #[test]
+    fn get_related_srvs_works() -> anyhow::Result<()> {
+        let cases_data = include_str!("cases/cases_ofbiz.yaml");
+        let cases: Cases = serde_yaml::from_str(cases_data)?;
+        let srv_name="updatePartyEmailAddress";
+        let rels=cases.resources.iter()
+            .filter(|r|r.url.is_some() && r.url.as_ref().unwrap().ends_with(srv_name))
+            .collect_vec();
+        for rel in rels{
+            println!("{}", rel.id);
+            println!("{}", rel.body.as_ref().unwrap().text);
+        }
         Ok(())
     }
 

@@ -23,6 +23,7 @@ extern crate lazy_static;
 $ cargo run -- srv createExample
 $ meta-cli srv -c createPerson
 $ meta-cli srv -c -e updatePerson
+$ meta-cli srv -c -e updatePartyEmailAddress
 $ cargo run -- call testScv
 $ meta-cli seed Person plain
 $ meta-cli seed Person json-init
@@ -103,7 +104,7 @@ async fn main() -> anyhow::Result<()> {
             let srv_ent_incs=srv.include_auto_attrs();
             let params = srvs.srv_params(name.as_str())?;
 
-            println!("srv-meta {} ({})", name, &srv.engine.yellow());
+            println!("srv-meta {} ({}): \n\t{}", name, &srv.engine.yellow(), &srv.description);
             println!("input params ->");
             if collapse && !srv_ent.is_empty(){
                 println!("\t default entity {} ({})", srv_ent.red().bold(), srv_ent_incs.yellow());
@@ -131,6 +132,9 @@ async fn main() -> anyhow::Result<()> {
             if example{
                 println!("example ->");
                 output_invoke_example(&srv)?;
+
+                println!("cases ->");
+                meta_gen::cases::list_related_srvs(srv.name.as_str())?;
             }
         }
 

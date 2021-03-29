@@ -1,0 +1,815 @@
+_type: export
+__export_format: 4
+__export_date: 2021-03-29T17:48:29.634Z
+__export_source: insomnia.desktop.app:v2021.2.1
+resources:
+  - _id: req_9e13cb7f25fd4a11a02677cc6dc19b83
+    parentId: fld_a8e9067307e0431abf850d91f808e909
+    modified: 1617038320692
+    created: 1617037996423
+    url: "{{ _.ofbiz_srvs }}/createFixedAssetRegistration"
+    name: createFixedAssetRegistration
+    description: testGetFXConversion
+    method: POST
+    body:
+      mimeType: application/json
+      text: |
+        {
+        	"fixedAssetId": "DEMO_VEHICLE_01",
+          "licenseNumber": "123456",
+          "registrationNumber": "abcdef",
+        	"registrationDate": {% now 'millis', '' %},
+        	"fromDate":{{ _.now }}
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+        id: pair_df19d714632e4e50ac3ef6cfb7100196
+    authentication:
+      token: "{{ _.token }}"
+      type: bearer
+    metaSortKey: -1616933319885.9375
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: fld_a8e9067307e0431abf850d91f808e909
+    parentId: fld_42aacac8c5994adb910e70a79acb8ebc
+    modified: 1617037962067
+    created: 1617037962067
+    name: fixed_asset
+    description: ""
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -1617037962067
+    _type: request_group
+  - _id: fld_42aacac8c5994adb910e70a79acb8ebc
+    parentId: fld_dd6b8fc4b71b45f2a7f2cf9fd494de29
+    modified: 1617035923721
+    created: 1617035923721
+    name: accounting
+    description: ""
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -1617035923721
+    _type: request_group
+  - _id: fld_dd6b8fc4b71b45f2a7f2cf9fd494de29
+    parentId: wrk_a0da93b329884d49a389f72e102cc5d8
+    modified: 1617027575055
+    created: 1616933351920
+    name: ofbiz-srvs
+    description: ""
+    environment: {}
+    environmentPropertyOrder: {}
+    metaSortKey: -1616933351920
+    _type: request_group
+  - _id: wrk_a0da93b329884d49a389f72e102cc5d8
+    parentId: null
+    modified: 1531330575115
+    created: 1531330575115
+    name: Insomnia
+    description: ""
+    scope: collection
+    _type: workspace
+  - _id: req_e605e9dce2734bb981fab9deeaf878a5
+    parentId: fld_a8e9067307e0431abf850d91f808e909
+    modified: 1617038922921
+    created: 1617038875579
+    url: "{{ _.ofbiz_srvs }}/createFixedAssetMeter"
+    name: createFixedAssetMeter
+    description: testGetFXConversion
+    method: POST
+    body:
+      mimeType: application/json
+      text: |
+        {
+        	"fixedAssetId": "DEMO_VEHICLE_01",
+          "productMeterTypeId": "ODOMETER",
+          "registrationNumber": "abcdef",
+        	"meterValue": 65,
+        	"readingDate":{{ _.now }}
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+        id: pair_df19d714632e4e50ac3ef6cfb7100196
+    authentication:
+      token: "{{ _.token }}"
+      type: bearer
+    metaSortKey: -1616933319879.6875
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_521e63fb3fff4011b373292330328e6a
+    parentId: fld_a8e9067307e0431abf850d91f808e909
+    modified: 1617038625350
+    created: 1617038581507
+    url: "{{ _.ofbiz_srvs }}/updateFixedAssetRegistration"
+    name: updateFixedAssetRegistration
+    description: testGetFXConversion
+    method: POST
+    body:
+      mimeType: application/json
+      text: |
+        {
+        	"fixedAssetId": "DEMO_VEHICLE_01",
+          "licenseNumber": "updated-123456",
+          "registrationNumber": "updated-abcdef",
+        	"registrationDate": {% now 'millis', '' %},
+        	"fromDate":{{ _.now }}
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+        id: pair_df19d714632e4e50ac3ef6cfb7100196
+    authentication:
+      token: "{{ _.token }}"
+      type: bearer
+    metaSortKey: -1616933319873.4375
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_07d0350675454c26a4da9ff2d6f38bea
+    parentId: fld_a8e9067307e0431abf850d91f808e909
+    modified: 1617038473678
+    created: 1617038445629
+    url: "{{ _.ofbiz_srvs }}/performFindItem"
+    name: find-FixedAssetRegistration
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |
+        {
+        	"entityName":"FixedAssetRegistration",
+        	"inputFields":{
+        		"fixedAssetId": "DEMO_VEHICLE_01"
+        	}
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+        id: pair_df19d714632e4e50ac3ef6cfb7100196
+    authentication:
+      token: "{{ _.token }}"
+      type: bearer
+    metaSortKey: -1616933319835.9375
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_62c50f2465df41de8d4b6c65f7081afc
+    parentId: fld_a8e9067307e0431abf850d91f808e909
+    modified: 1617038972542
+    created: 1617038951987
+    url: "{{ _.ofbiz_srvs }}/performFindItem"
+    name: find-FixedAssetMeter
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |
+        {
+        	"entityName":"FixedAssetMeter",
+        	"inputFields":{
+        		"fixedAssetId": "DEMO_VEHICLE_01",
+        		"productMeterTypeId":"ODOMETER"
+        	}
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+        id: pair_df19d714632e4e50ac3ef6cfb7100196
+    authentication:
+      token: "{{ _.token }}"
+      type: bearer
+    metaSortKey: -1616933318806.4688
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_4d8f39b729c74ecdb2cadfdb9b603e09
+    parentId: fld_8e4b56bf286f4e43b0987dcb98233b3e
+    modified: 1617036387423
+    created: 1617035953051
+    url: "{{ _.ofbiz_srvs }}/getFXConversion"
+    name: getFXConversion
+    description: testGetFXConversion
+    method: POST
+    body:
+      mimeType: application/json
+      text: |
+        {
+        	"uomId":"EUR",
+        	"uomIdTo":"USD"
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+        id: pair_df19d714632e4e50ac3ef6cfb7100196
+    authentication:
+      token: "{{ _.token }}"
+      type: bearer
+    metaSortKey: -1616933326312.75
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: fld_8e4b56bf286f4e43b0987dcb98233b3e
+    parentId: fld_42aacac8c5994adb910e70a79acb8ebc
+    modified: 1617036382374
+    created: 1617036382374
+    name: admin
+    description: ""
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -1617036382374
+    _type: request_group
+  - _id: req_78d0d33f24fc48fcbcc2a50ee8db0226
+    parentId: fld_8e4b56bf286f4e43b0987dcb98233b3e
+    modified: 1617036450481
+    created: 1617036395523
+    url: "{{ _.ofbiz_srvs }}/addPaymentMethodTypeGlAssignment"
+    name: addPaymentMethodTypeGlAssignment
+    description: testGetFXConversion
+    method: POST
+    body:
+      mimeType: application/json
+      text: |
+        {
+        	"paymentMethodTypeId": "GIFT_CARD",
+          "organizationPartyId": "DEMO_COMPANY1",
+          "glAccountId": "999999"
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+        id: pair_df19d714632e4e50ac3ef6cfb7100196
+    authentication:
+      token: "{{ _.token }}"
+      type: bearer
+    metaSortKey: -1616933322044.875
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_b440542f52cd4b7b955504fb76a03423
+    parentId: fld_8e4b56bf286f4e43b0987dcb98233b3e
+    modified: 1617037607431
+    created: 1617037553437
+    url: "{{ _.ofbiz_srvs }}/removePaymentTypeGlAssignment"
+    name: removePaymentTypeGlAssignment
+    description: testGetFXConversion
+    method: POST
+    body:
+      mimeType: application/json
+      text: |
+        {
+        	"paymentTypeId": "COMMISSION_PAYMENT",
+          "organizationPartyId": "DEMO_COMPANY1"
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+        id: pair_df19d714632e4e50ac3ef6cfb7100196
+    authentication:
+      token: "{{ _.token }}"
+      type: bearer
+    metaSortKey: -1616933320977.9062
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_5bfbc95f8eb44dce9b65fce385fe82bc
+    parentId: fld_8e4b56bf286f4e43b0987dcb98233b3e
+    modified: 1617037314007
+    created: 1617037314007
+    url: "{{ _.ofbiz_srvs }}/addPaymentMethodTypeGlAssignment"
+    name: addPaymentMethodTypeGlAssignment_2
+    description: testGetFXConversion
+    method: POST
+    body:
+      mimeType: application/json
+      text: |
+        {
+        	"paymentMethodTypeId": "GIFT_CARD",
+          "organizationPartyId": "DEMO_COMPANY1",
+          "glAccountId": "999999"
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+        id: pair_df19d714632e4e50ac3ef6cfb7100196
+    authentication:
+      token: "{{ _.token }}"
+      type: bearer
+    metaSortKey: -1616933319910.9375
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_67e0ed0d687c467f8149e83e06253d87
+    parentId: fld_8e4b56bf286f4e43b0987dcb98233b3e
+    modified: 1617037529626
+    created: 1617037452394
+    url: "{{ _.ofbiz_srvs }}/performFindItem"
+    name: find-PaymentMethodTypeGlAccount
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |
+        {
+        	"entityName":"PaymentMethodTypeGlAccount",
+        	"inputFields":{
+        		"paymentMethodTypeId": "GIFT_CARD",
+        		"organizationPartyId": "DEMO_COMPANY1"
+        	}
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+        id: pair_df19d714632e4e50ac3ef6cfb7100196
+    authentication:
+      token: "{{ _.token }}"
+      type: bearer
+    metaSortKey: -1616933319860.9375
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_904b5e73ab9546edb210ae2b346fd171
+    parentId: fld_c823302cc66b4dc7a5e52f13a3ef026d
+    modified: 1617039403568
+    created: 1617039392254
+    url: "{{ _.ofbiz_srvs }}/performFindItem"
+    name: find-UserLogin-new
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |
+        {
+        	"entityName":"UserLogin",
+        	"inputFields":{
+        		"userLoginId": "demo.user"
+        	}
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+        id: pair_df19d714632e4e50ac3ef6cfb7100196
+    authentication:
+      token: "{{ _.token }}"
+      type: bearer
+    metaSortKey: -1616933324228.8125
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: fld_c823302cc66b4dc7a5e52f13a3ef026d
+    parentId: fld_fa916b8b6f4340679b20906f04c23516
+    modified: 1617039283653
+    created: 1617039283653
+    name: user_login
+    description: ""
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -1617039283653
+    _type: request_group
+  - _id: fld_fa916b8b6f4340679b20906f04c23516
+    parentId: fld_dd6b8fc4b71b45f2a7f2cf9fd494de29
+    modified: 1616945257541
+    created: 1616945257541
+    name: common
+    description: ""
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -1616945257541
+    _type: request_group
+  - _id: req_6576d4ed0a224ddda39a7071e7f768db
+    parentId: fld_c823302cc66b4dc7a5e52f13a3ef026d
+    modified: 1617039376321
+    created: 1617039322563
+    url: "{{ _.ofbiz_srvs }}/createUserLogin"
+    name: createUserLogin
+    description: testGetFXConversion
+    method: POST
+    body:
+      mimeType: application/json
+      text: |
+        {
+        	"userLoginId":"demo.person",
+        	"enabled":"Y",
+        	"currentPassword":"ofbiz",
+        	"currentPasswordVerify":"ofbiz"
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+        id: pair_df19d714632e4e50ac3ef6cfb7100196
+    authentication:
+      token: "{{ _.token }}"
+      type: bearer
+    metaSortKey: -1616933324178.8125
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_744f09343cf04d62be5dd531e570d808
+    parentId: fld_fa916b8b6f4340679b20906f04c23516
+    modified: 1617004933356
+    created: 1616933369534
+    url: "{{ _.ofbiz_srvs }}/performFindList"
+    name: find-list
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |
+        {
+        	"entityName":"Product",
+        	"viewIndex": 0,
+        	"viewSize": "{{ _.default_view_size }}",
+        	"inputFields":{
+        		"productId": "{{ _.example_product }}"
+        	}
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+        id: pair_df19d714632e4e50ac3ef6cfb7100196
+    authentication:
+      token: "{{ _.token }}"
+      type: bearer
+    metaSortKey: -1616933334848.5
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_68c47de95d3945d7b1c3a042f2cf728b
+    parentId: fld_fa916b8b6f4340679b20906f04c23516
+    modified: 1617037413661
+    created: 1617037402464
+    url: "{{ _.ofbiz_srvs }}/performFindItem"
+    name: find-item
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |
+        {
+        	"entityName":"Product",
+        	"inputFields":{
+        		"productId": "{{ _.example_product }}"
+        	}
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+        id: pair_df19d714632e4e50ac3ef6cfb7100196
+    authentication:
+      token: "{{ _.token }}"
+      type: bearer
+    metaSortKey: -1616933330580.625
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_c9b7aec2d3d4487cbdc35930438204b1
+    parentId: fld_fa916b8b6f4340679b20906f04c23516
+    modified: 1617039230584
+    created: 1617039216223
+    url: "{{ _.ofbiz_srvs }}/performFindItem"
+    name: find-UserLogin
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |
+        {
+        	"entityName":"UserLogin",
+        	"inputFields":{
+        		"userLoginId": "admin"
+        	}
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+        id: pair_df19d714632e4e50ac3ef6cfb7100196
+    authentication:
+      token: "{{ _.token }}"
+      type: bearer
+    metaSortKey: -1616933328446.6875
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_ea6773d4688948f3aeb4a58ee7fea3e7
+    parentId: fld_1fd31a0d9ffd49b681871c0f685c884e
+    modified: 1617038540075
+    created: 1616945227183
+    url: "{{ _.ofbiz_srvs }}/performFindList"
+    name: find-product
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |
+        {
+        	"entityName":"Product",
+        	"viewIndex": 0,
+        	"viewSize": 10,
+        	"inputFields":{
+        		"productId": "GZ-1000"	
+        	}
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+        id: pair_df19d714632e4e50ac3ef6cfb7100196
+    authentication:
+      token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJ1c2VyTG9naW5JZCI6ImFkbWluIiwiaXNzIjoiQXBhY2hlT0ZCaXoiLCJleHAiOjE2MzQ1OTc3NTcsImlhdCI6MTYxNjU5Nzc1N30.Luuf2bK7ZJ8KE_CtsA3iPZ189i-Qbm2qK5r5VfeQcJqIyTKy4DHf2fBAp37W8OtU6SIplwCdnbTMtHuCZ5h8cA
+      type: bearer
+    metaSortKey: -1616944356924.25
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: fld_1fd31a0d9ffd49b681871c0f685c884e
+    parentId: fld_dd6b8fc4b71b45f2a7f2cf9fd494de29
+    modified: 1616945214123
+    created: 1616945214123
+    name: product
+    description: ""
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -1616945214123
+    _type: request_group
+  - _id: req_8c71d3afce99460bba6eb2acaa27cc0f
+    parentId: fld_3776b68a7e654189ab51cc55de33d033
+    modified: 1617039825858
+    created: 1617039806380
+    url: "{{ _.ofbiz_srvs }}/performFindItem"
+    name: find-Party
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |
+        {
+        	"entityName":"Party",
+        	"inputFields":{
+        		"userLoginId": "DemoCustomer"
+        	}
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+        id: pair_df19d714632e4e50ac3ef6cfb7100196
+    authentication:
+      token: "{{ _.token }}"
+      type: bearer
+    metaSortKey: -1616933324203.8125
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: fld_3776b68a7e654189ab51cc55de33d033
+    parentId: fld_dd6b8fc4b71b45f2a7f2cf9fd494de29
+    modified: 1616941785328
+    created: 1616941785328
+    name: party
+    description: ""
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -1616941785328
+    _type: request_group
+  - _id: req_f5657f689be946d2b6d00e48d68127a2
+    parentId: fld_3776b68a7e654189ab51cc55de33d033
+    modified: 1617040032410
+    created: 1617039852019
+    url: "{{ _.ofbiz_srvs }}/updatePartyEmailAddress"
+    name: updatePartyEmailAddress
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |
+        {
+        	"partyId":"DemoCustomer",
+        	"contactMechTypeId":"EMAIL_ADDRESS",
+        	"emailAddress":"ofbiztest@example.com",
+        	"contactMechId":"9026"
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+        id: pair_df19d714632e4e50ac3ef6cfb7100196
+    authentication:
+      token: "{{ _.token }}"
+      type: bearer
+    metaSortKey: -1616933324191.3125
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_90037661651041c285b0a438fdaec24b
+    parentId: fld_3776b68a7e654189ab51cc55de33d033
+    modified: 1617040044545
+    created: 1617039998693
+    url: "{{ _.ofbiz_srvs }}/createPartyEmailAddress"
+    name: createPartyEmailAddress
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |
+        {
+        	"partyId":"DemoCustomer",
+        	"contactMechTypeId":"EMAIL_ADDRESS",
+        	"emailAddress":"ofbiztest@example.com",
+        	"contactMechId":"9026"
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+        id: pair_df19d714632e4e50ac3ef6cfb7100196
+    authentication:
+      token: "{{ _.token }}"
+      type: bearer
+    metaSortKey: -1616933324185.0625
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: env_649ba01cd7264f5cb5f4fcae285ffc65
+    parentId: wrk_a0da93b329884d49a389f72e102cc5d8
+    modified: 1617027629500
+    created: 1531330575160
+    name: New Environment
+    data:
+      ofbiz_base: https://localhost:8443
+      ofbiz_rest: "{{ _.ofbiz_base }}/rest"
+      ofbiz_srvs: "{{ _.ofbiz_rest }}/services"
+    dataPropertyOrder:
+      "&":
+        - ofbiz_base
+        - ofbiz_rest
+        - ofbiz_srvs
+    color: null
+    isPrivate: false
+    metaSortKey: 1617004369147
+    _type: environment
+  - _id: jar_c6b6832e1fe343a0beb7c6ce3fb40961
+    parentId: wrk_a0da93b329884d49a389f72e102cc5d8
+    modified: 1548753690853
+    created: 1531330575239
+    name: Default Jar
+    cookies:
+      - creation: 2019-01-15T11:38:27.646Z
+        domain: localhost
+        expires: 2020-01-17T17:18:22.000Z
+        hostOnly: true
+        id: "48154485234931066"
+        key: csrftoken
+        lastAccessed: 2019-01-18T17:18:22.749Z
+        maxAge: 31449600
+        path: /
+        value: m5SZ9gwFxtQHwwJ56P1oqfcV08S0vmRZeA5Oxfg5Sa35UeE5X3EBFwS2597b6ygY
+      - creation: 2019-01-29T09:21:30.852Z
+        domain: typicode.com
+        expires: 2020-01-29T09:21:30.000Z
+        hostOnly: false
+        httpOnly: true
+        id: "027063079838645976"
+        key: __cfduid
+        lastAccessed: 2019-01-29T09:21:30.852Z
+        path: /
+        value: d119e5d6b9b56340c9681e64471a1819c1548753690
+    _type: cookie_jar
+  - _id: spc_798c0435f860485082bcd5b1d3c24bf9
+    parentId: wrk_a0da93b329884d49a389f72e102cc5d8
+    modified: 1601390470758
+    created: 1601390470758
+    fileName: Insomnia
+    contents: ""
+    contentType: yaml
+    _type: api_spec
+  - _id: env_eeeae01955a2448e92eb3aff3f61f45d
+    parentId: env_649ba01cd7264f5cb5f4fcae285ffc65
+    modified: 1617027623062
+    created: 1617004648585
+    name: common-sets
+    data:
+      default_view_size: 15
+      now: "{% now 'millis', '' %}"
+      token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJ1c2VyTG9naW5JZCI6ImFkbWluIiwiaXNzIjoiQXBhY2hlT0ZCaXoiLCJleHAiOjE2MzQ1OTc3NTcsImlhdCI6MTYxNjU5Nzc1N30.Luuf2bK7ZJ8KE_CtsA3iPZ189i-Qbm2qK5r5VfeQcJqIyTKy4DHf2fBAp37W8OtU6SIplwCdnbTMtHuCZ5h8cA
+      example_product: GZ-1000
+    dataPropertyOrder:
+      "&":
+        - default_view_size
+        - now
+        - token
+        - example_product
+    color: null
+    isPrivate: false
+    metaSortKey: 1617004648585
+    _type: environment

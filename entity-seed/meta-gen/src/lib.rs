@@ -15,7 +15,7 @@ mod resource_gen;
 mod srv_example;
 mod srv_finders;
 mod resources;
-mod cases;
+pub mod cases;
 
 #[macro_use]
 extern crate serde_derive;

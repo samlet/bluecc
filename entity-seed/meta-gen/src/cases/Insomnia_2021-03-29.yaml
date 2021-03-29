@@ -1,0 +1,189 @@
+_type: export
+__export_format: 4
+__export_date: 2021-03-29T08:03:29.357Z
+__export_source: insomnia.desktop.app:v2021.2.1
+resources:
+  - _id: req_744f09343cf04d62be5dd531e570d808
+    parentId: fld_fa916b8b6f4340679b20906f04c23516
+    modified: 1617004933356
+    created: 1616933369534
+    url: "{{ _.ofbiz_srvs }}/performFindList"
+    name: find-list
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |
+        {
+        	"entityName":"Product",
+        	"viewIndex": 0,
+        	"viewSize": "{{ _.default_view_size }}",
+        	"inputFields":{
+        		"productId": "{{ _.example_product }}"
+        	}
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+        id: pair_df19d714632e4e50ac3ef6cfb7100196
+    authentication:
+      token: "{{ _.token }}"
+      type: bearer
+    metaSortKey: -1616933334848.5
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: fld_fa916b8b6f4340679b20906f04c23516
+    parentId: fld_dd6b8fc4b71b45f2a7f2cf9fd494de29
+    modified: 1616945257541
+    created: 1616945257541
+    name: common
+    description: ""
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -1616945257541
+    _type: request_group
+  - _id: fld_dd6b8fc4b71b45f2a7f2cf9fd494de29
+    parentId: wrk_a0da93b329884d49a389f72e102cc5d8
+    modified: 1617004869165
+    created: 1616933351920
+    name: ofbiz-srvs
+    description: ""
+    environment:
+      ofbiz_srvs: "{{ _.ofbiz_rest }}/services"
+      token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJ1c2VyTG9naW5JZCI6ImFkbWluIiwiaXNzIjoiQXBhY2hlT0ZCaXoiLCJleHAiOjE2MzQ1OTc3NTcsImlhdCI6MTYxNjU5Nzc1N30.Luuf2bK7ZJ8KE_CtsA3iPZ189i-Qbm2qK5r5VfeQcJqIyTKy4DHf2fBAp37W8OtU6SIplwCdnbTMtHuCZ5h8cA
+      default_view_size: 15
+      example_product: GZ-1000
+    environmentPropertyOrder:
+      "&":
+        - ofbiz_srvs
+        - token
+        - default_view_size
+        - example_product
+    metaSortKey: -1616933351920
+    _type: request_group
+  - _id: wrk_a0da93b329884d49a389f72e102cc5d8
+    parentId: null
+    modified: 1531330575115
+    created: 1531330575115
+    name: Insomnia
+    description: ""
+    scope: collection
+    _type: workspace
+  - _id: req_ea6773d4688948f3aeb4a58ee7fea3e7
+    parentId: fld_1fd31a0d9ffd49b681871c0f685c884e
+    modified: 1616945240634
+    created: 1616945227183
+    url: https://localhost:8443/rest/services/performFindList
+    name: find-product
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |
+        {
+        	"entityName":"Product",
+        	"viewIndex": 0,
+        	"viewSize": 10,
+        	"inputFields":{
+        		"productId": "GZ-1000"	
+        	}
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+        id: pair_df19d714632e4e50ac3ef6cfb7100196
+    authentication:
+      token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJ1c2VyTG9naW5JZCI6ImFkbWluIiwiaXNzIjoiQXBhY2hlT0ZCaXoiLCJleHAiOjE2MzQ1OTc3NTcsImlhdCI6MTYxNjU5Nzc1N30.Luuf2bK7ZJ8KE_CtsA3iPZ189i-Qbm2qK5r5VfeQcJqIyTKy4DHf2fBAp37W8OtU6SIplwCdnbTMtHuCZ5h8cA
+      type: bearer
+    metaSortKey: -1616944356924.25
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: fld_1fd31a0d9ffd49b681871c0f685c884e
+    parentId: fld_dd6b8fc4b71b45f2a7f2cf9fd494de29
+    modified: 1616945214123
+    created: 1616945214123
+    name: product
+    description: ""
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -1616945214123
+    _type: request_group
+  - _id: env_649ba01cd7264f5cb5f4fcae285ffc65
+    parentId: wrk_a0da93b329884d49a389f72e102cc5d8
+    modified: 1617004410040
+    created: 1531330575160
+    name: New Environment
+    data:
+      ofbiz_base: https://localhost:8443
+      ofbiz_rest: "{{ _.ofbiz_base }}/rest"
+    dataPropertyOrder:
+      "&":
+        - ofbiz_base
+        - ofbiz_rest
+    color: null
+    isPrivate: false
+    metaSortKey: 1617004369147
+    _type: environment
+  - _id: jar_c6b6832e1fe343a0beb7c6ce3fb40961
+    parentId: wrk_a0da93b329884d49a389f72e102cc5d8
+    modified: 1548753690853
+    created: 1531330575239
+    name: Default Jar
+    cookies:
+      - creation: 2019-01-15T11:38:27.646Z
+        domain: localhost
+        expires: 2020-01-17T17:18:22.000Z
+        hostOnly: true
+        id: "48154485234931066"
+        key: csrftoken
+        lastAccessed: 2019-01-18T17:18:22.749Z
+        maxAge: 31449600
+        path: /
+        value: m5SZ9gwFxtQHwwJ56P1oqfcV08S0vmRZeA5Oxfg5Sa35UeE5X3EBFwS2597b6ygY
+      - creation: 2019-01-29T09:21:30.852Z
+        domain: typicode.com
+        expires: 2020-01-29T09:21:30.000Z
+        hostOnly: false
+        httpOnly: true
+        id: "027063079838645976"
+        key: __cfduid
+        lastAccessed: 2019-01-29T09:21:30.852Z
+        path: /
+        value: d119e5d6b9b56340c9681e64471a1819c1548753690
+    _type: cookie_jar
+  - _id: spc_798c0435f860485082bcd5b1d3c24bf9
+    parentId: wrk_a0da93b329884d49a389f72e102cc5d8
+    modified: 1601390470758
+    created: 1601390470758
+    fileName: Insomnia
+    contents: ""
+    contentType: yaml
+    _type: api_spec
+  - _id: env_eeeae01955a2448e92eb3aff3f61f45d
+    parentId: env_649ba01cd7264f5cb5f4fcae285ffc65
+    modified: 1617004680214
+    created: 1617004648585
+    name: common-sets
+    data:
+      default_view_size: 10
+    dataPropertyOrder:
+      "&":
+        - default_view_size
+    color: null
+    isPrivate: false
+    metaSortKey: 1617004648585
+    _type: environment

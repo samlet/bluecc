@@ -18,6 +18,8 @@ use itertools::Itertools;
 #[macro_use]
 extern crate lazy_static;
 #[macro_use] extern crate log;
+#[macro_use]
+extern crate serde_derive;
 
 /*
 $ cargo run -- srv createExample
@@ -34,6 +36,7 @@ $ meta-cli rels -i Budget
 $ meta-cli rels -i -s Position
 $ meta-cli resource createExample
 $ meta-cli resource findProductByIdCc plugins/adapters
+$ meta-cli meta Person
  */
 
 #[derive(StructOpt)]
@@ -56,6 +59,10 @@ enum Command {
     Entity {
         name: String,
         template: String,
+    },
+    /// Display entity meta
+    Meta {
+        name: String,
     },
     /// Call service
     Call { name: String},
@@ -271,6 +278,26 @@ async fn main() -> anyhow::Result<()> {
                 generate_srv_ent(&mut handle, &entity)?;
             }
             generate_srv_invoker(&mut handle, &srv, &ents)?;
+        }
+
+        Some(Command::Meta { name }) => {
+            let entity=seed::get_entity_model(name.as_str())?;
+            println!("entity {}", name);
+            #[derive(Debug, Deserialize, Serialize, Clone)]
+            struct FieldMeta{
+                field_name: String,
+                field_type: String,
+                field_info: String,
+            }
+            let fld_list=entity.fields.iter()
+                .map(|f|FieldMeta{
+                    field_name: f.field_name.to_owned(),
+                    field_type: f.field_type.to_owned(),
+                    field_info: if f.is_primary {"pk".to_string()} else {"_".to_string()},
+                })
+                .collect_vec();
+            deles::delegators::render(&fld_list)?;
+            deles::delegators::render(&entity.belongs())?;
         }
 
         None => {

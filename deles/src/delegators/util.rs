@@ -49,7 +49,9 @@ pub fn render_table(values: &Vec<DynamicValue>) {
         let mut row=Vec::new();
         let rec=&r.values;
         for &col in &cols{
-            row.push(rec.get(col).unwrap());
+            let val= rec.get(col).unwrap();
+            let sval:String=if val.is_string(){val.as_str().unwrap().to_string()} else{ val.to_string()};
+            row.push(sval);
         }
         table.add_row(row);
     }

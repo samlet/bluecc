@@ -16,6 +16,7 @@ impl ServiceMeta{
         Ok(ServiceMeta {
             service_reader: ServiceModelReader::new()?,
             entity_reader: ModelReader::load()?,
+            // entity_reader: seed::APP_CONTEXT.reader,
         })
     }
 

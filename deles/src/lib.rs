@@ -28,6 +28,7 @@ error_chain!{
         ParseBigDecimalErr(bigdecimal::ParseBigDecimalError);
         ParseDateTimeErr(chrono::ParseError);
         ParseFloatErr(std::num::ParseFloatError);
+        ParseXmlErr(serde_xml_rs::Error);
         DatabaseErr(quaint::error::Error);
     }
 }

@@ -35,6 +35,7 @@ toml = "0.5.8"
 comfy-table = "1"
 csv = "1.1"
 roxmltree = "0.14.0"
+serde-xml-rs = { git = "https://github.com/tobz1000/serde-xml-rs", branch = "out-of-order-elements", package = "serde-xml-rs" }
 
 [dependencies.quaint]
 git = "https://github.com/prisma/quaint"

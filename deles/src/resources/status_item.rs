@@ -4,6 +4,7 @@ use chrono::{DateTime, Utc};
 use quaint::{prelude::*, ast::*, single::Quaint,
              connector::{Queryable, TransactionCapable},
 };
+use serde_json::json;
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct StatusItem{
@@ -36,6 +37,9 @@ mod lib_tests {
     use bigdecimal::BigDecimal;
     use std::str::FromStr;
     use inflector::Inflector;
+    use crate::delegators::get_values_from_node;
+    use std::collections::HashMap;
+    use crate::delegators::values::get_values_from_map;
 
     // $ bluecc seed -s StatusItem
     /*
@@ -78,43 +82,19 @@ mod lib_tests {
         let raw=r#"<StatusItem description="In Design" sequenceId="01" statusCode="IN_DESIGN" statusId="EXST_IN_DESIGN" statusTypeId="EXAMPLE_STATUS"/>"#;
         let val_obj:StatusItemSeed=seed::load_xml(raw.as_bytes());
         println!("{}", pretty(&val_obj));
+        let xml=serde_xml_rs::to_string(&val_obj)?;
+        println!("{}", xml);
         Ok(())
     }
 
     #[tokio::test]
     async fn store_from_xml_works() -> crate::Result<()> {
-        use chrono::format::strftime::StrftimeItems;
-        use chrono::{DateTime, TimeZone, NaiveDateTime, Utc};
-
-        let parse_dt=NaiveDateTime::parse_from_str;
-
-        let raw=r#"<StatusItem description="In Design" sequenceId="01" statusCode="IN_DESIGN" statusId="EXST_IN_DESIGN" statusTypeId="EXAMPLE_STATUS"/>"#;
+        let raw=r#"<StatusItem description="In Design" sequenceId="01"
+            statusCode="IN_DESIGN" statusId="bluecc_IN_DESIGN"
+            statusTypeId="EXAMPLE_STATUS"/>"#;
         let doc = roxmltree::Document::parse(raw).unwrap();
         let node=doc.root_element();
-        let meta=seed::get_entity_model("StatusItem")?;
-        let mut cols=Vec::new();
-        let mut store_values=Vec::new();
-        for f in node.attributes().iter(){
-            let fld_val=f.value();
-            let fld_name=f.name();
-            cols.push(fld_name.to_snake_case());
-            let fld=meta.get_field(fld_name).expect("field-model");
-            let store_val=match fld.field_type.as_str() {
-                "date-time" => {quaint::Value::datetime(
-                    DateTime::<Utc>::from_utc(
-                        parse_dt(fld_val, "%Y-%m-%d %H:%M:%S")?, Utc))}
-                "date" => {quaint::Value::date(NaiveDate::parse_from_str(fld_val, "%Y-%m-%d")?)}
-                "time" => {quaint::Value::time(NaiveTime::parse_from_str(fld_val, "%H:%M:%S")?)}
-                "blob"|"byte-array" => {quaint::Value::bytes(fld_val.as_bytes())}
-                "currency-amount" | "currency-precise" | "fixed-point"=>
-                    {quaint::Value::numeric(BigDecimal::from_str(fld_val)?)}
-                "floating-point" => {quaint::Value::double(fld_val.parse()?)}
-                "integer" | "numeric" => {quaint::Value::integer(fld_val.parse::<i64>()?)}
-                "indicator" => {quaint::Value::character(fld_val.chars().next().unwrap())}
-                _ => {quaint::Value::text(fld_val)}
-            };
-            store_values.push(store_val);
-        }
+        let (cols, store_values)=get_values_from_node(&node)?;
 
         println!("{:?}", cols);
         println!("{:?}", store_values);
@@ -138,6 +118,25 @@ mod lib_tests {
                     "createdTxStamp".to_snake_case()
                 ])).await?;
         println!("res: {:?}", res);
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn store_from_obj_works() -> crate::Result<()> {
+        let json_vals:HashMap<String,serde_json::Value>= serde_json::from_value(json!({
+                      "statusId": "new_EXST_IN_DESIGN",
+                      "statusTypeId": "EXAMPLE_STATUS",
+                      "statusCode": "IN_DESIGN",
+                      "sequenceId": "01",
+                      "description": "In Design"
+                }))?;
+        let (cols,vals)=get_values_from_map(&json_vals)?;
+        println!("{:?} -> \n{:?}", cols, vals);
+
+        let delegator = Delegator::new().await?;
+        let changes = delegator.store("StatusItem", &json_vals).await?;
+        println!("changes: {}", changes);
 
         Ok(())
     }

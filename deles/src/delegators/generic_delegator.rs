@@ -5,6 +5,8 @@ use quaint::{prelude::*, ast::*, single::Quaint,
 use seed::GenericError;
 use inflector::Inflector;
 use serde::de::DeserializeOwned;
+use std::collections::HashMap;
+use crate::delegators::values::get_values_from_map;
 
 // The query parameters
 #[derive(Debug, Deserialize)]
@@ -86,6 +88,17 @@ impl Delegator{
         let result = self.conn.select(query).await?;
         let r=self.wrap_result::<T>(result).await?;
         Ok(r)
+    }
+
+    pub async fn store(&self, ent_name: &str, values: &HashMap<String,serde_json::Value>) -> crate::Result<u64> {
+        let (cols,vals)=get_values_from_map(values)?;
+        let table=ent_name.to_snake_case();
+        let insert: Insert<'_> = Insert::multi_into(table, cols)
+            .values(vals).into();
+        let changes = self.conn.execute(
+            insert.on_conflict(OnConflict::DoNothing).into()).await?;
+
+        Ok(changes)
     }
 }
 

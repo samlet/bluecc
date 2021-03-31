@@ -1,6 +1,6 @@
 use std::collections::{HashSet, HashMap};
 use std::collections::hash_map::RandomState;
-use chrono::NaiveDateTime;
+use chrono::{NaiveDateTime, NaiveDate};
 use roxmltree::Node;
 use crate::DynamicValue;
 use deles::delegators::pretty;
@@ -56,8 +56,11 @@ pub fn process_seed(xml_str: &str) -> crate::Result<Vec<SeedValue>> {
                 if mod_fld.is_dt_type() {
                     if let Ok(dt)=parse_dt(f.value(), "%Y-%m-%d %H:%M:%S%.f") {
                         fld_val = dt.format_with_items(fmt.clone()).to_string().into();
+                    }else if let Ok(_dt)=NaiveDate::parse_from_str(f.value(), "%Y-%m-%d") {
+                        // just a check, leave it as string value
                     }else{
                         // leave it as string value
+                        warn!("cannot parse date-time value {}", f.value());
                     }
                 } else if mod_fld.is_num_type() {
                     fld_val = Value::Number(f.value().parse().unwrap());
@@ -68,6 +71,8 @@ pub fn process_seed(xml_str: &str) -> crate::Result<Vec<SeedValue>> {
                         _ => Value::Bool(false)
                     };
                 }
+            }else{
+                warn!("no field {} in entity {}", fld_name, node_name);
             }
 
             (fld_name.to_string(), fld_val)

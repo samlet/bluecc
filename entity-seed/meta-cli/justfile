@@ -8,4 +8,14 @@ ink ent:
 install:
 	cargo install --path . --offline
 
+info ent:
+    cargo run -- meta {{ent}} 
+    cargo run -- rels -i -s {{ent}} 
 
+gen-seed:
+    cargo run -- convert {{env_var("HOME")}}/ofbiz/applications/datamodel/data/demo/AccountingDemoData.xml
+    cargo run -- convert {{env_var("HOME")}}/ofbiz/applications/datamodel/data/demo/ContentDemoData.xml
+
+dirs:
+    echo {{env_var("HOME")}}
+    echo {{invocation_directory()}}

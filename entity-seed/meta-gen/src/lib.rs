@@ -16,6 +16,7 @@ mod srv_example;
 mod srv_finders;
 mod resources;
 pub mod cases;
+mod xml_seed;
 
 #[macro_use]
 extern crate serde_derive;
@@ -35,6 +36,7 @@ pub use value_objs::{Generator};
 pub use component_descriptor::{ComponentDescriptor, ComponentModel,
                                get_srv};
 pub use resource_gen::{generate_srv_invoker, generate_srv_ent};
+pub use xml_seed::{process_seed};
 
 error_chain!{
     types {
@@ -48,6 +50,7 @@ error_chain!{
         ParseYaml(serde_yaml::Error);
         GenericErr(seed::GenericError);
         RequestErr(reqwest::Error);
+        XmlTreeErr(roxmltree::Error);
         // ConfigTomlErr(toml::de::Error);
     }
 }

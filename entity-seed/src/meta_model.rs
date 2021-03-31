@@ -95,6 +95,8 @@ pub struct ModelField{
 }
 
 const DT_FIELD: [&'static str; 3] = ["date-time", "date", "time"];
+const NUM_FIELD: [&'static str; 6] = ["currency-amount", "currency-precise",
+    "fixed-point", "floating-point", "integer", "numeric"];
 impl ModelField{
     pub fn is_id_type(&self) -> bool{
         self.field_type.starts_with("id")
@@ -102,6 +104,10 @@ impl ModelField{
 
     pub fn is_dt_type(&self) -> bool{
         DT_FIELD.contains(&self.field_type.as_str())
+    }
+
+    pub fn is_num_type(&self) -> bool{
+        NUM_FIELD.contains(&self.field_type.as_str())
     }
 }
 

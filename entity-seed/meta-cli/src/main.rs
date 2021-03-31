@@ -14,6 +14,8 @@ use serde_json::Value;
 use roxmltree::Node;
 use crate::generator::MetaGenerator;
 use itertools::Itertools;
+use deles::delegators::pretty;
+use std::path::PathBuf;
 
 #[macro_use]
 extern crate lazy_static;
@@ -94,11 +96,15 @@ enum Command {
         #[structopt(default_value = "_")]
         component: String
     },
+    /// Convert xml format resource to json format
+    Convert {
+        file: String,
+    },
 }
 
 #[tokio::main]
 #[paw::main]
-async fn main() -> anyhow::Result<()> {
+async fn main() -> meta_gen::Result<()> {
     std::env::set_var("RUST_LOG", "info,entity_seed=info,meta_gen=info");
     env_logger::init();
 
@@ -124,7 +130,8 @@ async fn main() -> anyhow::Result<()> {
                         continue; // skip the parameter if collapse
                     }
                 }
-                println!("\t {}: {}/{} ({:?},{})", f.name.black().bold(),
+                println!("\t {}: {}/{} ({:?},{})",
+                         if f.entity_name.is_none() {f.name.black().bold().underline()} else {f.name.italic()},
                          f.type_name, ptype, f.mode,
                          if f.optional { "optional".yellow() } else { "required".blue().bold() });
             }
@@ -298,6 +305,18 @@ async fn main() -> anyhow::Result<()> {
                 .collect_vec();
             deles::delegators::render(&fld_list)?;
             deles::delegators::render(&entity.belongs())?;
+        }
+
+        Some(Command::Convert { file }) => {
+            use std::fs;
+            let path=PathBuf::from(file);
+            let cnt=fs::read_to_string(path.as_path())?;
+            let rs=meta_gen::process_seed(cnt.as_str())?;
+            // println!("{}", pretty(&rs));
+            let output:PathBuf=PathBuf::from(".store").join(path.file_name().unwrap())
+                .with_extension("json");
+            println!("export to: {}", output.display());
+            fs::write(output.as_path(), pretty(&rs))?;
         }
 
         None => {

@@ -123,7 +123,7 @@ fn expand_vars(values:&mut HashMap<String, String>, orders:&Vec<&str>) -> Result
     Ok(())
 }
 
-pub fn list_related_srvs(srv_name:&str) -> anyhow::Result<()> {
+pub fn list_related_srvs(srv_name:&str) -> crate::Result<()> {
     let cases_data = include_str!("cases/cases_ofbiz.yaml");
     let cases: Cases = serde_yaml::from_str(cases_data)?;
     let rels=cases.resources.iter()

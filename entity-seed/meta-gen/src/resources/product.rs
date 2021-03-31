@@ -189,3 +189,18 @@ const CREATE_PRODUCT: &'static str = "createProduct";
 pub struct CreateProductResp {
     pub product_id: Option<String>,
 }
+
+#[cfg(test)]
+mod lib_tests {
+    use super::*;
+    use deles::delegators::pretty;
+
+    #[test]
+    fn xml_works() -> anyhow::Result<()> {
+        let raw=r#"<Product productId="WG-9943" productTypeId="FINISHED_GOOD"/>"#;
+        let prod:Product=serde_xml_rs::from_str(raw)?;
+        println!("{}", pretty(&prod));
+        Ok(())
+    }
+}
+

@@ -5,6 +5,7 @@ members = [
 	"cc-types",
 	"cc-pipes",
 	"cc-data-srv",
+	"cc-agent",
 	"deles",
     "contracts/cc_common",
     "entity-seed/meta-gen",

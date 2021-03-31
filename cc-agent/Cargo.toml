@@ -1,5 +1,5 @@
 [package]
-name = "cc-data-srv"
+name = "cc-agent"
 version = "0.1.0"
 authors = ["Samlet Wu <xiaofei.wu@gmail.com>"]
 edition = "2018"
@@ -7,8 +7,6 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-deles = { package="deles", version = "0.1.0",  path = "../deles"}
-
 log = "0.4"
 env_logger = "0.8.3"
 anyhow = "1.0"
@@ -24,13 +22,11 @@ serde = "1.0"
 serde_json = "1.0.11"
 serde_derive = "1.0"
 chrono = { version = "0.4.0", features = ["serde"] }
-# bigdecimal = { version = ">= 0.0.10, < 0.2.0", features=["serde"] }
-bigdecimal = { version = "0.2", features=["serde"] }
 
-tokio = { version = "1", features = ["macros", "full"] }
-warp = "0.3"
+reqwest = { version = "0.11", features = ["json", "blocking"] }
+tokio = { version = "1", features = ["macros", "time"] }
 
-[dependencies.quaint]
-git = "https://github.com/prisma/quaint"
-branch = "master"
-features=["serde-support", "postgresql", "pooled", "bigdecimal", "json"]
+dotenv = "0.10.0"
+toml = "0.5.8"
+comfy-table = "1"
+

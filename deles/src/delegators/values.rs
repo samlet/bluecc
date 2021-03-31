@@ -42,7 +42,7 @@ pub enum AttrValue<'a> {
     Time(Option<NaiveTime>),
 }
 
-pub fn convert_value<'a>(val: &'a serde_json::Value) -> crate::Result<Option<quaint::Value<'a>>>{
+pub fn convert_value(val: &serde_json::Value) -> crate::Result<Option<quaint::Value>> {
     let res=match val{
         Value::Null => {None}
         Value::Bool(v) => {Some(quaint::Value::boolean(v.to_owned()))}
@@ -101,8 +101,8 @@ pub fn get_values_from_node<'a>(node: &'a roxmltree::Node) -> crate::Result<(Vec
     Ok((cols, store_values))
 }
 
-pub fn get_values_from_map<'a>(map_vals:&'a HashMap<String,serde_json::Value>)
-    -> crate::Result<(Vec<String>, Vec<quaint::Value<'a>>)> {
+pub fn get_values_from_map(map_vals: &HashMap<String, serde_json::Value>)
+                           -> crate::Result<(Vec<String>, Vec<quaint::Value>)> {
     // let meta=seed::get_entity_model(ent_name)?;
     let mut cols=Vec::new();
     let mut store_values=Vec::new();
@@ -111,6 +111,21 @@ pub fn get_values_from_map<'a>(map_vals:&'a HashMap<String,serde_json::Value>)
         // let fld=meta.get_field(fld_name).expect("field-model");
         // let store_val=convert_field_value(fld.field_type.as_str(), fld_val.to_owned())?;
         let store_val=convert_value(f)?.unwrap();
+        store_values.push(store_val);
+    }
+
+    Ok((cols, store_values))
+}
+
+pub fn get_values_from_string_map(ent_name: &str, map_vals: HashMap<String, String>)
+                           -> crate::Result<(Vec<String>, Vec<quaint::Value>)> {
+    let meta=seed::get_entity_model(ent_name)?;
+    let mut cols=Vec::new();
+    let mut store_values=Vec::new();
+    for (fld_name, fld_val) in map_vals{
+        cols.push(fld_name.to_snake_case());
+        let fld=meta.get_field(fld_name.as_str()).expect("field-model");
+        let store_val=convert_field_value(fld.field_type.as_str(), fld_val.to_owned())?;
         store_values.push(store_val);
     }
 

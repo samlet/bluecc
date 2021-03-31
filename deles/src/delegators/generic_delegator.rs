@@ -6,7 +6,8 @@ use seed::GenericError;
 use inflector::Inflector;
 use serde::de::DeserializeOwned;
 use std::collections::HashMap;
-use crate::delegators::values::get_values_from_map;
+use crate::delegators::values::{get_values_from_map, get_values_from_string_map};
+use crate::delegators::get_values_from_node;
 
 // The query parameters
 #[derive(Debug, Deserialize)]
@@ -92,6 +93,15 @@ impl Delegator{
 
     pub async fn store(&self, ent_name: &str, values: &HashMap<String,serde_json::Value>) -> crate::Result<u64> {
         let (cols,vals)=get_values_from_map(values)?;
+        self.inner_store(ent_name, cols, vals).await
+    }
+
+    pub async fn store_string_map(&self, ent_name: &str, values: HashMap<String,String>) -> crate::Result<u64> {
+        let (cols,vals)=get_values_from_string_map(ent_name, values)?;
+        self.inner_store(ent_name, cols, vals).await
+    }
+
+    pub async fn inner_store<'a>(&self, ent_name: &str, cols:Vec<String>, vals:Vec<quaint::Value<'a>>) -> crate::Result<u64> {
         let table=ent_name.to_snake_case();
         let insert: Insert<'_> = Insert::multi_into(table, cols)
             .values(vals).into();

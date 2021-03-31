@@ -3,6 +3,41 @@ use serde_json::json;
 use bigdecimal::BigDecimal;
 use std::convert::TryFrom;
 use crate::GenericError;
+use std::borrow::Cow;
+use chrono::{DateTime, Utc, NaiveDate, NaiveTime};
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum AttrValue<'a> {
+    Null,
+    /// 64-bit signed integer.
+    Integer(i64),
+    /// 32-bit floating point.
+    Float(f32),
+    /// 64-bit floating point.
+    Double(f64),
+    /// String value.
+    Text(String),
+    /// Bytes value.
+    Bytes(Cow<'a, [u8]>),
+    /// Boolean value.
+    Boolean(bool),
+    /// A single character
+    Char(char),
+    /// An array value
+    Array(Vec<AttrValue<'a>>),
+    /// A numeric value.
+    Numeric(BigDecimal),
+    /// A JSON value.
+    Json(serde_json::Value),
+    /// A XML value.
+    Xml(String),
+    /// A datetime value.
+    DateTime(Option<DateTime<Utc>>),
+    /// A date value.
+    Date(Option<NaiveDate>),
+    /// A time value.
+    Time(Option<NaiveTime>),
+}
 
 pub fn convert_value<'a>(val:serde_json::Value) -> crate::Result<Option<quaint::Value<'a>>>{
     let res=match val{

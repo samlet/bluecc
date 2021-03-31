@@ -26,6 +26,9 @@ error_chain!{
         GenericErr(seed::GenericError);
         RequestErr(reqwest::Error);
         ParseBigDecimalErr(bigdecimal::ParseBigDecimalError);
+        ParseDateTimeErr(chrono::ParseError);
+        ParseFloatErr(std::num::ParseFloatError);
+        DatabaseErr(quaint::error::Error);
     }
 }
 

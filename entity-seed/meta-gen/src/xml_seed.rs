@@ -27,6 +27,10 @@ pub struct SeedValue {
 pub fn process_seed(xml_str: &str) -> crate::Result<Vec<SeedValue>> {
     use chrono::format::strftime::StrftimeItems;
     use serde_json::Value;
+    use crate::META_CONF;
+
+    let trans_indicator=META_CONF.xml_seed.translate_indicator;
+    let trans_dt=META_CONF.xml_seed.translate_date_time;
 
     let parse_dt = NaiveDateTime::parse_from_str;
     let fmt = StrftimeItems::new("%Y-%m-%dT%H:%M:%S");
@@ -54,22 +58,26 @@ pub fn process_seed(xml_str: &str) -> crate::Result<Vec<SeedValue>> {
             let opt_fld=mod_ent.get_field(fld_name);
             if let Some(mod_fld)=opt_fld {
                 if mod_fld.is_dt_type() {
-                    if let Ok(dt)=parse_dt(f.value(), "%Y-%m-%d %H:%M:%S%.f") {
-                        fld_val = dt.format_with_items(fmt.clone()).to_string().into();
-                    }else if let Ok(_dt)=NaiveDate::parse_from_str(f.value(), "%Y-%m-%d") {
-                        // just a check, leave it as string value
-                    }else{
-                        // leave it as string value
-                        warn!("cannot parse date-time value {}", f.value());
+                    if trans_dt {
+                        if let Ok(dt) = parse_dt(f.value(), "%Y-%m-%d %H:%M:%S%.f") {
+                            fld_val = dt.format_with_items(fmt.clone()).to_string().into();
+                        } else if let Ok(_dt) = NaiveDate::parse_from_str(f.value(), "%Y-%m-%d") {
+                            // just a check, leave it as string value
+                        } else {
+                            // leave it as string value
+                            warn!("cannot parse date-time value {}", f.value());
+                        }
                     }
                 } else if mod_fld.is_num_type() {
                     fld_val = Value::Number(f.value().parse().unwrap());
                 } else if mod_fld.field_type == "indicator" {
-                    fld_val = match f.value() {
-                        "Y" => Value::Bool(true),
-                        "N" => Value::Bool(false),
-                        _ => Value::Bool(false)
-                    };
+                    if trans_indicator {
+                        fld_val = match f.value() {
+                            "Y" => Value::Bool(true),
+                            "N" => Value::Bool(false),
+                            _ => Value::Bool(false)
+                        };
+                    }
                 }
             }else{
                 warn!("no field {} in entity {}", fld_name, node_name);
@@ -88,26 +96,32 @@ pub fn process_seed(xml_str: &str) -> crate::Result<Vec<SeedValue>> {
     Ok(result_set)
 }
 
-#[test]
-fn xml_seed_works() -> crate::Result<()> {
-    use std::fs;
-    let cnt=fs::read_to_string("test_files/ExampleDemoData.xml")?;
-    let ents=get_seed_entities(cnt.as_str())?;
-    let r=serde_json::to_string_pretty(&ents)?;
-    println!("{}", r);
-    Ok(())
+#[cfg(test)]
+mod lib_tests {
+    use super::*;
+
+    #[test]
+    fn xml_seed_works() -> crate::Result<()> {
+        use std::fs;
+        let cnt = fs::read_to_string("test_files/ExampleDemoData.xml")?;
+        let ents = get_seed_entities(cnt.as_str())?;
+        let r = serde_json::to_string_pretty(&ents)?;
+        println!("{}", r);
+        Ok(())
+    }
+
+    #[test]
+    fn convert_works() -> crate::Result<()> {
+        use std::fs;
+        let path = PathBuf::from("test_files/ExampleDemoData.xml");
+        let cnt = fs::read_to_string(path.as_path())?;
+        let rs = process_seed(cnt.as_str())?;
+        println!("{}", pretty(&rs));
+        let output: PathBuf = PathBuf::from(".store").join(path.file_name().unwrap()).with_extension("json");
+        println!("{}", output.display());
+        fs::write(output.as_path(), pretty(&rs))?;
+
+        Ok(())
+    }
 }
 
-#[test]
-fn convert_works() -> crate::Result<()> {
-    use std::fs;
-    let path=PathBuf::from("test_files/ExampleDemoData.xml");
-    let cnt=fs::read_to_string(path.as_path())?;
-    let rs=process_seed(cnt.as_str())?;
-    println!("{}", pretty(&rs));
-    let output:PathBuf=PathBuf::from(".store").join(path.file_name().unwrap()).with_extension("json");
-    println!("{}", output.display());
-    fs::write(output.as_path(), pretty(&rs))?;
-
-    Ok(())
-}

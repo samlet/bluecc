@@ -41,7 +41,9 @@ fn guess_action(value: &tera::Value, _args: &HashMap<String, tera::Value>) -> te
     Ok(tera::Value::String(action))
 }
 
-pub fn generate_srv_invoker(writer: &mut dyn std::io::Write, srv: &ModelService, ents: &HashMap<String, Entity>) -> Result<(), GenericError> {
+pub fn generate_srv_invoker(writer: &mut dyn std::io::Write, srv: &ModelService,
+                            ents: &HashMap<String, Entity>, spec: &str)
+    -> Result<(), GenericError> {
     debug!("srv name {} with {}, ents: {:?}", srv.name, srv.default_entity_name, ents.keys());
     let params = ServiceMeta::srv_model_params(&srv, &ents)?;
 
@@ -63,8 +65,10 @@ pub fn generate_srv_invoker(writer: &mut dyn std::io::Write, srv: &ModelService,
     generator.tera.register_filter("action", guess_action);
     generator.tera.register_filter("cstr", cstr_type);
     generator.tera.add_raw_template("srv_create", include_str!("incls/srv_create.j2"))?;
+    generator.tera.add_raw_template("srv_create_cr", include_str!("incls/srv_create_cr.j2"))?;
     generator.tera.add_raw_template("srv_resp", include_str!("incls/srv_resp.j2"))?;
     generator.tera.add_raw_template("srv_req", include_str!("incls/srv_req.j2"))?;
+    generator.tera.add_raw_template("srv_req_cr", include_str!("incls/srv_req_cr.j2"))?;
 
     let mut context = Context::new();
     context.insert("srv", &srv);
@@ -80,18 +84,20 @@ pub fn generate_srv_invoker(writer: &mut dyn std::io::Write, srv: &ModelService,
         .filter(|&p| !p.optional)
         .map(|p| format!("{}: {}",
                          p.name.to_snake_case(),
-                         p.param_value_type()))
+                         p.param_value_type(spec)))
         .collect::<Vec<String>>();
     let reqs_str = reqs.join(", ");
     context.insert("reqs", &reqs_str);
     context.insert("outputs", &outputs);
 
     if !srv.default_entity_name.is_empty() {
-        let result = generator.tera.render("srv_create", &context)?;
+        let tpl:String=if spec.is_empty() {"srv_create".to_string()} else {format!("srv_create_{}", spec)};
+        let result = generator.tera.render(tpl.as_str(), &context)?;
         // println!("result => \n{}", result);
         writeln!(writer, "{}", result)?;
     }else{
-        let result = generator.tera.render("srv_req", &context)?;
+        let tpl=if spec.is_empty() {"srv_req".to_string()} else {format!("srv_req_{}", spec)};
+        let result = generator.tera.render(tpl.as_str(), &context)?;
         writeln!(writer, "{}", result)?;
     }
 

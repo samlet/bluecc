@@ -1,17 +1,17 @@
-#[derive(Debug, Serialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct {{ srv.name | pascal }}Req<'a> {
+pub struct {{ srv.name | pascal }}Cr {
 {%- for fld in inputs %}
     {% if fld.optional -%}
     #[serde(skip_serializing_if = "Option::is_none")]
     {% endif -%}
-    pub {{fld.name | snake_case}}: {% if fld.optional %}Option<{% endif %}{{fld['type_name'] | plain_type | cstr}}{% if fld.optional %}>{% endif %},
+    pub {{fld.name | snake_case}}: {% if fld.optional %}Option<{% endif %}{{fld['type_name'] | plain_type}}{% if fld.optional %}>{% endif %},
 {%- endfor %}
 }
 
-impl<'a> {{ srv.name | pascal }}Req<'a> {
+impl {{ srv.name | pascal }}Cr {
     pub fn new({{ reqs }}) -> Self {
-        {{ srv.name | pascal }}Req {
+        {{ srv.name | pascal }}Cr {
 {%- for fld in inputs %}
             {% if fld.optional -%}
             {{fld.name | snake_case}}: Default::default(),

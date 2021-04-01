@@ -19,3 +19,18 @@ gen-seed:
 dirs:
     echo {{env_var("HOME")}}
     echo {{invocation_directory()}}
+
+kafka:
+	zookeeper-server-start /usr/local/etc/kafka/zookeeper.properties & kafka-server-start /usr/local/etc/kafka/server.properties
+
+kafka-stop:
+	kafka-server-stop 
+	zookeeper-server-stop 
+
+consumer:
+    kafka-console-consumer --bootstrap-server {{env_var("HOST_IP")}}:9092 --topic measure.entities
+create-topic topic:
+    kafka-topics --create --topic {{topic}} --if-not-exists --zookeeper localhost:2181 --partitions 1 --replication-factor 1
+
+
+

@@ -38,6 +38,7 @@ $ meta-cli rels -i Budget
 $ meta-cli rels -i -s Position
 $ meta-cli resource createExample
 $ meta-cli resource findProductByIdCc plugins/adapters
+$ meta-cli resource createPaymentApplication _ cr
 $ meta-cli meta Person
  */
 
@@ -94,7 +95,9 @@ enum Command {
     Resource {
         srv_name: String,
         #[structopt(default_value = "_")]
-        component: String
+        component: String,
+        #[structopt(default_value = "")]
+        spec: String,
     },
     /// Convert xml format resource to json format
     Convert {
@@ -269,7 +272,7 @@ async fn main() -> meta_gen::Result<()> {
             }
         }
 
-        Some(Command::Resource { srv_name, component  }) => {
+        Some(Command::Resource { srv_name, component, spec}) => {
             // let (srv,ents)=get_srv("plugins/example", "createExample")?;
             let (srv, ents) =
                 if component == "_" {
@@ -284,7 +287,7 @@ async fn main() -> meta_gen::Result<()> {
                 let entity = ents.get(srv.default_entity_name.as_str()).unwrap();
                 generate_srv_ent(&mut handle, &entity)?;
             }
-            generate_srv_invoker(&mut handle, &srv, &ents)?;
+            generate_srv_invoker(&mut handle, &srv, &ents, spec.as_str())?;
         }
 
         Some(Command::Meta { name }) => {

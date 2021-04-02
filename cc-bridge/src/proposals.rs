@@ -64,7 +64,7 @@ mod lib_tests {
     }
 
     #[test]
-    fn propsal_works() -> anyhow::Result<()> {
+    fn proposals_works() -> anyhow::Result<()> {
         let ppd:ProposalData=serde_json::from_value(json!({
                     "dataType": "createPaymentApplication",
                     "data": {

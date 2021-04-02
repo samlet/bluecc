@@ -40,6 +40,7 @@ $ meta-cli resource createExample
 $ meta-cli resource findProductByIdCc plugins/adapters
 $ meta-cli resource createPaymentApplication _ cr
 $ meta-cli meta Person
+$ meta-cli browse ProductType productTypeId description
  */
 
 #[derive(StructOpt)]
@@ -70,7 +71,13 @@ enum Command {
     /// Call service
     Call { name: String},
     /// Find entity records
-    Find { entity_name: String},
+    Find {
+        entity_name: String
+    },
+    Browse {
+        entity_name: String,
+        cols: Vec<String>,
+    },
     /// Show entity seed-data
     Seed {
         entity_name: String,
@@ -172,6 +179,14 @@ async fn main() -> meta_gen::Result<()> {
             let cols = result.rs.columns();
             println!("cols (total {}) {:?}", cols.len(), cols);
             println!("{}", result_str(result).await);
+        }
+
+        Some(Command::Browse { entity_name, cols }) => {
+            use deles::delegators::{browse_data, Delegator};
+            let delegator=Delegator::new().await?;
+            let cols: Vec<String> = cols.iter().map(|s| s.to_snake_case()).collect();
+            let cols: Vec<&str> = cols.iter().map(|s| &**s).collect();
+            browse_data(&delegator, entity_name.as_str(), &cols).await.unwrap();
         }
 
         Some(Command::Seed { entity_name, format  }) => {

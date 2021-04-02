@@ -5,6 +5,8 @@ use itertools::Itertools;
 use serde::de::DeserializeOwned;
 use crate::GenericError;
 use thiserror::private::DisplayAsDisplay;
+use crate::delegators::Delegator;
+use inflector::Inflector;
 
 pub fn pretty<T>(val:&T) -> String
 where
@@ -58,11 +60,55 @@ pub fn render_table(values: &Vec<DynamicValue>) {
     println!("{}", table);
 }
 
+pub async fn browse_data(delegator:&Delegator, ent:&str, cols: &Vec<&str>) -> crate::Result<()> {
+    use comfy_table::presets::UTF8_FULL;
+    use comfy_table::modifiers::UTF8_ROUND_CORNERS;
+    use quaint::{prelude::*, ast::*, single::Quaint,
+                 connector::{Queryable, TransactionCapable},
+    };
+
+    let table = ent.to_snake_case();
+    let query = Select::from_table(table).columns(cols);
+    let result = delegator.conn.select(query).await?;
+
+    let mut table = comfy_table::Table::new();
+    table
+        .load_preset(UTF8_FULL)
+        .apply_modifier(UTF8_ROUND_CORNERS)
+        .set_content_arrangement(comfy_table::ContentArrangement::Dynamic);
+    table.set_header(cols);
+    let columns: Vec<String> = result.columns().iter().map(ToString::to_string).collect();
+    for row in result.into_iter() {
+        let mut table_row = Vec::new();
+        for (idx, p_value) in row.into_iter().enumerate() {
+            let _column_name = &columns[idx];
+            let val = serde_json::Value::from(p_value);
+            if let serde_json::Value::Null = val {
+                table_row.push("".to_string());
+            } else {
+                table_row.push(if val.is_string() {
+                    val.as_str().unwrap().to_string()
+                } else { val.to_string() });
+            }
+        }
+
+        table.add_row(table_row);
+    }
+
+    println!("{}", table);
+
+    Ok(())
+}
+
 #[cfg(test)]
 mod lib_tests {
     use super::*;
     use crate::delegators::status_procs::StatusItemRaw;
     use crate::delegators::Delegator;
+    use quaint::{prelude::*, ast::*, single::Quaint,
+                 connector::{Queryable, TransactionCapable},
+    };
+    use inflector::Inflector;
 
     #[test]
     fn dt_works() -> anyhow::Result<()> {
@@ -80,6 +126,58 @@ mod lib_tests {
         let rs:Vec<StatusItemRaw>=delegator.list("StatusItem").await?;
         println!("total {}", rs.len());
         render(&rs)?;
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn browse_rec_works() -> crate::Result<()> {
+        use comfy_table::presets::UTF8_FULL;
+        use comfy_table::modifiers::UTF8_ROUND_CORNERS;
+
+        let ent="ProductType";
+        let table=ent.to_snake_case();
+
+        let cols=vec!["product_type_id", "description"];
+        let delegator=Delegator::new().await?;
+        let query = Select::from_table(table).columns(&cols);
+        let result = delegator.conn.select(query).await?;
+
+        let mut table = comfy_table::Table::new();
+        table
+            .load_preset(UTF8_FULL)
+            .apply_modifier(UTF8_ROUND_CORNERS)
+            .set_content_arrangement(comfy_table::ContentArrangement::Dynamic);
+        table.set_header(&cols);
+        let columns: Vec<String> = result.columns().iter().map(ToString::to_string).collect();
+        for row in result.into_iter() {
+            let mut table_row=Vec::new();
+            for (idx, p_value) in row.into_iter().enumerate() {
+                let _column_name = &columns[idx];
+                let val = serde_json::Value::from(p_value);
+                if let serde_json::Value::Null = val {
+                    table_row.push("".to_string());
+                }else {
+                    table_row.push(if val.is_string(){
+                        val.as_str().unwrap().to_string()
+                    } else {val.to_string()});
+                }
+            }
+
+            table.add_row(table_row);
+        }
+
+        println!("{}", table);
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn browse_works() -> crate::Result<()> {
+        let ent="ProductType";
+        let cols=vec!["product_type_id", "description"];
+        let delegator=Delegator::new().await?;
+        browse_data(&delegator, ent, &cols).await?;
 
         Ok(())
     }

@@ -63,6 +63,11 @@ impl Entity{
         self.fields.iter().find(|f| f.field_name==fld)
     }
 
+    pub fn get_field_names(&self) -> Vec<String>{
+        self.fields.iter()
+            .map(|f| f.field_name.to_owned()).collect()
+    }
+
     pub fn get_relation_entity(&self, fld:&str) -> Option<String> {
         self.relations.iter().filter(|r|
             r.keymaps.iter().any(|key|key.field_name==fld))

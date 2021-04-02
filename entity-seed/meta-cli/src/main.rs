@@ -184,6 +184,12 @@ async fn main() -> meta_gen::Result<()> {
         Some(Command::Browse { entity_name, cols }) => {
             use deles::delegators::{browse_data, Delegator};
             let delegator=Delegator::new().await?;
+            let cols=if cols.is_empty(){
+                let meta=seed::get_entity_model(entity_name.as_str())?;
+                meta.get_field_names()
+            }else{
+                cols
+            };
             let cols: Vec<String> = cols.iter().map(|s| s.to_snake_case()).collect();
             let cols: Vec<&str> = cols.iter().map(|s| &**s).collect();
             browse_data(&delegator, entity_name.as_str(), &cols).await.unwrap();

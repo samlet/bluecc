@@ -30,6 +30,7 @@ error_chain!{
         ParseFloatErr(std::num::ParseFloatError);
         ParseXmlErr(serde_xml_rs::Error);
         DatabaseErr(quaint::error::Error);
+        CommonErr(common::Error);
     }
 }
 

@@ -26,7 +26,7 @@ pub struct SeedValue {
 
 pub fn process_seed(xml_str: &str) -> crate::Result<Vec<SeedValue>> {
     use chrono::format::strftime::StrftimeItems;
-    use serde_json::Value;
+    use serde_json::{json,Value};
     use crate::META_CONF;
 
     let trans_indicator=META_CONF.xml_seed.translate_indicator;
@@ -69,7 +69,15 @@ pub fn process_seed(xml_str: &str) -> crate::Result<Vec<SeedValue>> {
                         }
                     }
                 } else if mod_fld.is_num_type() {
-                    fld_val = Value::Number(f.value().parse().unwrap());
+                    let fval= if f.value().contains(".") {f.value()}
+                        else {f.value().trim_start_matches('0')};
+                    if fval.is_empty() {
+                        fld_val=json!(0);
+                    }else {
+                        fld_val = Value::Number(fval.parse()
+                            .expect(format!("invalid number parse: {}, context: {:?}",
+                                            f.value(), node).as_str()));
+                    }
                 } else if mod_fld.field_type == "indicator" {
                     if trans_indicator {
                         fld_val = match f.value() {

@@ -4,6 +4,7 @@ use crate::{GenericError, ServiceMeta};
 use std::collections::HashMap;
 use tera::Context;
 use serde_json::Value;
+use meta_gen::generate_srv_ent;
 
 pub trait MetaGenerator{
     fn generate_for(&mut self, template: &str, ent_name: &str)
@@ -20,20 +21,29 @@ impl MetaGenerator for ServiceMeta {
         let ent = self.entity_reader.get_entity_model(ent_name)?;
         let flds=&ent.fields;
 
-        let mut generator = EntityGenerator::new(vec![ent_name.to_string()]);
-        generator.tera.register_filter("ink_type", ink_type);
+        let local_tpls=vec!["value_obj", "ink"];
+        if local_tpls.contains(&template) {
+            let mut generator = EntityGenerator::new(vec![ent_name.to_string()]);
+            generator.tera.register_filter("ink_type", ink_type);
 
-        generator.tera.add_raw_template("value_obj",
-                                        include_str!("incls/value_obj.j2"))?;
-        generator.tera.add_raw_template("ink",
-                                        include_str!("incls/ink_obj.j2"))?;
+            generator.tera.add_raw_template("value_obj",
+                                            include_str!("incls/value_obj.j2"))?;
+            generator.tera.add_raw_template("ink",
+                                            include_str!("incls/ink_obj.j2"))?;
 
-        let mut context = Context::new();
-        context.insert("ent", &ent);
-        context.insert("flds", flds);
-        let result = generator.tera.render(template, &context)?;
+            let mut context = Context::new();
+            context.insert("ent", &ent);
+            context.insert("flds", flds);
+            let result = generator.tera.render(template, &context)?;
 
-        Ok(result)
+            Ok(result)
+        }else{
+            use bstr::ByteVec;
+            let mut buf:Vec<u8>=Vec::new();
+            generate_srv_ent(&mut buf, &ent)?;
+
+            Ok(buf.into_string_lossy())
+        }
     }
 }
 

@@ -62,12 +62,14 @@ fn convert_field_value<'a>(fld_type:&str, fld_val:String) -> crate::Result<quain
     use chrono::format::strftime::StrftimeItems;
     use chrono::{DateTime, TimeZone, NaiveDateTime, Utc};
 
+    const STD_FORMAT: &'static str = "%Y-%m-%d %H:%M:%S%.f";
+
     let parse_dt=NaiveDateTime::parse_from_str;
 
     let store_val=match fld_type {
             "date-time" => {quaint::Value::datetime(
                 DateTime::<Utc>::from_utc(
-                    parse_dt(fld_val.as_str(), "%Y-%m-%d %H:%M:%S")?, Utc))}
+                    parse_dt(fld_val.as_str(), STD_FORMAT)?, Utc))}
             "date" => {quaint::Value::date(NaiveDate::parse_from_str(fld_val.as_str(), "%Y-%m-%d")?)}
             "time" => {quaint::Value::time(NaiveTime::parse_from_str(fld_val.as_str(), "%H:%M:%S")?)}
             "blob"|"byte-array" => {
@@ -101,7 +103,7 @@ pub fn get_values_from_node<'a>(node: &'a roxmltree::Node) -> crate::Result<(Vec
     Ok((cols, store_values))
 }
 
-pub fn get_values_from_map(map_vals: &HashMap<String, serde_json::Value>)
+pub fn get_values_from_map(map_vals: &serde_json::Map<String, serde_json::Value>)
                            -> crate::Result<(Vec<String>, Vec<quaint::Value>)> {
     // let meta=seed::get_entity_model(ent_name)?;
     let mut cols=Vec::new();
@@ -147,7 +149,7 @@ mod lib_tests {
 
     #[test]
     fn from_map_works() -> crate::Result<()> {
-        let json_vals:HashMap<String,serde_json::Value>= serde_json::from_value(json!({
+        let json_vals= serde_json::from_value(json!({
                     "productId":"Product",
                     "taxable":"N",
                 }))?;

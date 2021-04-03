@@ -1,4 +1,3 @@
-use bson::Bson;
 use serde_derive::{Deserialize, Serialize};
 use url::Url;
 
@@ -9,6 +8,7 @@ struct Person {
     phones: Vec<String>,
 }
 
+/*
 // https://crates.io/crates/bson
 #[test]
 fn bson_works() {
@@ -33,6 +33,7 @@ fn bson_works() {
     // Get a serialized version of the input data as a `Bson`.
     // let redacted_bson = bson::to_bson(&person).unwrap();
 }
+*/
 
 #[test]
 fn url_join_works() -> anyhow::Result<()>{

@@ -8,19 +8,23 @@ edition = "2018"
 
 [dependencies]
 anyhow = "1.0"
+error-chain = "0.12.2"
 bytes = "1.0.1"
 uuid = { version = "0.8", features = ["serde", "v4"] }
 url = { version = "2", features = ["serde"] }
-bson = "1.2.0"
+#bson = "1.2.0"
 
-# Expr supports deserialization using the serde library to make flexible configuration easy to set up,
-# if the feature serde is enabled (disabled by default).
-meval = {version="0.2", features = ["serde"]}
 serde = { version = "1.0", features = ["derive"] }
 serde_derive = "1.0"
 serde_json = "1.0"
 # doesn't require singularize, pluralize, class, table, demodulize, deconstantize.
 Inflector = {version="0.11.4", default-features=false}
-toml = "0.5.8"
 chrono = "0.4"
+
+[dev-dependencies]
+tempfile = "3.1.0"
+# Expr supports deserialization using the serde library to make flexible configuration easy to set up,
+# if the feature serde is enabled (disabled by default).
+meval = {version="0.2", features = ["serde"]}
+toml = "0.5.8"
 

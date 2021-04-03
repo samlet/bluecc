@@ -124,7 +124,7 @@ mod lib_tests {
 
     #[tokio::test]
     async fn store_from_obj_works() -> crate::Result<()> {
-        let json_vals:HashMap<String,serde_json::Value>= serde_json::from_value(json!({
+        let json_vals= serde_json::from_value(json!({
                       "statusId": "new_EXST_IN_DESIGN",
                       "statusTypeId": "EXAMPLE_STATUS",
                       "statusCode": "IN_DESIGN",

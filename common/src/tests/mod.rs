@@ -13,4 +13,5 @@ mod enum_tests;
 mod io_tests;
 mod err_tests;
 mod function_map_tests;
+mod string_tests;
 

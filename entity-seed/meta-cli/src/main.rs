@@ -61,7 +61,10 @@ enum Command {
     },
     /// Generate values and ink objects
     Entity {
+        #[structopt(short)]
+        example: bool,
         name: String,
+        #[structopt(default_value = "")]
         template: String,
     },
     /// Display entity meta
@@ -125,13 +128,19 @@ async fn main() -> meta_gen::Result<()> {
             let srv= srvs.srv(name.as_str())?.to_owned();
             let srv_ent=&srv.default_entity_name;
             let srv_ent_incs=srv.include_auto_attrs();
-            let params = srvs.srv_params(name.as_str())?;
 
             println!("srv-meta {} ({}): \n\t{}", name, &srv.engine.yellow(), &srv.description);
-            println!("input params ->");
+            println!("\ninput params ->");
             if collapse && !srv_ent.is_empty(){
-                println!("\t default entity {} ({})", srv_ent.red().bold(), srv_ent_incs.yellow());
+                println!("\t * default entity {} ({})", srv_ent.red().bold(), srv_ent_incs.yellow());
             }
+            if srv.has_interface(){
+                for imp in &srv.implements{
+                    println!("\t * interface {}", imp.service.blue().bold());
+                }
+            }
+
+            let params = srvs.srv_params(name.as_str())?;
             for f in params.iter().filter(|p|p.mode==ParamMode::In || p.mode==ParamMode::InOut) {
                 let mut ptype=f.param_type();
                 if let Some(v)=&f.entity_name{
@@ -140,24 +149,23 @@ async fn main() -> meta_gen::Result<()> {
                         continue; // skip the parameter if collapse
                     }
                 }
-                println!("\t {}: {}/{} ({:?},{})",
+                println!("\t - {}: {}/{} ({:?},{})",
                          if f.entity_name.is_none() {f.name.black().bold().underline()} else {f.name.italic()},
                          f.type_name, ptype, f.mode,
                          if f.optional { "optional".yellow() } else { "required".blue().bold() });
             }
 
-            println!("output params ->");
+            println!("\noutput params ->");
             for f in params.iter().filter(|p|p.mode==ParamMode::Out || p.mode==ParamMode::InOut) {
-                println!("\t {}: {}/{} ({:?},{})", f.name.black().bold(),
+                println!("\t - {}: {}/{} ({:?},{})", f.name.black().bold(),
                          f.type_name, f.param_type(), f.mode,
                          if f.optional { "optional".yellow() } else { "required".blue().bold() });
             }
 
             if example{
-                println!("example ->");
+                println!("\nexample ->");
                 output_invoke_example(&srv)?;
-
-                println!("cases ->");
+                println!("\ncases ->");
                 meta_gen::cases::list_related_srvs(srv.name.as_str())?;
             }
         }
@@ -183,11 +191,11 @@ async fn main() -> meta_gen::Result<()> {
 
         Some(Command::Browse { entity_name, cols }) => {
             use deles::delegators::{browse_data, Delegator};
-            let delegator=Delegator::new().await?;
-            let cols=if cols.is_empty(){
-                let meta=seed::get_entity_model(entity_name.as_str())?;
+            let delegator = Delegator::new().await?;
+            let cols = if cols.is_empty() {
+                let meta = seed::get_entity_model(entity_name.as_str())?;
                 meta.get_field_names()
-            }else{
+            } else {
                 cols
             };
             let cols: Vec<String> = cols.iter().map(|s| s.to_snake_case()).collect();
@@ -239,10 +247,14 @@ async fn main() -> meta_gen::Result<()> {
             }
         }
 
-        Some(Command::Entity { name, template  }) => {
+        Some(Command::Entity { example, name, template  }) => {
             let mut srvs = ServiceMeta::load()?;
             let result=srvs.generate_for(template.as_str(), name.as_str())?;
             println!("{}", result);
+
+            if example{
+                output_seed_example(name.as_str())?;
+            }
         }
 
         Some(Command::Dump { spec  }) => {
@@ -351,27 +363,35 @@ async fn main() -> meta_gen::Result<()> {
     Ok(())
 }
 
+fn output_seed_example(ent_name: &str) -> Result<(), GenericError>{
+    let seeds = SeedFiles::load()?;
+
+    let rs = seeds.entity_seeds(ent_name)?;
+    let mut stats = HashMap::new();
+    for r in &rs {
+        let fld_num = r.len();
+        let entry = stats.entry(fld_num).or_insert(1);
+        *entry += 1;
+    }
+
+    // 找到最常用的字段组合(即这个组合的频次最高)
+    let max_item = stats.iter()
+        .max_by(|f, s| f.1.cmp(s.1)).unwrap();
+    // println!("{:?} => {:?}", max_item, stats);
+    let exflds = rs.iter().filter(|&r| r.len() == *max_item.0)
+        .nth(0).unwrap();
+    let exflds_str = serde_json::to_string_pretty(&exflds)?;
+    println!("```rust");
+    println!("let p: {} = serde_json::from_value(json!({}))?;", ent_name, exflds_str);
+    println!("```");
+
+    Ok(())
+}
+
 fn output_invoke_example(srv:&ModelService) -> Result<(), GenericError>{
     let ent_name = &srv.default_entity_name;
     if !ent_name.is_empty() {
-        let seeds = SeedFiles::load()?;
-
-        let rs = seeds.entity_seeds(ent_name)?;
-        let mut stats = HashMap::new();
-        for r in &rs {
-            let fld_num = r.len();
-            let entry = stats.entry(fld_num).or_insert(1);
-            *entry += 1;
-        }
-
-        // 找到最常用的字段组合(即这个组合的频次最高)
-        let max_item = stats.iter()
-            .max_by(|f, s| f.1.cmp(s.1)).unwrap();
-        // println!("{:?} => {:?}", max_item, stats);
-        let exflds = rs.iter().filter(|&r| r.len() == *max_item.0)
-            .nth(0).unwrap();
-        let exflds_str = serde_json::to_string_pretty(&exflds)?;
-        println!("let p: {} = serde_json::from_value(json!({}))?;", ent_name, exflds_str);
+        output_seed_example(ent_name)?;
     }
 
     Ok(())

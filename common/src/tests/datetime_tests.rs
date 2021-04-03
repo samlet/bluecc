@@ -1,6 +1,39 @@
 use chrono::prelude::*;
 use chrono::offset::LocalResult;
 
+const FORMAT: &'static str = "%Y-%m-%d %H:%M:%S%.f";
+
+#[test]
+fn utc_format_works() -> anyhow::Result<()> {
+    let s="2008-04-23 16:49:27.392";
+    let dt:DateTime<Utc>=Utc.datetime_from_str(s, FORMAT)?;
+    println!("{}", dt);
+
+    let s = format!("{}", dt.format(FORMAT));
+    println!("{}, {}", s, dt.to_rfc3339_opts(SecondsFormat::Millis, false));
+    Ok(())
+}
+
+#[test]
+fn utc_works() -> anyhow::Result<()> {
+    use chrono::{DateTime, FixedOffset, SecondsFormat, TimeZone, Utc};
+
+    let dt = Utc.ymd(2018, 1, 26).and_hms_micro(18, 30, 9, 453_829);
+    assert_eq!(dt.to_rfc3339_opts(SecondsFormat::Millis, false),
+               "2018-01-26T18:30:09.453+00:00");
+    assert_eq!(dt.to_rfc3339_opts(SecondsFormat::Millis, true),
+               "2018-01-26T18:30:09.453Z");
+    assert_eq!(dt.to_rfc3339_opts(SecondsFormat::Secs, true),
+               "2018-01-26T18:30:09Z");
+
+    let pst = FixedOffset::east(8 * 60 * 60);
+    let dt = pst.ymd(2018, 1, 26).and_hms_micro(10, 30, 9, 453_829);
+    assert_eq!(dt.to_rfc3339_opts(SecondsFormat::Secs, true),
+               "2018-01-26T10:30:09+08:00");
+
+    Ok(())
+}
+
 #[test]
 fn datetime_works() {
     let d = NaiveDate::from_ymd(2015, 6, 3);

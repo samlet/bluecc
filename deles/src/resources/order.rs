@@ -95,6 +95,8 @@ mod lib_tests {
     use crate::delegators::{pretty, Delegator};
     use serde_json::json;
     use std::collections::HashMap;
+    use itertools::Itertools;
+    use std::any::Any;
 
     fn print_errs(errors:&crate::Error){
         eprintln!("Error level - description");
@@ -113,7 +115,7 @@ mod lib_tests {
         std::env::set_var("RUST_LOG", "info,deles=debug");
         env_logger::init();
 
-        let order_id = "DEMO10090";
+        let order_id = format!("{}", seed::new_snowflake_id());
 
         let p: OrderHeader = serde_json::from_value(json!({
           "orderTypeId": "SALES_ORDER",
@@ -134,21 +136,26 @@ mod lib_tests {
         }))?;
 
         println!("{}", pretty(&p));
-        // let vals=serde_json::to_value(&p)?;
-        let json_str = serde_json::to_string(&p)?;
-        println!("{}", json_str);
+        // let json_str = serde_json::to_string(&p)?;
+        // println!("{}", json_str);
 
-        // let values:HashMap<String,String> = serde_json::from_str(json_str.as_str())?;
-        // let delegator = Delegator::new().await?;
+        // 无法通过to_value方式得到包含准确数据类型的map用于delegator.store(),
+        // 因为json中日期型和decimal型表现的都是字符串
+        let vals=serde_json::to_value(&p)?;
+        if let Some(values)=vals.as_object() {
+            let map_vals: HashMap<String, String> = values.into_iter()
+                .map(|(k, v)| (k.to_owned(), v.as_str().unwrap().to_string()))
+                .collect();
+            println!("{:?}", map_vals);
 
-        // if let Some(values)=vals.as_object(){
-        // println!("{:?}", values);
-        // let changes = delegator.store_string_map("OrderHeader", values).await;
-        // if let Err(ref errors) = changes {
-        //     print_errs(errors);
-        // }
-        // println!("changes: {}", changes);
-        // }
+            let delegator = Delegator::new().await?;
+            let changes = delegator.store_string_map("OrderHeader", map_vals).await;
+            if let Err(ref errors) = changes {
+                print_errs(errors);
+            }
+            println!("changes: {:?}", changes);
+            assert_eq!(1, changes.unwrap());
+        }
 
         Ok(())
     }
@@ -182,6 +189,7 @@ mod lib_tests {
         let delegator = Delegator::new().await?;
 
         // if let Some(values)=p.as_object(){
+        // delegator.store_string_map是通过entity-meta进行值转换的
         let changes = delegator.store_string_map("OrderHeader", p).await;
         if let Err(ref errors) = changes {
             print_errs(errors);

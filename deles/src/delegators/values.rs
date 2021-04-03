@@ -58,30 +58,35 @@ pub fn convert_value(val: &serde_json::Value) -> crate::Result<Option<quaint::Va
     Ok(res)
 }
 
-fn convert_field_value<'a>(fld_type:&str, fld_val:String) -> crate::Result<quaint::Value<'a>>{
+fn parse_date_time(fld_val:&str) -> crate::Result<DateTime<Utc>>{
     use chrono::format::strftime::StrftimeItems;
     use chrono::{DateTime, TimeZone, NaiveDateTime, Utc};
 
     const STD_FORMAT: &'static str = "%Y-%m-%d %H:%M:%S%.f";
-
     let parse_dt=NaiveDateTime::parse_from_str;
+    let result=if !fld_val.contains("T"){
+        DateTime::<Utc>::from_utc(parse_dt(fld_val, STD_FORMAT)?, Utc)
+    }else {
+        DateTime::from(DateTime::parse_from_rfc3339(fld_val)?)
+    };
+    Ok(result)
+}
 
-    let store_val=match fld_type {
-            "date-time" => {quaint::Value::datetime(
-                DateTime::<Utc>::from_utc(
-                    parse_dt(fld_val.as_str(), STD_FORMAT)?, Utc))}
-            "date" => {quaint::Value::date(NaiveDate::parse_from_str(fld_val.as_str(), "%Y-%m-%d")?)}
-            "time" => {quaint::Value::time(NaiveTime::parse_from_str(fld_val.as_str(), "%H:%M:%S")?)}
-            "blob"|"byte-array" => {
-                quaint::Value::Bytes(Some(Cow::Owned(fld_val.as_bytes().into())))
-            }
-            "currency-amount" | "currency-precise" | "fixed-point"=>
-                {quaint::Value::numeric(BigDecimal::from_str(fld_val.as_str())?)}
-            "floating-point" => {quaint::Value::double(fld_val.parse()?)}
-            "integer" | "numeric" => {quaint::Value::integer(fld_val.parse::<i64>()?)}
-            "indicator" => {quaint::Value::character(fld_val.chars().next().unwrap())}
-            _ => {quaint::Value::text(fld_val.to_owned())}
-        };
+fn convert_field_value<'a>(fld_type:&str, fld_val:String) -> crate::Result<quaint::Value<'a>> {
+    let store_val = match fld_type {
+        "date-time" => { quaint::Value::datetime(parse_date_time(fld_val.as_str())?) }
+        "date" => { quaint::Value::date(NaiveDate::parse_from_str(fld_val.as_str(), "%Y-%m-%d")?) }
+        "time" => { quaint::Value::time(NaiveTime::parse_from_str(fld_val.as_str(), "%H:%M:%S")?) }
+        "blob" | "byte-array" => {
+            quaint::Value::Bytes(Some(Cow::Owned(fld_val.as_bytes().into())))
+        }
+        "currency-amount" | "currency-precise" | "fixed-point" =>
+            { quaint::Value::numeric(BigDecimal::from_str(fld_val.as_str())?) }
+        "floating-point" => { quaint::Value::double(fld_val.parse()?) }
+        "integer" | "numeric" => { quaint::Value::integer(fld_val.parse::<i64>()?) }
+        "indicator" => { quaint::Value::character(fld_val.chars().next().unwrap()) }
+        _ => { quaint::Value::text(fld_val.to_owned()) }
+    };
     Ok(store_val)
 }
 

@@ -10,7 +10,11 @@ fn utc_format_works() -> anyhow::Result<()> {
     println!("{}", dt);
 
     let s = format!("{}", dt.format(FORMAT));
-    println!("{}, {}", s, dt.to_rfc3339_opts(SecondsFormat::Millis, false));
+    let utc=dt.to_rfc3339_opts(SecondsFormat::Millis, false);
+    println!("{}, {}", s, utc);
+
+    let dt:DateTime<Utc>= DateTime::from(DateTime::parse_from_rfc3339(utc.as_str())?);
+    println!("{}", dt);
     Ok(())
 }
 

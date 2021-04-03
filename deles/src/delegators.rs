@@ -6,7 +6,7 @@ mod party_procs;
 mod util;
 pub mod values;
 
-pub use generic_delegator::{Delegator, GenericValues, ListOptions, result_str};
+pub use generic_delegator::{Delegator, GenericValues, ListOptions, result_str, EntityData};
 pub use party_procs::{Person, Party};
 pub use util::{pretty, render, render_table, browse_data};
 pub use values::{get_values_from_node};

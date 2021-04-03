@@ -100,6 +100,20 @@ pub async fn browse_data(delegator:&Delegator, ent:&str, cols: &Vec<&str>) -> cr
     Ok(())
 }
 
+/*
+pub fn print_errs(errors:&crate::Error){
+    eprintln!("Error level - description");
+    errors
+        .iter()
+        .enumerate()
+        .for_each(|(index, error)| eprintln!("└> {} - {}", index, error));
+
+    if let Some(backtrace) = errors.backtrace() {
+        eprintln!("{:?}", backtrace);
+    }
+}
+*/
+
 #[cfg(test)]
 mod lib_tests {
     use super::*;

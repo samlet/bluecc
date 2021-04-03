@@ -1,15 +1,16 @@
 use std::convert::Infallible;
 use warp::{Rejection, Reply};
 use serde_derive::Serialize;
-use deles::GenericError;
+use deles::{GenericError, error};
 use warp::Filter;
 use serde::de::DeserializeOwned;
 
-fn with_json_body<T: DeserializeOwned + Send>(
+pub fn with_json_body<T: DeserializeOwned + Send>(
 ) -> impl Filter<Extract = (T,), Error = warp::Rejection> + Clone {
     // When accepting a body, we want a JSON body
     // (and to reject huge payloads)...
-    warp::body::content_length_limit(1024 * 16).and(warp::body::json())
+    // // Limit the upload to 1mb...
+    warp::body::content_length_limit(1024 * 1024).and(warp::body::json())
 }
 
 #[derive(Serialize)]
@@ -18,10 +19,11 @@ struct ErrorMessage {
     message: String,
 }
 
-pub fn to_http_status(err: &GenericError) -> warp::http::StatusCode {
-    match err {
-        GenericError::NotFound{ .. } => warp::http::StatusCode::NOT_FOUND,
-        GenericError::Unknown => warp::http::StatusCode::BAD_REQUEST,
+pub fn to_http_status(err: &error::ServiceError) -> warp::http::StatusCode {
+    match err  {
+        error::ServiceError::NotFound{ .. } => warp::http::StatusCode::NOT_FOUND,
+        error::ServiceError::Unknown => warp::http::StatusCode::BAD_REQUEST,
+        error::ServiceError::Io(_) => warp::http::StatusCode::BAD_REQUEST,
         _ => warp::http::StatusCode::INTERNAL_SERVER_ERROR,
     }
 }
@@ -33,7 +35,7 @@ pub async fn handle_rejection(err: Rejection) -> Result<impl Reply, Infallible> 
     if err.is_not_found() {
         code = warp::http::StatusCode::NOT_FOUND;
         message.push_str("Not Found");
-    } else if let Some(app_err) = err.find::<GenericError>() {
+    } else if let Some(app_err) = err.find::<error::ServiceError>() {
         code = to_http_status(app_err);
         // message = app_err.message.as_str();
         message = format!("err: {:?}", app_err);

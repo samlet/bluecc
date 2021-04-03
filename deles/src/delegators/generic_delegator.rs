@@ -21,12 +21,25 @@ pub struct Delegator{
     pub conn: Quaint
 }
 
+#[derive(Debug, Deserialize, Serialize, Clone)]
+#[serde(rename_all(serialize = "camelCase", deserialize = "camelCase"))]
+pub struct EntityData{
+    pub entity: String,
+    pub values: serde_json::Value,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+#[serde(rename_all(serialize = "camelCase", deserialize = "camelCase"))]
+pub struct ServiceResult<T>{
+    pub data: T,
+}
+
 fn table_name(ent: &str) -> String {
     ent.to_snake_case()
 }
 
 impl Delegator{
-    pub async fn new() -> Result<Self, GenericError> {
+    pub async fn new() -> crate::Result<Self> {
         // let url = "mysql://root:root@localhost:3306/ofbiz";
         let url = "postgres://ofbiz:ofbiz@localhost:5432/ofbiz";
         // dotenv::dotenv().ok();
@@ -34,7 +47,7 @@ impl Delegator{
         Ok(Delegator { conn: (Quaint::new(url).await?) })
     }
 
-    pub async fn find<'a, T>(&self, entity_name: &str, conditions: T) -> Result<GenericValues, GenericError>
+    pub async fn find<'a, T>(&self, entity_name: &str, conditions: T) -> crate::Result<GenericValues>
     where
         T: Into<ConditionTree<'a>>,{
         let query = Select::from_table(entity_name.to_snake_case()).so_that(conditions);
@@ -44,7 +57,7 @@ impl Delegator{
     }
 
     pub async fn find_all(&self, entity_name: &str, include_null_fields:bool,
-                          include_internal_fields:bool) -> Result<GenericValues, GenericError> {
+                          include_internal_fields:bool) -> crate::Result<GenericValues> {
         let query = Select::from_table(entity_name.to_snake_case());
         let result = self.conn.select(query).await?;
         Ok(GenericValues{ entity_name: entity_name.to_string(), rs: result,
@@ -52,7 +65,7 @@ impl Delegator{
             include_internal_fields: include_internal_fields })
     }
 
-    pub async fn wrap_result<T>(&self, result: ResultSet) -> Result<Vec<T>, GenericError>
+    pub async fn wrap_result<T>(&self, result: ResultSet) -> crate::Result<Vec<T>>
     where T: DeserializeOwned, {
         let jval = serde_json::Value::from(result);
         let rows = jval.as_array();
@@ -66,7 +79,7 @@ impl Delegator{
         Ok(items)
     }
 
-    pub async fn list<T>(&self, entity_name: &str) -> Result<Vec<T>, GenericError>
+    pub async fn list<T>(&self, entity_name: &str) -> crate::Result<Vec<T>>
     where T: DeserializeOwned, {
         let query = Select::from_table(entity_name.to_snake_case());
         let result = self.conn.select(query).await?;
@@ -74,7 +87,7 @@ impl Delegator{
         Ok(r)
     }
 
-    pub async fn list_with_options<T>(&self, entity_name: &str, options:ListOptions) -> Result<Vec<T>, GenericError>
+    pub async fn list_with_options<T>(&self, entity_name: &str, options:ListOptions) -> crate::Result<Vec<T>>
     where T: DeserializeOwned, {
         let query = Select::from_table(entity_name.to_snake_case())
             .limit(options.limit.unwrap_or(100)).offset(options.offset.unwrap_or(0));
@@ -83,7 +96,7 @@ impl Delegator{
         Ok(r)
     }
 
-    pub async fn list_for<T>(&self, entity_name: &str, conditions: ConditionTree<'_>) -> Result<Vec<T>, GenericError>
+    pub async fn list_for<T>(&self, entity_name: &str, conditions: ConditionTree<'_>) -> crate::Result<Vec<T>>
     where T: DeserializeOwned, {
         let query = Select::from_table(entity_name.to_snake_case()).so_that(conditions);
         let result = self.conn.select(query).await?;
@@ -111,6 +124,23 @@ impl Delegator{
             insert.on_conflict(OnConflict::DoNothing).into()).await?;
 
         Ok(changes)
+    }
+
+    pub async fn store_entity(&self, ppd: &EntityData) -> crate::Result<ServiceResult<u64>> {
+        debug!("store entity {} ->", ppd.entity);
+
+        if let Some(values)=ppd.values.as_object() {
+            let map_vals: HashMap<String, String> = values.into_iter()
+                .map(|(k, v)| (k.to_owned(), v.as_str().unwrap().to_string()))
+                .collect();
+            debug!("{:?}", map_vals);
+            let changes = self.store_string_map(ppd.entity.as_str(), map_vals).await?;
+            Ok(ServiceResult{data:changes})
+        }else{
+            Err(crate::ServiceError::DataFormatError{
+                info: format!("Cannot extract data for entity {}", ppd.entity),
+            })
+        }
     }
 }
 
@@ -162,8 +192,9 @@ pub async fn result_str(rs: GenericValues) -> String {
 #[cfg(test)]
 mod lib_tests {
     use super::*;
-    use serde_json::to_string_pretty;
+    use serde_json::{json, to_string_pretty};
     use chrono::{DateTime, Utc};
+    use crate::delegators::print_errs;
 
     // source from: $ cargo run --bin seed gen UserLogin dto_orig
     #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -324,6 +355,36 @@ mod lib_tests {
         );
         assert_eq!(vec![Value::from(4)], params);
 
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn store_entity_data() -> crate::Result<()> {
+        let delegator = Delegator::new().await?;
+
+        let ppd:EntityData=serde_json::from_value(json!({
+                "entity": "SecurityGroupPermission",
+                "values": {
+                  "groupId": "VIEWADMIN",
+                  "permissionId": "PAY_INFO_VIEW",
+                  "fromDate": "2001-05-13 12:00:00.0"
+                }
+            }))?;
+        println!("{} ->", ppd.entity);
+
+        if let Some(values)=ppd.values.as_object() {
+            let map_vals: HashMap<String, String> = values.into_iter()
+                .map(|(k, v)| (k.to_owned(), v.as_str().unwrap().to_string()))
+                .collect();
+            println!("{:?}", map_vals);
+            let changes = delegator.store_string_map(ppd.entity.as_str(), map_vals).await;
+            if let Err(ref errors) = changes {
+                // print_errs(errors);
+                println!("{:?}", errors);
+            }
+            println!("changes: {:?}", changes);
+            // assert_eq!(1, changes.unwrap());
+        }
         Ok(())
     }
 }

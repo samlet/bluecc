@@ -92,23 +92,11 @@ impl Object for OrderHeader{
 #[cfg(test)]
 mod lib_tests {
     use super::*;
-    use crate::delegators::{pretty, Delegator};
+    use crate::delegators::{pretty, Delegator, print_errs};
     use serde_json::json;
     use std::collections::HashMap;
     use itertools::Itertools;
     use std::any::Any;
-
-    fn print_errs(errors:&crate::Error){
-        eprintln!("Error level - description");
-        errors
-            .iter()
-            .enumerate()
-            .for_each(|(index, error)| eprintln!("└> {} - {}", index, error));
-
-        if let Some(backtrace) = errors.backtrace() {
-            eprintln!("{:?}", backtrace);
-        }
-    }
 
     #[tokio::test]
     async fn serialize_obj_works() -> crate::Result<()> {

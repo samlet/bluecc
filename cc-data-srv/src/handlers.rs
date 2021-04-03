@@ -1,4 +1,4 @@
-use deles::delegators::{Person, Party, Delegator, ListOptions};
+use deles::delegators::{Person, Party, Delegator, EntityData, ListOptions};
 use serde::Serialize;
 use deles::GenericError;
 use warp::http::StatusCode;
@@ -10,12 +10,14 @@ use std::collections::HashMap;
 use quaint::{prelude::*, ast::*, single::Quaint,
              connector::{Queryable, TransactionCapable},
 };
+use deles::error::ServiceError as CommErr;
+use crate::common::with_json_body;
 
 pub fn with_ctx(db: Delegator) -> impl Filter<Extract = (Delegator,), Error = std::convert::Infallible> + Clone {
     warp::any().map(move || db.clone())
 }
 
-pub fn respond<T: Serialize>(result: Result<T, GenericError>, status: warp::http::StatusCode) -> Result<impl warp::Reply, warp::Rejection> {
+pub fn respond<T: Serialize>(result: Result<T, CommErr>, status: warp::http::StatusCode) -> Result<impl warp::Reply, warp::Rejection> {
     match result {
         Ok(response) => {
             Ok(warp::reply::with_status(warp::reply::json(&response), status))
@@ -34,6 +36,7 @@ pub fn api_filters(
         .and(
             persons_list(ctx.clone())
                 .or(party_list(ctx.clone()))
+                .or(handle_create(ctx.clone()))
             // .or(todos_update(ctx.clone()))
             // .or(todos_delete(ctx))
         )
@@ -60,10 +63,26 @@ pub fn party_list(
         .and_then(list_parties)
 }
 
+pub fn handle_create(
+    ctx: Delegator,
+) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
+    warp::path!("create")
+        .and(warp::post())
+        .and(with_json_body::<EntityData>())
+        .and(with_ctx(ctx))
+        .and_then(create_entity)
+}
+
 pub async fn list_persons(opts: ListOptions, ctx: Delegator) -> Result<impl warp::Reply, warp::Rejection> {
     respond( ctx.list_with_options::<Person>("Person", opts).await,
              warp::http::StatusCode::OK)
 }
+
+pub async fn create_entity(val: EntityData, ctx: Delegator) -> Result<impl warp::Reply, warp::Rejection> {
+    respond( ctx.store_entity(&val).await,
+             warp::http::StatusCode::OK)
+}
+
 
 pub async fn list_parties(opts: HashMap<String, String>, ctx: Delegator) -> Result<impl warp::Reply, warp::Rejection> {
     if opts.contains_key("party_type_id"){

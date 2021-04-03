@@ -23,7 +23,7 @@ pub struct StatusItem{
 }
 
 impl StatusItem{
-    pub async fn list_items(delegator:&Delegator, type_id:&str) -> Result<Vec<StatusItem>, GenericError>{
+    pub async fn list_items(delegator:&Delegator, type_id:&str) -> crate::Result<Vec<StatusItem>>{
         let conditions = "status_type_id".equals(type_id);
         let rs: Vec<StatusItem> = delegator.list_for("StatusItem", conditions.into()).await?;
         Ok(rs)

@@ -449,7 +449,7 @@ mod lib_tests {
     #[test]
     fn load_all_ents_works() -> anyhow::Result<()> {
         let mut reader=ModelReader::load()?;
-        let mut sw = Stopwatch::start_new();
+        let mut sw = Stopwatch::new();
         reader.load_all_ents()?;
         println!("load all ents elapsed time {} ms", sw.ms());
 

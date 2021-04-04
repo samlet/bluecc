@@ -1,77 +1,28 @@
-/// Simple stopwatch
-#[derive(Clone, Copy)]
+use parking_lot::Mutex;
+use std::{
+    sync::{atomic, Arc},
+    thread, time,
+};
+
 pub struct Stopwatch {
-    /// Start time in ns
-    start_time_ns: u64,
+    time: Mutex<time::Instant>,
 }
 
 impl Stopwatch {
-    /// Create new stopwatch and start timing
-    pub fn start_new() -> Stopwatch {
-        Stopwatch {
-            start_time_ns: time::precise_time_ns(),
+    pub fn new() -> Self {
+        Stopwatch { time: Mutex::new(time::Instant::now()),}
+    }
+
+    pub fn ms(&self) -> u64 {
+        fn as_millis(dur: time::Duration) -> u64 {
+            dur.as_secs() * 1_000 + dur.subsec_nanos() as u64 / 1_000_000
         }
-    }
 
-    /// Restart timing from current time
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use seed::Stopwatch;
-    /// use std::time::Duration;
-    ///
-    /// fn main() {
-    ///     let mut sw = Stopwatch::start_new();
-    ///
-    ///     // emulate some work
-    ///     std::thread::sleep(Duration::from_millis(1000));
-    ///
-    ///     sw.restart();
-    ///
-    ///     let ms = sw.ms();
-    ///     assert!( ms < 1f32, "After restart, timer value is small" );
-    /// }
-    /// ```
-    pub fn restart(&mut self) {
-        *self = Stopwatch::start_new();
-    }
+        let mut time = self.time.lock();
+        let elapsed = as_millis(time.elapsed());
 
-    /// Get elapsed time since creation/restart in seconds
-    pub fn s(&self) -> f32 {
-        (time::precise_time_ns() - self.start_time_ns) as f32 / 1000000000f32
-    }
+        *time = time::Instant::now();
 
-    /// Get elapsed time since creation/restart in milliseconds
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use seed::Stopwatch;
-    /// use std::time::Duration;
-    ///
-    /// fn main() {
-    ///     let mut sw = Stopwatch::start_new();
-    ///
-    ///     // emulate some work
-    ///     std::thread::sleep(Duration::from_millis(10));
-    ///
-    ///     // measure elapsed time
-    ///     let ms = sw.ms();
-    ///     assert!( ms >= 10f32 );
-    /// }
-    /// ```
-    pub fn ms(&self) -> f32 {
-        (time::precise_time_ns() - self.start_time_ns) as f32 / 1000000f32
-    }
-
-    /// Get elapsed time since creation/restart in microseconds
-    pub fn us(&self) -> f32 {
-        (time::precise_time_ns() - self.start_time_ns) as f32 / 1000f32
-    }
-
-    /// Get elapsed time since creation/restart in nanoseconds
-    pub fn ns(&self) -> f32 {
-        (time::precise_time_ns() - self.start_time_ns) as f32
+        elapsed
     }
 }

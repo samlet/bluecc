@@ -236,6 +236,7 @@ mod lib_tests {
     fn multi_primary_keys_works() -> anyhow::Result<()> {
         let pk_vals=vec!["admin","read","2004-03-04 18:48:34.612"];
         let ent_name="SecurityGroupPermission";
+        
         let ent=seed::get_entity_model(ent_name)?;
         let mut conditions:ConditionTree =ConditionTree::NoCondition;
         for (i,p) in ent.primary_keys.iter().enumerate(){

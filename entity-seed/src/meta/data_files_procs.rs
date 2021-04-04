@@ -8,7 +8,7 @@ use std::str::FromStr;
 use std::str;
 use super::*;
 use serde::{Serialize, de};
-use crate::meta_model::{EntityModel, Entity};
+use crate::meta_model::{EntityModel, Entity, ExtendEntity};
 use roxmltree::Node;
 use crate::meta::service_models::{ServiceModel, ModelService};
 use std::collections::HashMap;
@@ -232,6 +232,26 @@ impl ModelReader{
             info: "entity model".to_string()
         })
     }
+
+    pub fn load_all_ents(&mut self) -> Result<Vec<&Entity>, GenericError> {
+        let mut all_extends:Vec<ExtendEntity>=Vec::new();
+        for f in &self.data_files.files {
+            let mut model: EntityModel = load_xml(f.content.as_bytes());
+            model.build();
+            for e in &model.entities{
+                self.cached_ents.insert(e.entity_name.to_owned(), e.clone());
+            }
+            all_extends.append(&mut model.extends);
+        }
+        for ext in &mut all_extends{
+            let mut ent=self.cached_ents.get_mut(ext.entity_name.as_str()).expect("entity to extend");
+            ent.fields.append(&mut ext.fields);
+            ent.relations.append(&mut ext.relations);
+        }
+
+        let vals=Vec::from_iter(self.cached_ents.values());
+        Ok(vals)
+    }
 }
 
 pub struct SeedFiles{
@@ -290,6 +310,7 @@ where P: Fn(&Node<'_,'_>) -> bool,{
 #[cfg(test)]
 mod lib_tests {
     use super::*;
+    use crate::stopwatch::Stopwatch;
 
     #[test]
     fn json_object_works() -> anyhow::Result<()> {
@@ -422,6 +443,20 @@ mod lib_tests {
         let item = sr.get_service_model(srv_name)?;
         let json_str = serde_json::to_string_pretty(&item)?;
         println!("{} => {}", srv_name, json_str);
+        Ok(())
+    }
+
+    #[test]
+    fn load_all_ents_works() -> anyhow::Result<()> {
+        let mut reader=ModelReader::load()?;
+        let mut sw = Stopwatch::start_new();
+        reader.load_all_ents()?;
+        println!("load all ents elapsed time {} ms", sw.ms());
+
+        let model:Entity=reader.get_entity_model("UserLogin")?;
+        println!("{:?}", model.get_field_names());
+        assert!(model.get_field_names().contains(&"partyId".to_string()));
+
         Ok(())
     }
 }

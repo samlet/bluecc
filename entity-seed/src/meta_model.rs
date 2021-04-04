@@ -177,16 +177,31 @@ pub struct ViewEntity{
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct ExtendEntity{
+    #[serde(rename = "entity-name", default)]
+    pub entity_name: String,
+    #[serde(rename = "field", default)]
+    pub fields: Vec<ModelField>,
+    #[serde(rename = "relation", default)]
+    pub relations: Vec<ModelRelation>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct EntityModel{
+    #[serde(default)]
     pub title: String,
+    #[serde(default)]
     pub description: String,
+    #[serde(default)]
     pub version: String,
     #[serde(rename = "default-resource-name", default)]
     pub default_resource_name: String,
     #[serde(rename = "entity", default)]
     pub entities: Vec<Entity>,
     #[serde(rename = "view-entity", default)]
-    pub views: Vec<ViewEntity>
+    pub views: Vec<ViewEntity>,
+    #[serde(rename = "extend-entity", default)]
+    pub extends: Vec<ExtendEntity>
 }
 
 #[derive(Serialize, Deserialize)]

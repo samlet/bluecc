@@ -1,4 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports, unused_mut))]
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports, unused_mut, deprecated))]
 #![recursion_limit="256"]
 
 #[macro_use]
@@ -26,6 +26,7 @@ pub mod errors;
 pub mod snowflake;
 mod object_id;
 mod topo;
+pub mod stopwatch;
 
 pub use self::database::establish_connection;
 pub use self::util::deserialize_branch_with_contiguous_check as load_xml;

@@ -5,6 +5,7 @@ mod status_procs;
 mod party_procs;
 mod util;
 pub mod values;
+mod query;
 
 pub use generic_delegator::{Delegator, GenericValues, ListOptions, result_str, EntityData};
 pub use party_procs::{Person, Party};

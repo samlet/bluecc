@@ -194,7 +194,6 @@ mod lib_tests {
     use super::*;
     use serde_json::{json, to_string_pretty};
     use chrono::{DateTime, Utc};
-    use crate::delegators::print_errs;
 
     // source from: $ cargo run --bin seed gen UserLogin dto_orig
     #[derive(Debug, Deserialize, Serialize, Clone)]

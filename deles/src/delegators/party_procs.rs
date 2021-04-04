@@ -127,7 +127,7 @@ mod lib_tests {
     use super::*;
 
     #[tokio::test]
-    async fn list_ent_works() -> Result<(), GenericError> {
+    async fn list_ent_works() -> crate::Result<()> {
         let delegator = Delegator::new().await?;
         let rs: Vec<Person> = delegator.list("Person").await?;
         println!("total {}", rs.len());
@@ -136,7 +136,7 @@ mod lib_tests {
     }
 
     #[tokio::test]
-    async fn list_parties_works() -> Result<(), GenericError> {
+    async fn list_parties_works() -> crate::Result<()> {
         let delegator = Delegator::new().await?;
         let conditions = "party_type_id".equals("PARTY_GROUP");
         let rs: Vec<Party> = delegator.list_for("Party", conditions.into()).await?;
@@ -148,7 +148,7 @@ mod lib_tests {
     }
 
     #[tokio::test]
-    async fn list_parties_table_works() -> Result<(), GenericError> {
+    async fn list_parties_table_works() -> crate::Result<()> {
         use comfy_table::presets::UTF8_FULL;
         use comfy_table::modifiers::UTF8_ROUND_CORNERS;
 

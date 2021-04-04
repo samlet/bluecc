@@ -119,7 +119,7 @@ mod lib_tests {
     use super::*;
     use crate::delegators::status_procs::StatusItemRaw;
     use crate::delegators::Delegator;
-    use quaint::{prelude::*, ast::*, single::Quaint,
+    use quaint::{prelude::*, ast::*, single::Quaint, visitor::{Visitor, Postgres},
                  connector::{Queryable, TransactionCapable},
     };
     use inflector::Inflector;
@@ -192,6 +192,84 @@ mod lib_tests {
         let cols=vec!["product_type_id", "description"];
         let delegator=Delegator::new().await?;
         browse_data(&delegator, ent, &cols).await?;
+
+        Ok(())
+    }
+
+    #[test]
+    fn conditions_works() -> anyhow::Result<()> {
+        let query = Select::from_table("users").so_that("foo".like("bar"));
+        let (sql, params) = Postgres::build(query)?;
+        println!("{} ==> {:?}", sql, params);
+
+        let mut conditions:ConditionTree = "product_id".equals("WG-1111").into();
+        conditions=conditions.and("unit_price".less_than(100.00)).into();
+        conditions=conditions.and("unit_price".greater_than(10.00)).into();
+        let query = Select::from_table("users").so_that(conditions);
+        let (sql, params) = Postgres::build(query)?;
+        println!("{} ==> {:?}", sql, params);
+
+        Ok(())
+    }
+
+    #[test]
+    fn primary_keys_works() -> anyhow::Result<()> {
+        let pk_vals=vec!["WG-1111"];
+        let ent=seed::get_entity_model("Product")?;
+        let mut conditions:ConditionTree =ConditionTree::NoCondition;
+        for (i,p) in ent.primary_keys.iter().enumerate(){
+            if i==0{
+                conditions=p.field_name.to_owned().equals(pk_vals[i]).into();
+            }else {
+                conditions = conditions.and(p.field_name.to_owned().equals(pk_vals[i])).into();
+            }
+        }
+
+        let query = Select::from_table("product").so_that(conditions);
+        let (sql, params) = Postgres::build(query)?;
+        println!("{} ==> {:?}", sql, params);
+
+        Ok(())
+    }
+
+    #[test]
+    fn multi_primary_keys_works() -> anyhow::Result<()> {
+        let pk_vals=vec!["admin","read","2004-03-04 18:48:34.612"];
+        let ent_name="SecurityGroupPermission";
+        let ent=seed::get_entity_model(ent_name)?;
+        let mut conditions:ConditionTree =ConditionTree::NoCondition;
+        for (i,p) in ent.primary_keys.iter().enumerate(){
+            let fld_name=p.field_name.to_snake_case();
+            if i==0{
+                conditions=fld_name.equals(pk_vals[i]).into();
+            }else {
+                conditions = conditions.and(fld_name.equals(pk_vals[i])).into();
+            }
+        }
+
+        // select expr
+        let query = Select::from_table(ent_name.to_snake_case()).so_that(conditions.clone());
+        let (sql, params) = Postgres::build(query)?;
+        println!("{} ==> {:?}", sql, params);
+
+        // delete expr
+        let query = Delete::from_table(ent_name.to_snake_case()).so_that(conditions.clone());
+        let (sql, params) = Postgres::build(query)?;
+        println!("{} ==> {:?}", sql, params);
+
+        // update expr
+        let mut query=Update::table(ent_name.to_snake_case());
+        let paras: HashMap<&str, i32> =
+            [("Norway", 100),
+             ("Denmark", 50),
+             ("Iceland", 10)]
+             .iter().cloned().collect();
+        for (k,v) in paras{
+            query=query.set(k,v)
+        }
+        query=query.so_that(conditions.clone());
+        let (sql, params) = Postgres::build(query)?;
+        println!("{} ==> {:?}", sql, params);
 
         Ok(())
     }

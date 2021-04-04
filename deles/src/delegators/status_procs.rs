@@ -121,7 +121,7 @@ async fn print_raw_sts(status_type: &str, items: &Vec<StatusItemRaw>) -> anyhow:
 }
 
 #[tokio::test]
-async fn list_ent_works() -> Result<(), GenericError> {
+async fn list_ent_works() -> crate::Result<()> {
     let delegator=Delegator::new().await?;
     let rs:Vec<StatusItemRaw>=delegator.list("StatusItem").await?;
     println!("total {}", rs.len());

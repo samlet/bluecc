@@ -66,6 +66,10 @@ pub mod error {
         GenericErr(#[from] seed::GenericError),
         #[error("config error")]
         ConfigErr,
+        #[error("parse xml error")]
+        ParseXmlErr(#[from] serde_xml_rs::Error),
+        #[error("common error")]
+        CommonErr(#[from] common::Error),
         #[error("invalid header (expected {expected:?}, found {found:?})")]
         InvalidHeader {
             expected: String,

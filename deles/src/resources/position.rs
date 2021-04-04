@@ -47,7 +47,7 @@ mod lib_tests {
     use crate::delegators::Delegator;
 
     #[tokio::test]
-    async fn list_ent_works() -> Result<(), GenericError> {
+    async fn list_ent_works() -> crate::Result<()> {
         let delegator=Delegator::new().await?;
         let rs:Vec<EmplPosition>=delegator.list(EmplPosition::NAME).await?;
         println!("total {}", rs.len());

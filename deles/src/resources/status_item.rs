@@ -52,7 +52,7 @@ mod lib_tests {
      */
 
     #[tokio::test]
-    async fn list_works() -> Result<(), GenericError> {
+    async fn list_works() -> crate::Result<()> {
         let delegator = Delegator::new().await?;
         let rs=StatusItem::list_items(&delegator, "POSTX_STATUS").await?;
         println!("total {}", rs.len());

@@ -92,7 +92,7 @@ impl Object for OrderHeader{
 #[cfg(test)]
 mod lib_tests {
     use super::*;
-    use crate::delegators::{pretty, Delegator, print_errs};
+    use crate::delegators::{pretty, Delegator};
     use serde_json::json;
     use std::collections::HashMap;
     use itertools::Itertools;
@@ -139,7 +139,7 @@ mod lib_tests {
             let delegator = Delegator::new().await?;
             let changes = delegator.store_string_map("OrderHeader", map_vals).await;
             if let Err(ref errors) = changes {
-                print_errs(errors);
+                println!("{:?}", errors);
             }
             println!("changes: {:?}", changes);
             assert_eq!(1, changes.unwrap());
@@ -180,7 +180,7 @@ mod lib_tests {
         // delegator.store_string_map是通过entity-meta进行值转换的
         let changes = delegator.store_string_map("OrderHeader", p).await;
         if let Err(ref errors) = changes {
-            print_errs(errors);
+            println!("{:?}", errors);
         }
         println!("changes: {:?}", changes);
         // }

@@ -83,7 +83,6 @@ pub async fn create_entity(val: EntityData, ctx: Delegator) -> Result<impl warp:
              warp::http::StatusCode::OK)
 }
 
-
 pub async fn list_parties(opts: HashMap<String, String>, ctx: Delegator) -> Result<impl warp::Reply, warp::Rejection> {
     if opts.contains_key("party_type_id"){
         let conditions = "party_type_id"

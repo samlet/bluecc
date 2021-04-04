@@ -273,6 +273,29 @@ mod lib_tests {
 
         Ok(())
     }
+
+    #[derive(Serialize, Deserialize)]
+    enum ConditionExpr{
+        Equals{fld:String, val:String},
+        Between{fld:String, start:String, end:String},
+    }
+
+    #[derive(Serialize, Deserialize)]
+    struct Exprs{
+        pub conditions: Vec<ConditionExpr>
+    }
+
+    #[test]
+    fn condition_json_works() -> anyhow::Result<()> {
+        let range_val=ConditionExpr::Between {
+            fld: "age".to_string(),
+            start: "1".to_string(),
+            end: "11".to_string()
+        };
+        let exprs=Exprs{ conditions: vec![range_val] };
+        println!("{}", pretty(&exprs));
+        Ok(())
+    }
 }
 
 

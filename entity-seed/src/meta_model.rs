@@ -28,7 +28,15 @@ pub struct Entity{
     pub multiple_keys: bool
 }
 
+const STAMP_FIELD: &'static str = "lastUpdatedStamp";
+const STAMP_TX_FIELD: &'static str = "lastUpdatedTxStamp";
+const CREATE_STAMP_FIELD: &'static str = "createdStamp";
+const CREATE_STAMP_TX_FIELD: &'static str = "createdTxStamp";
+
 impl Entity{
+    pub fn internal_fields() -> Vec<&'static str>{
+        vec![STAMP_FIELD, STAMP_TX_FIELD, CREATE_STAMP_FIELD, CREATE_STAMP_TX_FIELD]
+    }
     pub fn pks_str(&self) -> String{
         use inflector::cases::snakecase::to_snake_case;
         let pks:Vec<String>=self.primary_keys.iter().map(|x|

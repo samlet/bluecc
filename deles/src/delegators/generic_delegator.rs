@@ -106,24 +106,45 @@ impl Delegator{
 
     pub async fn store(&self, ent_name: &str, values: &serde_json::Map<String,serde_json::Value>) -> crate::Result<u64> {
         let (cols,vals)=get_values_from_map(values)?;
-        self.inner_store(ent_name, cols, vals).await
+        self.inner_store(ent_name, cols, vals, true).await
     }
 
     pub async fn store_string_map(&self, ent_name: &str, values: HashMap<String,String>) -> crate::Result<u64> {
         let (cols,vals)=get_values_from_string_map(ent_name, values)?;
-        self.inner_store(ent_name, cols, vals).await
+        self.inner_store(ent_name, cols, vals, true).await
     }
 
-    pub async fn inner_store<'a>(&self, ent_name: &str, cols:Vec<String>, vals:Vec<quaint::Value<'a>>) -> crate::Result<u64> {
-        let table=ent_name.to_snake_case();
+    pub async fn inner_store<'a>(&self, ent_name: &str, cols:Vec<String>,
+                                 vals:Vec<quaint::Value<'a>>,
+                                 include_internal_fields:bool) -> crate::Result<u64> {
+        let table = ent_name.to_snake_case();
+
         debug!("cols -> {:?}", cols);
         debug!("vals -> {:?}", vals);
-        let insert: Insert<'_> = Insert::multi_into(table, cols)
-            .values(vals).into();
-        let changes = self.conn.execute(
-            insert.on_conflict(OnConflict::DoNothing).into()).await?;
 
-        Ok(changes)
+        if include_internal_fields {
+            let dt = chrono::Utc::now();
+            fn cat<T>(a: &[T], b: &[T]) -> Vec<T> where T: Clone {
+                [a, b].concat()
+            }
+            let ts_flds = vec![Value::datetime(dt), Value::datetime(dt),
+                               Value::datetime(dt), Value::datetime(dt)];
+            let ts_cols: Vec<String> = seed::Entity::internal_fields().iter()
+                .map(|f| f.to_snake_case()).collect();
+
+            let insert: Insert<'_> = Insert::multi_into(table, cat(&cols, &ts_cols))
+                .values(cat(&vals, &ts_flds)).into();
+            let changes = self.conn.execute(
+                insert.on_conflict(OnConflict::DoNothing).into()).await?;
+
+            Ok(changes)
+        }else{
+            let insert: Insert<'_> = Insert::multi_into(table, cols).values(vals).into();
+            let changes = self.conn.execute(
+                insert.on_conflict(OnConflict::DoNothing).into()).await?;
+
+            Ok(changes)
+        }
     }
 
     pub async fn store_entity(&self, ppd: &EntityData) -> crate::Result<ServiceResult<u64>> {
@@ -365,25 +386,14 @@ mod lib_tests {
                 "entity": "SecurityGroupPermission",
                 "values": {
                   "groupId": "VIEWADMIN",
-                  "permissionId": "PAY_INFO_VIEW",
+                  "permissionId": "c3_PAY_INFO_VIEW",
                   "fromDate": "2001-05-13 12:00:00.0"
                 }
             }))?;
         println!("{} ->", ppd.entity);
 
-        if let Some(values)=ppd.values.as_object() {
-            let map_vals: HashMap<String, String> = values.into_iter()
-                .map(|(k, v)| (k.to_owned(), v.as_str().unwrap().to_string()))
-                .collect();
-            println!("{:?}", map_vals);
-            let changes = delegator.store_string_map(ppd.entity.as_str(), map_vals).await;
-            if let Err(ref errors) = changes {
-                // print_errs(errors);
-                println!("{:?}", errors);
-            }
-            println!("changes: {:?}", changes);
-            // assert_eq!(1, changes.unwrap());
-        }
+        let resp=delegator.store_entity(&ppd).await?;
+        println!("{:?}", resp);
         Ok(())
     }
 }

@@ -73,6 +73,10 @@ pub mod prelude {
         dt.to_rfc3339_opts(SecondsFormat::Millis, false).to_string()
     }
 
+    fn cat<T>(a: &[T], b: &[T]) -> Vec<T> where T: Clone {
+        [a, b].concat()
+    }
+
     pub fn remove_spaces<'a>(input: &'a str) -> Cow<'a, str> {
         if input.contains(' ') {
             let mut buf = String::with_capacity(input.len());

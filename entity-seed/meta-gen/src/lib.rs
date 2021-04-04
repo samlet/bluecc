@@ -26,8 +26,8 @@ extern crate lazy_static;
 #[macro_use] extern crate log;
 #[macro_use]
 extern crate diesel;
-#[macro_use]
-extern crate error_chain;
+// #[macro_use]
+// extern crate error_chain;
 
 pub use requests::{SrvResp, SrvErr, SrvDeles, DynamicValue, extract_val};
 pub use service_gen::{ServiceMeta, ParamMode, ModelParam};
@@ -40,22 +40,54 @@ pub use resource_gen::{generate_srv_invoker, generate_srv_ent};
 pub use xml_seed::{process_seed};
 pub use meta_conf::{META_CONF};
 
-error_chain!{
-    types {
-        Error, ErrorKind, ResultExt, Result;
-    }
-    links {}
-    foreign_links {
-        Io(std::io::Error);
-        ParseInt(::std::num::ParseIntError);
-        ParseJson(serde_json::Error);
-        ParseYaml(serde_yaml::Error);
-        GenericErr(seed::GenericError);
-        RequestErr(reqwest::Error);
-        XmlTreeErr(roxmltree::Error);
-        // ConfigTomlErr(toml::de::Error);
+// error_chain!{
+//     types {
+//         Error, ErrorKind, ResultExt, Result;
+//     }
+//     links {}
+//     foreign_links {
+//         Io(std::io::Error);
+//         ParseInt(::std::num::ParseIntError);
+//         ParseJson(serde_json::Error);
+//         ParseYaml(serde_yaml::Error);
+//         GenericErr(seed::GenericError);
+//         RequestErr(reqwest::Error);
+//         XmlTreeErr(roxmltree::Error);
+//         // ConfigTomlErr(toml::de::Error);
+//     }
+// }
+
+mod error{
+    use thiserror::Error;
+
+    #[derive(Error, Debug)]
+    pub enum MetaError {
+        #[error("io error")]
+        Io(#[from] std::io::Error),
+        #[error("parse error")]
+        Parse(#[from] std::num::ParseIntError),
+        #[error("xml parse fail")]
+        ParseXml(#[from] roxmltree::Error),
+        #[error("json parse fail")]
+        JsonSerialize(#[from] serde_json::Error),
+        #[error("xml parse fail")]
+        XmlSerialize(#[from] serde_xml_rs::Error),
+        #[error("yaml parse fail")]
+        YamlSerialize(#[from] serde_yaml::Error),
+        #[error("request fail")]
+        RequestErr(#[from] reqwest::Error),
+        #[error("tera template fail")]
+        TeraTemplateErr(#[from] tera::Error),
+        #[error("config toml error")]
+        ConfigTomlErr(#[from] toml::de::Error),
+        #[error("generic error")]
+        GenericErr(#[from] seed::GenericError),
+        #[error("service error")]
+        ServiceErr(#[from] deles::ServiceError),
     }
 }
+
+pub type Result<T> = std::result::Result<T, error::MetaError>;
 
 #[cfg(test)]
 mod tests {

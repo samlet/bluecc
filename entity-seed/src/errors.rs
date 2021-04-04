@@ -17,6 +17,8 @@ pub enum GenericError {
     JsonSerialize(#[from] serde_json::Error),
     #[error("xml parse fail")]
     XmlSerialize(#[from] serde_xml_rs::Error),
+    #[error("yaml parse fail")]
+    YamlSerialize(#[from] serde_yaml::Error),
     #[error("request fail")]
     RequestErr(#[from] reqwest::Error),
     #[error("tera template fail")]

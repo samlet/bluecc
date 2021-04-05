@@ -4,8 +4,12 @@ use std::collections::HashMap;
 #[serde(rename_all(serialize = "camelCase", deserialize = "camelCase"))]
 pub struct ContractFixture{
     pub abi: ethabi::Contract,
+
     #[serde(default)]
     pub all_source_paths: HashMap<String, String>,
+    bytecode: String,
+    bytecode_sha1: String,
+    contract_name: String,
 }
 
 #[cfg(test)]
@@ -52,7 +56,7 @@ mod lib_tests {
         let abi = fixture.abi;
         let functions=abi.functions.iter()
             .map(|(k,_)|k).collect_vec();
-        println!("{}", pretty(&functions));
+        println!("{} contains: {}", fixture.contract_name, pretty(&functions));
 
         Ok(())
     }

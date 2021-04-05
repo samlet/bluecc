@@ -7,7 +7,8 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-#seed = { package="entity-seed", version = "0.1.0",  path = "../entity-seed"}
+common = {package="common", version = "0.1.0",  path = "../common"}
+seed = { package="entity-seed", version = "0.1.0",  path = "../entity-seed"}
 
 log = "0.4"
 env_logger = "0.8.3"
@@ -19,7 +20,7 @@ itertools = "0.10"
 thiserror = "1.0"
 lazy_static = "1.4.0"
 Inflector = "0.11.4"
-error-chain = "0.12.2"
+#error-chain = "0.12.2"
 
 serde = { version = "1", features = ["derive"] }
 serde_json = "1.0.11"
@@ -37,6 +38,10 @@ lapin = "1.6.8"
 rand = "0.3.15"
 regex = "1.1.6"
 uuid = { version = "0.8.1", features = ["v4"] }
+
+web3 = { git="https://github.com/tomusdrw/rust-web3.git", rev="376bc7ea8ee78142b175f7f99787de15742b0790" }
+ethabi = "14.0.0"
+ethereum-types = "0.11.0"
 
 [dev-dependencies]
 clap = "2.18.0"

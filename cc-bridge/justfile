@@ -18,3 +18,7 @@ consumer topic:
 create-topic topic:
     kafka-topics --create --topic {{topic}} --if-not-exists --zookeeper localhost:2181 --partitions 1 --replication-factor 1
 
+eth:
+    ganache-cli -b 3 -m "hamster coin cup brief quote trick stove draft hobby strong caught unable"
+bridge:
+    cargo run --bin bridge

@@ -1,0 +1,761 @@
+{
+  "abi": [
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "hello",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "sender",
+          "type": "address"
+        }
+      ],
+      "name": "Hello",
+      "type": "event"
+    }
+  ],
+  "allSourcePaths": {
+    "0": "contracts/SimpleEvent.sol"
+  },
+  "ast": {
+    "absolutePath": "contracts/SimpleEvent.sol",
+    "exportedSymbols": {
+      "SimpleEvent": [
+        15
+      ]
+    },
+    "id": 16,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 1,
+        "literals": [
+          "solidity",
+          "^",
+          "0.4",
+          ".22"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:0"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": true,
+        "id": 15,
+        "linearizedBaseContracts": [
+          15
+        ],
+        "name": "SimpleEvent",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "anonymous": false,
+            "documentation": null,
+            "id": 5,
+            "name": "Hello",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 4,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3,
+                  "indexed": false,
+                  "name": "sender",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5,
+                  "src": "65:14:0",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 2,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "65:7:0",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "64:16:0"
+            },
+            "src": "53:28:0"
+          },
+          {
+            "body": {
+              "id": 13,
+              "nodeType": "Block",
+              "src": "111:39:0",
+              "statements": [
+                {
+                  "eventCall": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "expression": {
+                          "argumentTypes": null,
+                          "id": 9,
+                          "name": "msg",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 30,
+                          "src": "132:3:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_magic_message",
+                            "typeString": "msg"
+                          }
+                        },
+                        "id": 10,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "memberName": "sender",
+                        "nodeType": "MemberAccess",
+                        "referencedDeclaration": null,
+                        "src": "132:10:0",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        }
+                      ],
+                      "id": 8,
+                      "name": "Hello",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 5,
+                      "src": "126:5:0",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_event_nonpayable$_t_address_$returns$__$",
+                        "typeString": "function (address)"
+                      }
+                    },
+                    "id": 11,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "126:17:0",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 12,
+                  "nodeType": "EmitStatement",
+                  "src": "121:22:0"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 14,
+            "implemented": true,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "hello",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "101:2:0"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 7,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "111:0:0"
+            },
+            "scope": 15,
+            "src": "87:63:0",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          }
+        ],
+        "scope": 16,
+        "src": "26:126:0"
+      }
+    ],
+    "src": "0:153:0"
+  },
+  "bytecode": "6080604052348015600f57600080fd5b5060b88061001e6000396000f300608060405260043610603e5763ffffffff7c010000000000000000000000000000000000000000000000000000000060003504166319ff1d2181146043575b600080fd5b348015604e57600080fd5b5060556057565b005b6040805133815290517fd282f389399565f3671145f5916e51652b60eee8e5c759293a2f5771b8ddfd2e9181900360200190a15600a165627a7a72305820060c35364dbcba5449a8f5f3530758a3daa2636c40463464f4078930cd8a75540029",
+  "bytecodeSha1": "a52d8356e4fd5f47f02626d9cbed9ead03e6106c",
+  "compiler": {
+    "evm_version": "byzantium",
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "version": "0.4.25"
+  },
+  "contractName": "SimpleEvent",
+  "coverageMap": {
+    "branches": {
+      "0": {}
+    },
+    "statements": {
+      "0": {
+        "SimpleEvent.hello": {
+          "0": [
+            121,
+            143
+          ]
+        }
+      }
+    }
+  },
+  "dependencies": [],
+  "deployedBytecode": "608060405260043610603e5763ffffffff7c010000000000000000000000000000000000000000000000000000000060003504166319ff1d2181146043575b600080fd5b348015604e57600080fd5b5060556057565b005b6040805133815290517fd282f389399565f3671145f5916e51652b60eee8e5c759293a2f5771b8ddfd2e9181900360200190a15600a165627a7a72305820060c35364dbcba5449a8f5f3530758a3daa2636c40463464f4078930cd8a75540029",
+  "deployedSourceMap": "26:126:0:-;;;;;;;;;;;;;;;;;;;;;;;87:63;;8:9:-1;5:2;;;30:1;27;20:12;5:2;87:63:0;;;;;;;126:17;;;132:10;126:17;;;;;;;;;;;;;87:63::o",
+  "language": "Solidity",
+  "natspec": {
+    "methods": {}
+  },
+  "offset": [
+    26,
+    152
+  ],
+  "opcodes": "PUSH1 0x80 PUSH1 0x40 MSTORE PUSH1 0x4 CALLDATASIZE LT PUSH1 0x3E JUMPI PUSH4 0xFFFFFFFF PUSH29 0x100000000000000000000000000000000000000000000000000000000 PUSH1 0x0 CALLDATALOAD DIV AND PUSH4 0x19FF1D21 DUP2 EQ PUSH1 0x43 JUMPI JUMPDEST PUSH1 0x0 DUP1 REVERT JUMPDEST CALLVALUE DUP1 ISZERO PUSH1 0x4E JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP PUSH1 0x55 PUSH1 0x57 JUMP JUMPDEST STOP JUMPDEST PUSH1 0x40 DUP1 MLOAD CALLER DUP2 MSTORE SWAP1 MLOAD PUSH32 0xD282F389399565F3671145F5916E51652B60EEE8E5C759293A2F5771B8DDFD2E SWAP2 DUP2 SWAP1 SUB PUSH1 0x20 ADD SWAP1 LOG1 JUMP STOP LOG1 PUSH6 0x627A7A723058 KECCAK256 MOD 0xc CALLDATALOAD CALLDATASIZE 0x4d 0xbc 0xba SLOAD 0x49 0xa8 0xf5 RETURN MSTORE8 SMOD PC LOG3 0xda LOG2 PUSH4 0x6C404634 PUSH5 0xF4078930CD DUP11 PUSH22 0x54002900000000000000000000000000000000000000 ",
+  "pcMap": {
+    "0": {
+      "offset": [
+        26,
+        152
+      ],
+      "op": "PUSH1",
+      "path": "0",
+      "value": "0x80"
+    },
+    "2": {
+      "fn": null,
+      "offset": [
+        26,
+        152
+      ],
+      "op": "PUSH1",
+      "path": "0",
+      "value": "0x40"
+    },
+    "4": {
+      "fn": null,
+      "offset": [
+        26,
+        152
+      ],
+      "op": "MSTORE",
+      "path": "0"
+    },
+    "5": {
+      "fn": null,
+      "offset": [
+        26,
+        152
+      ],
+      "op": "PUSH1",
+      "path": "0",
+      "value": "0x4"
+    },
+    "7": {
+      "fn": null,
+      "offset": [
+        26,
+        152
+      ],
+      "op": "CALLDATASIZE",
+      "path": "0"
+    },
+    "8": {
+      "fn": null,
+      "offset": [
+        26,
+        152
+      ],
+      "op": "LT",
+      "path": "0"
+    },
+    "9": {
+      "fn": null,
+      "offset": [
+        26,
+        152
+      ],
+      "op": "PUSH1",
+      "path": "0",
+      "value": "0x3E"
+    },
+    "11": {
+      "fn": null,
+      "offset": [
+        26,
+        152
+      ],
+      "op": "JUMPI",
+      "path": "0"
+    },
+    "12": {
+      "fn": null,
+      "offset": [
+        26,
+        152
+      ],
+      "op": "PUSH4",
+      "path": "0",
+      "value": "0xFFFFFFFF"
+    },
+    "17": {
+      "fn": null,
+      "offset": [
+        26,
+        152
+      ],
+      "op": "PUSH29",
+      "path": "0",
+      "value": "0x100000000000000000000000000000000000000000000000000000000"
+    },
+    "47": {
+      "fn": null,
+      "offset": [
+        26,
+        152
+      ],
+      "op": "PUSH1",
+      "path": "0",
+      "value": "0x0"
+    },
+    "49": {
+      "fn": null,
+      "offset": [
+        26,
+        152
+      ],
+      "op": "CALLDATALOAD",
+      "path": "0"
+    },
+    "50": {
+      "fn": null,
+      "offset": [
+        26,
+        152
+      ],
+      "op": "DIV",
+      "path": "0"
+    },
+    "51": {
+      "fn": null,
+      "offset": [
+        26,
+        152
+      ],
+      "op": "AND",
+      "path": "0"
+    },
+    "52": {
+      "fn": null,
+      "offset": [
+        26,
+        152
+      ],
+      "op": "PUSH4",
+      "path": "0",
+      "value": "0x19FF1D21"
+    },
+    "57": {
+      "fn": null,
+      "offset": [
+        26,
+        152
+      ],
+      "op": "DUP2",
+      "path": "0"
+    },
+    "58": {
+      "fn": null,
+      "offset": [
+        26,
+        152
+      ],
+      "op": "EQ",
+      "path": "0"
+    },
+    "59": {
+      "fn": null,
+      "offset": [
+        26,
+        152
+      ],
+      "op": "PUSH1",
+      "path": "0",
+      "value": "0x43"
+    },
+    "61": {
+      "fn": null,
+      "offset": [
+        26,
+        152
+      ],
+      "op": "JUMPI",
+      "path": "0"
+    },
+    "62": {
+      "fn": null,
+      "offset": [
+        26,
+        152
+      ],
+      "op": "JUMPDEST",
+      "path": "0"
+    },
+    "63": {
+      "fn": null,
+      "offset": [
+        26,
+        152
+      ],
+      "op": "PUSH1",
+      "path": "0",
+      "value": "0x0"
+    },
+    "65": {
+      "fn": null,
+      "offset": [
+        26,
+        152
+      ],
+      "op": "DUP1",
+      "path": "0"
+    },
+    "66": {
+      "first_revert": true,
+      "fn": null,
+      "offset": [
+        26,
+        152
+      ],
+      "op": "REVERT",
+      "path": "0"
+    },
+    "67": {
+      "fn": "SimpleEvent.hello",
+      "offset": [
+        87,
+        150
+      ],
+      "op": "JUMPDEST",
+      "path": "0"
+    },
+    "68": {
+      "fn": "SimpleEvent.hello",
+      "offset": [
+        87,
+        150
+      ],
+      "op": "CALLVALUE",
+      "path": "0"
+    },
+    "69": {
+      "op": "DUP1"
+    },
+    "70": {
+      "op": "ISZERO"
+    },
+    "71": {
+      "op": "PUSH1",
+      "value": "0x4E"
+    },
+    "73": {
+      "op": "JUMPI"
+    },
+    "74": {
+      "op": "PUSH1",
+      "value": "0x0"
+    },
+    "76": {
+      "op": "DUP1"
+    },
+    "77": {
+      "dev": "Cannot send ether to nonpayable function",
+      "fn": "SimpleEvent.hello",
+      "offset": [
+        87,
+        150
+      ],
+      "op": "REVERT",
+      "path": "0"
+    },
+    "78": {
+      "op": "JUMPDEST"
+    },
+    "79": {
+      "fn": "SimpleEvent.hello",
+      "offset": [
+        87,
+        150
+      ],
+      "op": "POP",
+      "path": "0"
+    },
+    "80": {
+      "fn": "SimpleEvent.hello",
+      "offset": [
+        87,
+        150
+      ],
+      "op": "PUSH1",
+      "path": "0",
+      "value": "0x55"
+    },
+    "82": {
+      "fn": "SimpleEvent.hello",
+      "offset": [
+        87,
+        150
+      ],
+      "op": "PUSH1",
+      "path": "0",
+      "value": "0x57"
+    },
+    "84": {
+      "fn": "SimpleEvent.hello",
+      "offset": [
+        87,
+        150
+      ],
+      "op": "JUMP",
+      "path": "0"
+    },
+    "85": {
+      "fn": "SimpleEvent.hello",
+      "offset": [
+        87,
+        150
+      ],
+      "op": "JUMPDEST",
+      "path": "0"
+    },
+    "86": {
+      "fn": "SimpleEvent.hello",
+      "offset": [
+        87,
+        150
+      ],
+      "op": "STOP",
+      "path": "0"
+    },
+    "87": {
+      "fn": "SimpleEvent.hello",
+      "offset": [
+        87,
+        150
+      ],
+      "op": "JUMPDEST",
+      "path": "0"
+    },
+    "88": {
+      "fn": "SimpleEvent.hello",
+      "offset": [
+        126,
+        143
+      ],
+      "op": "PUSH1",
+      "path": "0",
+      "statement": 0,
+      "value": "0x40"
+    },
+    "90": {
+      "fn": "SimpleEvent.hello",
+      "offset": [
+        126,
+        143
+      ],
+      "op": "DUP1",
+      "path": "0"
+    },
+    "91": {
+      "fn": "SimpleEvent.hello",
+      "offset": [
+        126,
+        143
+      ],
+      "op": "MLOAD",
+      "path": "0"
+    },
+    "92": {
+      "fn": "SimpleEvent.hello",
+      "offset": [
+        132,
+        142
+      ],
+      "op": "CALLER",
+      "path": "0"
+    },
+    "93": {
+      "fn": "SimpleEvent.hello",
+      "offset": [
+        126,
+        143
+      ],
+      "op": "DUP2",
+      "path": "0"
+    },
+    "94": {
+      "fn": "SimpleEvent.hello",
+      "offset": [
+        126,
+        143
+      ],
+      "op": "MSTORE",
+      "path": "0"
+    },
+    "95": {
+      "fn": "SimpleEvent.hello",
+      "offset": [
+        126,
+        143
+      ],
+      "op": "SWAP1",
+      "path": "0"
+    },
+    "96": {
+      "fn": "SimpleEvent.hello",
+      "offset": [
+        126,
+        143
+      ],
+      "op": "MLOAD",
+      "path": "0"
+    },
+    "97": {
+      "fn": "SimpleEvent.hello",
+      "offset": [
+        126,
+        143
+      ],
+      "op": "PUSH32",
+      "path": "0",
+      "value": "0xD282F389399565F3671145F5916E51652B60EEE8E5C759293A2F5771B8DDFD2E"
+    },
+    "130": {
+      "fn": "SimpleEvent.hello",
+      "offset": [
+        126,
+        143
+      ],
+      "op": "SWAP2",
+      "path": "0"
+    },
+    "131": {
+      "fn": "SimpleEvent.hello",
+      "offset": [
+        126,
+        143
+      ],
+      "op": "DUP2",
+      "path": "0"
+    },
+    "132": {
+      "fn": "SimpleEvent.hello",
+      "offset": [
+        126,
+        143
+      ],
+      "op": "SWAP1",
+      "path": "0"
+    },
+    "133": {
+      "fn": "SimpleEvent.hello",
+      "offset": [
+        126,
+        143
+      ],
+      "op": "SUB",
+      "path": "0"
+    },
+    "134": {
+      "fn": "SimpleEvent.hello",
+      "offset": [
+        126,
+        143
+      ],
+      "op": "PUSH1",
+      "path": "0",
+      "value": "0x20"
+    },
+    "136": {
+      "fn": "SimpleEvent.hello",
+      "offset": [
+        126,
+        143
+      ],
+      "op": "ADD",
+      "path": "0"
+    },
+    "137": {
+      "fn": "SimpleEvent.hello",
+      "offset": [
+        126,
+        143
+      ],
+      "op": "SWAP1",
+      "path": "0"
+    },
+    "138": {
+      "fn": "SimpleEvent.hello",
+      "offset": [
+        126,
+        143
+      ],
+      "op": "LOG1",
+      "path": "0"
+    },
+    "139": {
+      "fn": "SimpleEvent.hello",
+      "jump": "o",
+      "offset": [
+        87,
+        150
+      ],
+      "op": "JUMP",
+      "path": "0"
+    }
+  },
+  "sha1": "5d885fbb93f9c7ae6d890c71064ee5159372e545",
+  "source": "pragma solidity ^0.4.22;\n\ncontract SimpleEvent {\n    event Hello(address sender);\n\n    function hello() public {\n        emit Hello(msg.sender);\n    }\n}\n",
+  "sourceMap": "26:126:0:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;26:126:0;;;;;;;",
+  "sourcePath": "contracts/SimpleEvent.sol",
+  "type": "contract"
+}

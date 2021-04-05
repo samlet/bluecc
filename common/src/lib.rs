@@ -2,26 +2,10 @@
 
 #[macro_use]
 extern crate serde_derive;
-// #[macro_use]
-// extern crate error_chain;
 
 #[cfg(test)]
 mod tests;
 pub mod params;
-
-// error_chain!{
-//     types {
-//         Error, ErrorKind, ResultExt, Result;
-//     }
-//     links {}
-//     foreign_links {
-//         Io(std::io::Error);
-//         ParseInt(::std::num::ParseIntError);
-//         ParseJson(serde_json::Error);
-//         ParseDateTimeErr(chrono::ParseError);
-//         ParseFloatErr(std::num::ParseFloatError);
-//     }
-// }
 
 pub mod error {
     use thiserror::Error;
@@ -50,26 +34,28 @@ pub mod prelude {
     use chrono::prelude::*;
 
     pub use super::params::{Object};
+    use serde::Serialize;
+
     pub type Result<T> = std::result::Result<T, super::error::CommonError>;
 
     const STD_FORMAT: &'static str = "%Y-%m-%d %H:%M:%S%.f";
 
     /// Call like: let s="2008-04-23 16:49:27.392";
-    pub fn from_std_fmt(s:&str) -> Result<DateTime<Utc>> {
-        let dt:DateTime<Utc>=Utc.datetime_from_str(s, STD_FORMAT)?;
+    pub fn from_std_fmt(s: &str) -> Result<DateTime<Utc>> {
+        let dt: DateTime<Utc> = Utc.datetime_from_str(s, STD_FORMAT)?;
         Ok(dt)
     }
 
-    pub fn utc_fmt(s:&str) -> Result<String> {
-        let dt:DateTime<Utc>=Utc.datetime_from_str(s, STD_FORMAT)?;
+    pub fn utc_fmt(s: &str) -> Result<String> {
+        let dt: DateTime<Utc> = Utc.datetime_from_str(s, STD_FORMAT)?;
         Ok(dt.to_rfc3339_opts(SecondsFormat::Millis, false).to_string())
     }
 
-    pub fn to_std_fmt(dt:&DateTime<Utc>) -> String {
+    pub fn to_std_fmt(dt: &DateTime<Utc>) -> String {
         dt.format(STD_FORMAT).to_string()
     }
 
-    pub fn to_utc_fmt(dt:&DateTime<Utc>) -> String {
+    pub fn to_utc_fmt(dt: &DateTime<Utc>) -> String {
         dt.to_rfc3339_opts(SecondsFormat::Millis, false).to_string()
     }
 
@@ -91,6 +77,12 @@ pub mod prelude {
         }
 
         return Cow::Borrowed(input);
+    }
+
+    pub fn pretty<T>(val: &T) -> String
+        where
+            T: ?Sized + Serialize, {
+        serde_json::to_string_pretty(val).unwrap()
     }
 }
 

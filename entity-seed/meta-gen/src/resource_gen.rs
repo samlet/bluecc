@@ -44,7 +44,7 @@ fn guess_action(value: &tera::Value, _args: &HashMap<String, tera::Value>) -> te
 pub fn generate_srv_invoker(writer: &mut dyn std::io::Write, srv: &ModelService,
                             ents: &HashMap<String, Entity>, spec: &str)
     -> Result<(), GenericError> {
-    debug!("srv name {} with {}, ents: {:?}", srv.name, srv.default_entity_name, ents.keys());
+    debug!("srv name {} with {}, ents: {:?}", srv.name, srv.get_entity_name(), ents.keys());
     let params = ServiceMeta::srv_model_params(&srv, &ents)?;
 
     for p in &params {
@@ -72,8 +72,9 @@ pub fn generate_srv_invoker(writer: &mut dyn std::io::Write, srv: &ModelService,
 
     let mut context = Context::new();
     context.insert("srv", &srv);
-    if !srv.default_entity_name.is_empty() {
-        context.insert("ent", ents.get(srv.default_entity_name.as_str()).unwrap());
+    let default_entity_name=srv.get_entity_name();
+    if !default_entity_name.is_empty() {
+        context.insert("ent", ents.get(default_entity_name.as_str()).unwrap());
     }
     context.insert("inputs", &inputs);
     context.insert("opts", &inputs.iter()
@@ -90,7 +91,7 @@ pub fn generate_srv_invoker(writer: &mut dyn std::io::Write, srv: &ModelService,
     context.insert("reqs", &reqs_str);
     context.insert("outputs", &outputs);
 
-    if !srv.default_entity_name.is_empty() {
+    if !default_entity_name.is_empty() {
         let tpl:String=if spec.is_empty() {"srv_create".to_string()} else {format!("srv_create_{}", spec)};
         let result = generator.tera.render(tpl.as_str(), &context)?;
         // println!("result => \n{}", result);
@@ -152,7 +153,7 @@ mod lib_tests {
         let stdout = std::io::stdout();
         let mut handle = stdout.lock();
         let (srv,ents)=get_srv("plugins/example", "createExample")?;
-        generate_srv_invoker(&mut handle, &srv, &ents)?;
+        generate_srv_invoker(&mut handle, &srv, &ents, "")?;
         Ok(())
     }
 }

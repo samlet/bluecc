@@ -126,7 +126,7 @@ async fn main() -> meta_gen::Result<()> {
         Some(Command::Srv { collapse, example, name }) => {
             let mut srvs = ServiceMeta::load()?;
             let srv= srvs.srv(name.as_str())?.to_owned();
-            let srv_ent=&srv.default_entity_name;
+            let srv_ent=&srv.get_entity_name();
             let srv_ent_incs=srv.include_auto_attrs();
 
             println!("srv-meta {} ({}): \n\t{}", name, &srv.engine.yellow(), &srv.description);
@@ -193,6 +193,7 @@ async fn main() -> meta_gen::Result<()> {
             use deles::delegators::{browse_data, Delegator};
             let delegator = Delegator::new().await?;
             let cols = if cols.is_empty() {
+                seed::load_all_entities()?;
                 let meta = seed::get_entity_model(entity_name.as_str())?;
                 meta.get_field_names()
             } else {
@@ -316,8 +317,8 @@ async fn main() -> meta_gen::Result<()> {
                 };
             let stdout = std::io::stdout();
             let mut handle = stdout.lock();
-            if !srv.default_entity_name.is_empty() {
-                let entity = ents.get(srv.default_entity_name.as_str()).unwrap();
+            if !srv.get_entity_name().is_empty() {
+                let entity = ents.get(srv.get_entity_name().as_str()).unwrap();
                 generate_srv_ent(&mut handle, &entity)?;
             }
             generate_srv_invoker(&mut handle, &srv, &ents, spec.as_str())?;
@@ -332,6 +333,7 @@ async fn main() -> meta_gen::Result<()> {
                 field_type: String,
                 field_info: String,
             }
+
             let fld_list=entity.fields.iter()
                 .map(|f|FieldMeta{
                     field_name: f.field_name.to_owned(),
@@ -341,12 +343,14 @@ async fn main() -> meta_gen::Result<()> {
                 .collect_vec();
             deles::delegators::render(&fld_list)?;
             deles::delegators::render(&entity.belongs())?;
+            // deles::delegators::render(&entity.relations)?;
         }
 
         Some(Command::Convert { file }) => {
             use std::fs;
             let path=PathBuf::from(file);
             let cnt=fs::read_to_string(path.as_path())?;
+            seed::load_all_entities()?;
             let rs=meta_gen::process_seed(cnt.as_str())?;
             // println!("{}", pretty(&rs));
             let output:PathBuf=PathBuf::from(".store").join(path.file_name().unwrap())
@@ -389,7 +393,7 @@ fn output_seed_example(ent_name: &str) -> Result<(), GenericError>{
 }
 
 fn output_invoke_example(srv:&ModelService) -> Result<(), GenericError>{
-    let ent_name = &srv.default_entity_name;
+    let ent_name = &srv.get_entity_name();
     if !ent_name.is_empty() {
         output_seed_example(ent_name)?;
     }

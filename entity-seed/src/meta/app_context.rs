@@ -54,6 +54,11 @@ impl AppContext{
     }
 }
 
+pub fn load_all_entities()-> Result<(), GenericError> {
+    APP_CONTEXT.lock().unwrap().reader.load_all_ents()?;
+    Ok(())
+}
+
 pub fn get_entity_model(name: &str) -> Result<Entity, GenericError> {
     APP_CONTEXT.lock().unwrap().get_model(name)
 }

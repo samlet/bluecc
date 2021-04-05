@@ -17,6 +17,7 @@ gen-seed:
     cargo run -- convert {{env_var("HOME")}}/ofbiz/applications/datamodel/data/demo/ContentDemoData.xml
     cargo run -- convert {{env_var("HOME")}}/ofbiz/applications/datamodel/data/demo/OrderDemoData.xml
     cargo run -- convert {{env_var("HOME")}}/ofbiz/applications/datamodel/data/demo/WorkEffortDemoData.xml
+    cargo run -- convert {{env_var("HOME")}}/ofbiz/applications/datamodel/data/demo/MarketingDemoData.xml
 
 dirs:
     echo {{env_var("HOME")}}

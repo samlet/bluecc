@@ -27,8 +27,8 @@ impl ServiceMeta{
     pub fn srv_and_ent(&mut self, srv_name: &str) -> Result<(ModelService, HashMap<String, Entity>), GenericError> {
         let mut ents=HashMap::new();
         let srv=self.service_reader.get_service_model(srv_name)?;
-        if !srv.default_entity_name.is_empty() {
-            let ent=self.entity_reader.get_entity_model(srv.default_entity_name.as_str())?;
+        if !srv.get_entity_name().is_empty() {
+            let ent=self.entity_reader.get_entity_model(srv.get_entity_name().as_str())?;
             ents.insert(ent.entity_name.to_owned(), ent.clone());
         }
 
@@ -37,12 +37,14 @@ impl ServiceMeta{
 
     pub fn srv_ent(&mut self, srv_name: &str) -> Result<Entity, GenericError> {
         let srv=self.service_reader.get_service_model(srv_name)?;
-        if !srv.default_entity_name.is_empty() {
-            self.entity_reader.get_entity_model(srv.default_entity_name.as_str())
+        let default_ent=ServiceMeta::get_entity_name(srv);
+
+        if !default_ent.is_empty() {
+            self.entity_reader.get_entity_model(default_ent.as_str())
         } else {
             Err(GenericError::NotFound {
-                item_name: srv.default_entity_name.clone(),
-                info: format!("cannot find entity {}", srv.default_entity_name)
+                item_name: default_ent.clone(),
+                info: format!("cannot find entity {}", default_ent)
             })
         }
     }
@@ -51,12 +53,17 @@ impl ServiceMeta{
         debug!("get srv {} meta ..", srv_name);
         let srv = self.service_reader.get_service_model(srv_name)?.to_owned();
         let mut ents=HashMap::new();
-        if !srv.default_entity_name.is_empty() {
-            debug!("srv ent {:?}", srv.default_entity_name);
+        let ent_name=srv.get_entity_name();
+        if !ent_name.is_empty() {
+            debug!("srv ent {:?}", ent_name);
             let ent = self.srv_ent(srv.name.as_str())?;
-            ents.insert(srv.default_entity_name.to_owned(), ent);
+            ents.insert(ent_name, ent);
         }
         ServiceMeta::srv_model_params(&srv, &ents)
+    }
+
+    fn get_entity_name(srv: &ModelService) -> String{
+        srv.get_entity_name()
     }
 
     pub fn srv_model_params(srv: &ModelService, ents: &HashMap<String, Entity>) -> Result<Vec<ModelParam>, GenericError> {
@@ -66,12 +73,14 @@ impl ServiceMeta{
         let mut all_flds = Vec::new();
         let mut params = Vec::new();
 
+        let default_ent=ServiceMeta::get_entity_name(srv);
+
         // process entity-auto-attrs
-        if !srv.default_entity_name.is_empty() {
-            debug!("srv ent {:?}", srv.default_entity_name);
+        if !default_ent.is_empty() {
+            debug!("srv ent {:?}", default_ent);
 
             // let ent = self.srv_ent(srv.name.as_str())?;
-            let ent= ents.get(srv.default_entity_name.as_str()).expect("ent");
+            let ent= ents.get(default_ent.as_str()).expect("ent");
             debug!("srv ent {}: {}", ent.entity_name, ent.title);
 
             for auto_attr in &srv.auto_attributes {
@@ -101,7 +110,7 @@ impl ServiceMeta{
                             type_name: f.field_type.to_string(),
                             mode: fld_mode,
                             form_label: None,
-                            entity_name: if !srv.default_entity_name.is_empty() { Some(srv.default_entity_name.to_owned()) } else { None },
+                            entity_name: if !default_ent.is_empty() { Some(default_ent.to_owned()) } else { None },
                             field_name: Some(f.field_name.to_owned()),
                             optional: fld_opt,
                             internal: false,
@@ -158,7 +167,7 @@ impl ServiceMeta{
         let mut result=Vec::new();
         for srv_name in &all_names {
             let model = self.service_reader.get_service_model(srv_name.as_str())?.to_owned();
-            if model.default_entity_name==ent{
+            if model.get_entity_name()==ent{
                 result.push(model.name.to_owned());
             }
         }
@@ -276,6 +285,7 @@ mod lib_tests {
     use serde::Deserialize;
     use std::io::{Read, BufReader};
     use std::fs::File;
+    use itertools::Itertools;
 
     fn ex_service_models() -> ServiceModel {
         let bytes: &[u8] = include_bytes!("fixtures/services.xml");
@@ -337,8 +347,8 @@ mod lib_tests {
         let mut params = Vec::new();
 
         // process entity-auto-attrs
-        if !srv.default_entity_name.is_empty() {
-            println!("srv ent {:?}", srv.default_entity_name);
+        if !srv.get_entity_name().is_empty() {
+            println!("srv ent {:?}", srv.get_entity_name());
 
             let ent = srvs.srv_ent(srv.name.as_str())?;
             println!("srv ent {}: {}", ent.entity_name, ent.title);
@@ -400,7 +410,7 @@ mod lib_tests {
                             type_name: f.field_type.to_string(),
                             mode: fld_mode,
                             form_label: None,
-                            entity_name: if !srv.default_entity_name.is_empty() { Some(srv.default_entity_name.to_owned()) } else { None },
+                            entity_name: if !srv.get_entity_name().is_empty() { Some(srv.get_entity_name().to_owned()) } else { None },
                             field_name: Some(f.field_name.to_owned()),
                             optional: fld_opt,
                             internal: false,
@@ -513,13 +523,14 @@ mod lib_tests {
         let srvs=meta.service_reader.load_all_srvs()?;
         let mut buffer = File::create(".store/ent-srv-rels.txt")?;
         writeln!(buffer, "{}", srvs.len())?;
-        let ents:HashSet<&String>=srvs.iter().filter(|s|!s.default_entity_name.is_empty())
-            .map(|&s|&s.default_entity_name)
-            .collect::<HashSet<&String>>();
-        for (i, &e) in ents.iter().enumerate(){
+
+        let ents:HashSet<String>=srvs.iter().filter(|s|!s.get_entity_name().is_empty())
+            .map(|&s|s.get_entity_name())
+            .collect::<HashSet<String>>();
+        for (i, e) in ents.iter().enumerate(){
             writeln!(buffer, "{} - {}", i, e)?;
             let rels=srvs.iter()
-                .filter(|&s|s.default_entity_name==e.as_str())
+                .filter(|&s|s.get_entity_name()==e.as_str())
                 .map(|&s|&s.name)
                 .collect::<Vec<&String>>();
             for r in rels{
@@ -529,6 +540,19 @@ mod lib_tests {
         Ok(())
     }
 
+    #[test]
+    fn auto_attrs_works() -> anyhow::Result<()> {
+        let mut meta = ServiceMeta::load()?;
+        let srv=meta.srv("createTelecomNumber")?.to_owned();
+        let ent = meta.srv_ent("createTelecomNumber")?;
+        println!("srv ent {}: {}", ent.entity_name, ent.title);
+        for auto_attr in &srv.auto_attributes {
+            let flds = extract_auto_attrs(&ent, auto_attr);
+            let names=flds.iter().map(|&f|&f.field_name).collect_vec();
+            println!("{:?}", names);
+        }
+        Ok(())
+    }
 }
 
 

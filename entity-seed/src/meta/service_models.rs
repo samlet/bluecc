@@ -27,7 +27,8 @@ pub struct ServiceModel{
 pub struct ModelService{
     pub name: String,
     #[serde(rename = "default-entity-name", default)]
-    pub default_entity_name: String,
+    default_entity_name: String,
+
     pub engine: String,
     #[serde(default)]
     pub invoke: String,
@@ -55,8 +56,22 @@ pub struct ModelService{
 }
 
 impl ModelService{
+    pub fn get_entity_name(&self) -> String{
+        let mut default_ent=self.default_entity_name.to_owned();
+        if default_ent.is_empty() {
+            let item=self.auto_attributes.iter()
+                .find(|att|!att.entity_name.is_empty());
+            if let Some(auto_att)=item{
+                default_ent=auto_att.entity_name.to_owned();
+            }
+        }
+
+        default_ent
+    }
+
     pub fn include_auto_attrs(&self) -> String{
-        if !self.default_entity_name.is_empty(){
+        let def_ent=self.get_entity_name();
+        if !def_ent.is_empty(){
             let incls:Vec<String>=self.auto_attributes.iter()
                 .filter(|a|a.mode=="IN")
                 .map(|a|a.include.to_owned())

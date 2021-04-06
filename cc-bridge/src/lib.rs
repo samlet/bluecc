@@ -34,6 +34,10 @@ pub mod error {
         RequestErr(#[from] reqwest::Error),
         #[error("rabbitmq fail")]
         RabbitErr(#[from] lapin::Error),
+        #[error("web3 fail")]
+        Web3Err(#[from] web3::Error),
+        #[error("ethabi fail")]
+        AbiErr(#[from] web3::ethabi::Error),
         #[error("deles error")]
         GenericErr(#[from] seed::GenericError),
         #[error("config error")]

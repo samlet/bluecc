@@ -15,7 +15,7 @@ pub struct SrvDirector{
 impl SrvDirector{
     pub fn new() -> Self {
         SrvDirector { conf: DirectorConf{
-            default_queue:"task_queue".to_string(),
+            default_queue:"ink_queue".to_string(),
             broker_uri: "amqp://127.0.0.1:5672".to_string(),
         }}
     }
@@ -26,7 +26,7 @@ impl SrvDirector{
         let channel = conn.create_channel().await?;
 
         channel.queue_declare(self.conf.default_queue.as_str(),
-                              QueueDeclareOptions::default(),
+                              QueueDeclareOptions{durable:true, ..QueueDeclareOptions::default()},
                               FieldTable::default()) .await?;
 
         let consumer = channel

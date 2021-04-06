@@ -11,6 +11,7 @@ extern crate error_chain;
 mod handlers;
 mod common;
 mod directors;
+mod auth;
 
 use std::env;
 use structopt::StructOpt;

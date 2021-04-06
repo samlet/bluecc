@@ -5,41 +5,12 @@
 extern crate serde_derive;
 #[macro_use]
 extern crate lazy_static;
-#[macro_use]
-extern crate error_chain;
 
 pub mod delegators;
 mod resources;
 mod ds;
 
 pub use seed::{GenericError};
-
-// error_chain!{
-//     types {
-//         Error, ErrorKind, ResultExt, Result;
-//     }
-//     links {}
-//     foreign_links {
-//         Io(std::io::Error);
-//         ParseInt(::std::num::ParseIntError);
-//         ParseJson(serde_json::Error);
-//         GenericErr(seed::GenericError);
-//         RequestErr(reqwest::Error);
-//         ParseBigDecimalErr(bigdecimal::ParseBigDecimalError);
-//         ParseDateTimeErr(chrono::ParseError);
-//         ParseFloatErr(std::num::ParseFloatError);
-//         ParseXmlErr(serde_xml_rs::Error);
-//         DatabaseErr(quaint::error::Error);
-//         CommonErr(common::Error);
-//     }
-//
-//     errors {
-//         DataFormatError(t: String){
-//             description("invalid data format")
-//             display("invalid data format: '{}'", t)
-//         }
-//     }
-// }
 
 pub mod error {
     use thiserror::Error;

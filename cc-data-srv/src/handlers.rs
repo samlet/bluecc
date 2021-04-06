@@ -118,7 +118,7 @@ mod lib_tests {
     }
 
     #[tokio::test]
-    async fn list_ent_works() -> Result<(), GenericError> {
+    async fn list_ent_works() -> deles::Result<()> {
         let delegator = Delegator::new().await?;
         let rs: Vec<Person> = delegator.list("Person").await?;
         println!("total {}", rs.len());

@@ -22,3 +22,8 @@ eth:
     ganache-cli -b 3 -m "hamster coin cup brief quote trick stove draft hobby strong caught unable"
 bridge:
     cargo run --bin bridge
+queues:
+	rabbitmqadmin list queues vhost name node messages message_stats.publish_details.rate
+listeners:
+	rabbitmq-diagnostics -s listeners
+

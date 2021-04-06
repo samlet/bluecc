@@ -71,6 +71,10 @@ enum Command {
     Meta {
         name: String,
     },
+    /// Generate eth solidity contract source
+    Eth {
+        entity_name: String,
+    },
     /// Call service
     Call { name: String},
     /// Find entity records
@@ -344,6 +348,11 @@ async fn main() -> meta_gen::Result<()> {
             deles::delegators::render(&fld_list)?;
             deles::delegators::render(&entity.belongs())?;
             // deles::delegators::render(&entity.relations)?;
+        }
+
+        Some(Command::Eth { entity_name }) => {
+            let code=meta_gen::solidity_gen::generate_for_eth("eth", entity_name.as_str())?;
+            println!("{}", code);
         }
 
         Some(Command::Convert { file }) => {

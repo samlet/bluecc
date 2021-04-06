@@ -299,8 +299,10 @@ pub struct FieldTypeDef{
     pub orig_type: String,
     #[serde(rename = "quaint-type", default)]
     pub quaint_type: String,
-     #[serde(rename = "ink-type", default)]
+    #[serde(rename = "ink-type", default)]
     pub ink_type: String,
+    #[serde(rename = "eth-type", default)]
+    pub eth_type: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -387,6 +389,15 @@ impl FieldTypes{
             "Vec<u8>".to_string()
         }else{
             fld.ink_type.to_owned()
+        }
+    }
+
+    pub fn eth_type(&self, field_type:&str) -> String{
+        let fld=self.get_field(field_type);
+        if fld.eth_type.is_empty(){
+            "string".to_string()
+        }else{
+            fld.eth_type.to_owned()
         }
     }
 }

@@ -18,6 +18,7 @@ mod resources;
 pub mod cases;
 mod xml_seed;
 mod meta_conf;
+pub mod solidity_gen;
 
 #[macro_use]
 extern crate serde_derive;

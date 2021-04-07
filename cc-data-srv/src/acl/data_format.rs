@@ -6,6 +6,7 @@ use chrono::{DateTime, Utc};
 use serde_json::json;
 use common::prelude::utc_fmt;
 use itertools::Itertools;
+use deles::resources::{Role, Permission};
 
 macro_rules! regex {
     ($re:expr) => {
@@ -62,43 +63,6 @@ pub struct SecurityGroupPermission{
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(rename_all(serialize = "camelCase", deserialize = "camelCase"))]
-pub struct UserLogin{
-    // keys
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub user_login_id: Option<String>,
-    // fields
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub current_password: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub password_hint: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub is_system: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub enabled: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub has_logged_out: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub require_password_change: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub last_currency_uom: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub last_locale: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub last_time_zone: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub disabled_date_time: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub successive_failed_logins: Option<i64>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub external_auth_id: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub user_ldap_dn: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub disabled_by: Option<String>
-}
-
-#[derive(Debug, Deserialize, Serialize, Clone)]
-#[serde(rename_all(serialize = "camelCase", deserialize = "camelCase"))]
 pub struct UserLoginSecurityGroup{
     // keys
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -112,27 +76,53 @@ pub struct UserLoginSecurityGroup{
     pub thru_date: Option<DateTime<Utc>>
 }
 
-fn perm_lines(recs: &Vec<SecurityGroupPermission>) -> Vec<String>{
-    let empty="".to_string();
+
+impl Role for UserLoginSecurityGroup{
+    fn get_user_login_id(&self) -> String {
+        self.user_login_id.as_ref().expect("login id").to_string()
+    }
+
+    fn get_group_id(&self) -> String {
+        self.group_id.as_ref().expect("group id").to_string()
+    }
+}
+
+impl Permission for SecurityGroupPermission{
+    fn get_group_id(&self) -> String {
+        self.group_id.as_ref().expect("group id").to_string()
+    }
+
+    fn get_permission_id(&self) -> String {
+        self.permission_id.as_ref().expect("permission id").to_string()
+    }
+}
+
+pub fn perm_lines(recs: &Vec<impl Permission>) -> Vec<String>{
     let lines=recs.iter()
         .map(|f|vec!["p".to_string(),
-                     f.group_id.as_ref().unwrap_or(&empty).to_lowercase(),
-                     perm_parts(f.permission_id.as_ref())])
+                     f.get_group_id().to_lowercase(),
+                     perm_parts(f.get_permission_id())])
         .map(|r|r.join(", "))
         .collect::<Vec<String>>();
     lines
 }
 
-fn perm_parts(perm_str: Option<&String>) -> String{
-    perm_str.unwrap().to_lowercase().split("_").join(", ")
+fn perm_parts(perm_str: String) -> String{
+    let perm=perm_str.to_lowercase();
+    if !perm.contains("_"){
+        format!("{}, *", perm)
+    }else {
+        let opt = perm.rsplit_once("_");
+        let (obj, act) = opt.expect(format!("split error: {}", perm).as_str());
+        format!("{}, {}", obj, act)
+    }
 }
 
-fn role_lines(rs: &Vec<UserLoginSecurityGroup>) -> Vec<String>{
-    let empty="".to_string();
+pub fn role_lines(rs: &Vec<impl Role>) -> Vec<String>{
     let lines=rs.iter()
         .map(|f|vec!["g".to_string(),
-                    f.user_login_id.as_ref().unwrap_or(&empty).to_owned(),
-                    f.group_id.as_ref().unwrap_or(&empty).to_lowercase(), ])
+                    f.get_user_login_id(),
+                    f.get_group_id().to_lowercase(), ])
         .map(|r|r.join(", "))
         .collect::<Vec<String>>();
     lines

@@ -1,6 +1,9 @@
 mod position;
 mod status_item;
 mod order;
+pub mod policy;
+
+pub use policy::{Role, Permission};
 
 pub trait Resource {
     const KIND: &'static str;

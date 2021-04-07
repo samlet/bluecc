@@ -38,7 +38,8 @@ casbin = { version = "2.0", default-features = false, features = ["runtime-tokio
 async-trait = "0.1.42"
 
 csv = "1.1"
-regex       = "1.4.5"
+regex = "1.4.5"
+uuid = { version = "0.8", features = ["serde", "v4"] }
 
 [dependencies.quaint]
 git = "https://github.com/prisma/quaint"

@@ -9,7 +9,7 @@ use std::sync::Arc;
 type SharedEnforcer = Arc<Enforcer>;
 
 #[derive(Clone)]
-struct SecurityManager{
+pub struct SecurityManager{
     delegator: Delegator,
     e: SharedEnforcer,
 }

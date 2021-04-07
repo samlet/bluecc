@@ -1,17 +1,21 @@
-use jsonwebtoken::errors::ErrorKind;
-use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
-use serde::{Deserialize, Serialize};
-
-#[derive(Debug, Serialize, Deserialize)]
-struct Claims {
-    sub: String,
-    company: String,
-    exp: usize,
-}
+mod error;
+mod jwt_auth;
+mod user;
+pub mod handlers;
 
 #[cfg(test)]
 mod lib_tests {
     use super::*;
+    use jsonwebtoken::errors::ErrorKind;
+    use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
+    use serde::{Deserialize, Serialize};
+
+    #[derive(Debug, Serialize, Deserialize)]
+    struct Claims {
+        sub: String,
+        company: String,
+        exp: usize,
+    }
 
     #[test]
     fn jwt_works() -> anyhow::Result<()> {
@@ -38,6 +42,7 @@ mod lib_tests {
         Ok(())
     }
 }
+
 
 
 

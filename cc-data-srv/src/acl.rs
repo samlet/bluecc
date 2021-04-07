@@ -1,6 +1,6 @@
 use thiserror::Error;
 
-mod permissions;
+pub mod permissions;
 mod data_format;
 mod adapters;
 

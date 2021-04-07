@@ -12,5 +12,8 @@ graphql-db:
 schema-json:
     apollo client:download-schema --endpoint=http://localhost:5000/graphql
 
-
+login:
+    curl http://localhost:8000/login -d '{"email": "user@userland.com", "pw": "1234"}' -H 'Content-Type: application/json'
+as-user:
+    curl http://localhost:8000/user -H 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxIiwicm9sZSI6IlVzZXIiLCJleHAiOjE2MTc4MzEzMTd9.eboCTzQP7Yztt88FYb62pG7S9Z3aumnetsJaBL4gjCpRh0zxN5XV0k8QnFRnpePOqNp5Xf684QXxLmN41SRS8A' -H 'Content-Type: application/json'
 

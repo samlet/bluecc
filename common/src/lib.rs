@@ -59,7 +59,7 @@ pub mod prelude {
         dt.to_rfc3339_opts(SecondsFormat::Millis, false).to_string()
     }
 
-    fn cat<T>(a: &[T], b: &[T]) -> Vec<T> where T: Clone {
+    pub fn cat<T>(a: &[T], b: &[T]) -> Vec<T> where T: Clone {
         [a, b].concat()
     }
 

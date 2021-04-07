@@ -289,18 +289,28 @@ mod lib_tests {
         let delegator=Delegator::new().await?;
         let rs:Vec<SecurityGroupPermission>=delegator.list("SecurityGroupPermission").await?;
         println!("total perms {}", rs.len());
-        let lines=perm_lines(&rs);
-        for l in lines{
+        let p_lines=perm_lines(&rs);
+        for l in &p_lines{
             println!("{}", l);
         }
 
         let rs:Vec<UserLoginSecurityGroup>=delegator.list("UserLoginSecurityGroup").await?;
         println!("total groups {}", rs.len());
 
-        let lines=role_lines(&rs);
-        for l in lines{
+        let r_lines=role_lines(&rs);
+        for l in &r_lines{
             println!("{}", l);
         }
+
+        let source=common::prelude::cat(&p_lines, &r_lines);
+        let m1 = DefaultModel::from_file("examples/rbac_model_in_multi_line.conf")
+            .await.unwrap();
+        let adapter1 = SecurityAdapter::new(source);
+        let mut e = Enforcer::new(m1, adapter1).await.unwrap();
+
+        assert_eq!(true, e.enforce(("blog_editor", "userpref", "admin")).unwrap());
+        assert_eq!(false, e.enforce(("DemoLeadOwner", "userpref", "admin")).unwrap());
+
         Ok(())
     }
 }

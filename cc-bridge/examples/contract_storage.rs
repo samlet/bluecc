@@ -43,6 +43,7 @@ async fn main() -> anyhow::Result<()> {
                            Options::default()).await?;
     println!("TxHash: {}", tx);
 
+    // let duration=5;
     let duration=5;
     println!("wait result for {} secs", duration);
     // consider using `async_std::task::sleep` instead.

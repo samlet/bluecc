@@ -20,6 +20,7 @@ create-topic topic:
 
 eth:
     ganache-cli -b 3 -m "hamster coin cup brief quote trick stove draft hobby strong caught unable"
+
 bridge:
     cargo run --bin bridge
 queues:

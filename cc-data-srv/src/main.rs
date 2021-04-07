@@ -12,6 +12,7 @@ mod handlers;
 mod common;
 mod directors;
 mod auth;
+mod acl;
 
 use std::env;
 use structopt::StructOpt;

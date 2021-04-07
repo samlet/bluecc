@@ -16,6 +16,7 @@ use crate::generator::MetaGenerator;
 use itertools::Itertools;
 use deles::delegators::pretty;
 use std::path::PathBuf;
+use thiserror::private::PathAsDisplay;
 
 #[macro_use]
 extern crate lazy_static;
@@ -41,6 +42,7 @@ $ meta-cli resource findProductByIdCc plugins/adapters
 $ meta-cli resource createPaymentApplication _ cr
 $ meta-cli meta Person
 $ meta-cli browse ProductType productTypeId description
+$ meta-cli eth -w PartyGroup
  */
 
 #[derive(StructOpt)]
@@ -73,6 +75,9 @@ enum Command {
     },
     /// Generate eth solidity contract source
     Eth {
+        /// Write to file (default target dir: ~/alpha/contracts/cc_prod)
+        #[structopt(short)]
+        write_to_file: bool,
         entity_name: String,
     },
     /// Call service
@@ -330,7 +335,7 @@ async fn main() -> meta_gen::Result<()> {
 
         Some(Command::Meta { name }) => {
             let entity=seed::get_entity_model(name.as_str())?;
-            println!("entity {}", name);
+            println!("entity {} ({})", name, entity.package_name);
             #[derive(Debug, Deserialize, Serialize, Clone)]
             struct FieldMeta{
                 field_name: String,
@@ -350,9 +355,27 @@ async fn main() -> meta_gen::Result<()> {
             // deles::delegators::render(&entity.relations)?;
         }
 
-        Some(Command::Eth { entity_name }) => {
+        Some(Command::Eth { write_to_file, entity_name }) => {
             let code=meta_gen::solidity_gen::generate_for_eth("eth", entity_name.as_str())?;
             println!("{}", code);
+            if write_to_file{
+                // let target_file=target_dir.join("alpha").join("contracts").join("cc_prod")
+                //     .join(format!("{}Cm.sol", entity_name));
+
+                let ent = seed::get_entity_model(entity_name.as_str())?;
+                let pkg=ent.package_name;
+                let sub_path = pkg.trim_start_matches("org.apache.ofbiz.").split(".").join("/");
+                let target_dir = dirs::home_dir().unwrap();
+                let target_file = target_dir.join("alpha").join("contracts").join(sub_path)
+                    .join(format!("{}Cm.sol", entity_name));
+                let sub_dir=target_file.parent().unwrap();
+                if !sub_dir.exists(){
+                    std::fs::create_dir_all(sub_dir)?;
+                }
+
+                println!("write to {}.", target_file.as_display());
+                std::fs::write(target_file, code)?;
+            }
         }
 
         Some(Command::Convert { file }) => {

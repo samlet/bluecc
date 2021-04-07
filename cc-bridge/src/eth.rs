@@ -18,6 +18,14 @@ mod lib_tests {
     use itertools::Itertools;
     use common::prelude::pretty;
 
+    fn read_contract_asset(contract_name: &str) -> std::io::Result<Vec<u8>> {
+        let target_dir = dirs::home_dir().unwrap();
+        let target_file = target_dir.join("alpha").join("build")
+            .join("contracts")
+            .join(format!("{}.json", contract_name));
+        std::fs::read(target_file)
+    }
+
     #[tokio::test]
     async fn accounts_works() -> web3::Result<()> {
         let transport = web3::transports::Http::new("http://localhost:8545")?;
@@ -52,6 +60,18 @@ mod lib_tests {
     #[test]
     fn contract_json_works() -> anyhow::Result<()> {
         let bytes=std::fs::read("fixtures/dist/SimpleEvent.json")?;
+        let fixture:ContractFixture=serde_json::from_reader(&*bytes)?;
+        let abi = fixture.abi;
+        let functions=abi.functions.iter()
+            .map(|(k,_)|k).collect_vec();
+        println!("{} contains: {}", fixture.contract_name, pretty(&functions));
+
+        Ok(())
+    }
+
+    #[test]
+    fn contract_asset_works() -> anyhow::Result<()> {
+        let bytes=read_contract_asset("CrowdFunding2")?;
         let fixture:ContractFixture=serde_json::from_reader(&*bytes)?;
         let abi = fixture.abi;
         let functions=abi.functions.iter()

@@ -1,5 +1,43 @@
 use casbin::prelude::*;
 use crate::acl::Result;
+use deles::delegators::Delegator;
+use deles::resources::policy::{UserLoginSecurityGroup, SecurityGroupPermission};
+use crate::acl::{role_lines, perm_lines};
+use crate::acl::adapters::SecurityAdapter;
+use std::sync::Arc;
+
+type SharedEnforcer = Arc<Enforcer>;
+
+#[derive(Clone)]
+struct SecurityManager{
+    delegator: Delegator,
+    e: SharedEnforcer,
+}
+
+impl SecurityManager{
+    pub async fn new(delegator: Delegator) -> Result<Self> {
+        let e=SecurityManager::load_perms(&delegator).await?;
+        Ok(SecurityManager { delegator: delegator, e: Arc::new(e)})
+    }
+
+    async fn load_perms(delegator: &Delegator) -> Result<Enforcer>{
+        let rs:Vec<SecurityGroupPermission>=delegator.list("SecurityGroupPermission").await?;
+        let p_lines=perm_lines(&rs);
+        let rs:Vec<UserLoginSecurityGroup>=delegator.list("UserLoginSecurityGroup").await?;
+        let r_lines=role_lines(&rs);
+
+        let source=common::prelude::cat(&p_lines, &r_lines);
+        let m1 = DefaultModel::from_str(include_str!("rbac_model.conf"))
+            .await.unwrap();
+        let adapter = SecurityAdapter::new(source);
+        let e=Enforcer::new(m1, adapter).await?;
+        Ok(e)
+    }
+
+    pub fn enforcer(&self) -> &Enforcer{
+        &self.e
+    }
+}
 
 #[cfg(test)]
 mod lib_tests {
@@ -103,6 +141,18 @@ mod lib_tests {
 
         assert_eq!(true, e.enforce(("cathy", "/cathy_data", "GET")).unwrap());
         assert_eq!(true, e.enforce(("cathy", "/cathy_data", "POST")).unwrap());
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn security_manager_works() -> Result<()> {
+        let delegator=Delegator::new().await?;
+        let secmgr=SecurityManager::new(delegator).await?;
+        let e=secmgr.enforcer();
+
+        assert_eq!(true, e.enforce(("blog_editor", "userpref", "admin")).unwrap());
+        assert_eq!(false, e.enforce(("DemoLeadOwner", "userpref", "admin")).unwrap());
+
         Ok(())
     }
 }

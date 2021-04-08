@@ -1,7 +1,5 @@
 github:
 	open https://github.com/samlet/bluecc
-info:
-	python -m bluefin.procs.emitter info
 
 substrate:
     substrate --dev --tmp --unsafe-ws-external --rpc-cors=all --unsafe-rpc-external --rpc-methods=Unsafe --prometheus-external

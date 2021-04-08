@@ -1,0 +1,2 @@
+info:
+	python -m bluefin.procs.emitter info

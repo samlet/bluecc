@@ -16,3 +16,4 @@ Cargo.lock
 /workspace/.ipynb_checkpoints/
 **/.store/**
 
+/connectors/bluefin/.ipynb_checkpoints/

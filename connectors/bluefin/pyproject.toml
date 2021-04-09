@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "bluefin"
 version = "0.1.0"
-description = ""
+description = "bluefin package"
 authors = ["Samlet Wu <xiaofei.wu@gmail.com>"]
 
 [tool.poetry.dependencies]

@@ -1,4 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports, unused_mut))]
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports, unused_mut, unused_macros))]
 
 #[macro_use] extern crate log;
 #[macro_use]
@@ -9,6 +9,7 @@ extern crate lazy_static;
 pub mod proposals;
 pub mod srv_director;
 pub mod eth;
+mod dispat;
 
 pub mod error {
     use thiserror::Error;

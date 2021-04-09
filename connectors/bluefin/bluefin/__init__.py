@@ -1,3 +1,3 @@
-from bluefin.conf.loggers import init_logger
+from .conf.loggers import init_logger
 
 init_logger()

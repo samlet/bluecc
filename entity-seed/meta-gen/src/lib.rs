@@ -19,6 +19,7 @@ pub mod cases;
 mod xml_seed;
 mod meta_conf;
 pub mod solidity_gen;
+mod proto_gen;
 
 #[macro_use]
 extern crate serde_derive;
@@ -38,6 +39,7 @@ pub use value_objs::{Generator};
 pub use component_descriptor::{ComponentDescriptor, ComponentModel,
                                get_srv};
 pub use resource_gen::{generate_srv_invoker, generate_srv_ent};
+pub use proto_gen::{generate_for_proto};
 pub use xml_seed::{process_seed};
 pub use meta_conf::{META_CONF};
 

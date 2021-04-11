@@ -1,0 +1,11 @@
+// Entity {{ent['entity-name'] -}} ({{ ent['package-name'] | pkg }}): {{ ent.title }}
+message {{ent['entity-name'] -}} {
+    // keys
+    {%- for fld in keys %}
+    {{fld['type'] | proto_type}} {{fld.name | snake_case}} = {{loop.index}};   // {{fld['type']}}
+    {%- endfor %}
+    // fields
+    {%- for fld in flds %}
+    {{fld['type'] | proto_type}} {{fld.name | snake_case}} = {{loop.index | start(base=10)}};   // {{fld['type']}}
+    {%- endfor %}
+}

@@ -303,6 +303,8 @@ pub struct FieldTypeDef{
     pub ink_type: String,
     #[serde(rename = "eth-type", default)]
     pub eth_type: String,
+    #[serde(rename = "proto-type", default)]
+    pub proto_type: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -398,6 +400,15 @@ impl FieldTypes{
             "string".to_string()
         }else{
             fld.eth_type.to_owned()
+        }
+    }
+
+    pub fn proto_type(&self, field_type:&str) -> String{
+        let fld=self.get_field(field_type);
+        if fld.proto_type.is_empty(){
+            "string".to_string()
+        }else{
+            fld.proto_type.to_owned()
         }
     }
 }

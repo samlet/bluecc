@@ -88,6 +88,11 @@ impl EntityGenerator {
             Ok(Value::String(format!("{}", val)))
         }
 
+        fn var_name(value: &Value, _args: &HashMap<String, Value>) -> tera::Result<Value> {
+            let val = value.as_str().unwrap().to_camel_case();
+            Ok(Value::String(format!("{}", val)))
+        }
+
         self.tera.add_raw_template("ent", include_str!("incls/ent.j2"))?;
         self.tera.add_raw_template("ent_rel", include_str!("incls/ent_rel.j2"))?;
         self.tera.add_raw_template("ent_drop", include_str!("incls/ent_drop.j2"))?;
@@ -118,6 +123,7 @@ impl EntityGenerator {
         self.tera.register_filter("static_var", static_var);
         self.tera.register_filter("fk", fk_name);
         self.tera.register_filter("plain_type", plain_type);
+        self.tera.register_filter("var_name", var_name);
 
         Ok(())
     }

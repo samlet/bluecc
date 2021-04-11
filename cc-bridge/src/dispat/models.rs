@@ -1,9 +1,22 @@
 use mongodb::bson::{doc, document::Document, oid::ObjectId, Bson};
-use mongodb::{options::ClientOptions, Client, Collection};
+use mongodb::{options::ClientOptions, Client, Collection, bson};
 use common::prelude::*;
 use chrono::prelude::*;
+use thiserror::Error;
 
 const ID: &str = "_id";
+
+#[derive(Error, Debug)]
+pub enum Error {
+    #[error("mongodb error: {0}")]
+    MongoError(#[from] mongodb::error::Error),
+    #[error("error during mongodb query: {0}")]
+    MongoQueryError(mongodb::error::Error),
+    #[error("could not access field in document: {0}")]
+    MongoDataError(#[from] bson::document::ValueAccessError),
+    #[error("invalid id used: {0}")]
+    InvalidIDError(String),
+}
 
 #[derive(Serialize, Deserialize, Debug)]
 struct DispatStatus {
@@ -16,6 +29,7 @@ mod lib_tests {
     use super::*;
     use futures::StreamExt;
     use mongodb::bson;
+    use crate::dispat::models::Error::InvalidIDError;
 
     macro_rules! assert_coll_count {
         ($coll:expr, $expected:expr) => {
@@ -269,6 +283,44 @@ mod lib_tests {
         // Deserialize the document into a Movie instance
         let loaded_movie_struct: Movie = bson::from_bson(Bson::Document(loaded_movie))?;
         println!("Movie loaded from collection: {:?}", loaded_movie_struct);
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn json_doc_works() -> anyhow::Result<()> {
+        use serde_json::json;
+        use std::convert::{TryFrom, TryInto};
+        let client = Client::with_uri_str("mongodb://localhost:27017/").await?;
+        let db = client.database("some_db");
+        let stuffs = db.collection("stuffs");
+        stuffs.drop(None).await?;
+
+        let json_doc = json!({ "x": 5i32, "y": { "$numberInt": "5" }, "z": { "subdoc": "hello" } });
+        let bson: Bson = json_doc.try_into().unwrap(); // Bson::Document(...)
+        let result=stuffs.insert_one(
+            bson.as_document().unwrap().to_owned(),
+            None).await?;
+        let id_str=result.inserted_id.as_object_id().unwrap().to_hex();
+        println!("save to id {}", id_str);
+
+        // find with string id
+        let oid = ObjectId::with_string(&id_str)
+            .map_err(|_| InvalidIDError(id_str.to_owned()))?;
+        let filter = doc! {
+            "_id": oid,
+        };
+        let loaded_rec = stuffs
+           .find_one(Some(filter), None)
+           .await?
+           .expect("Document not found");
+        println!("find doc {}", loaded_rec);
+
+        // date-time
+        let json_date = json!({ "$date": { "$numberLong": "1590972160292" } });
+        let bson_date: Bson = json_date.try_into().unwrap(); // Bson::DateTime(...)
+        let dt=bson_date.as_datetime().unwrap();
+        println!("converted dt: {}", dt);
 
         Ok(())
     }

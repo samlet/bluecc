@@ -80,6 +80,10 @@ enum Command {
         write_to_file: bool,
         entity_name: String,
     },
+    /// Generate eth proto source
+    Proto {
+        entity_name: String,
+    },
     /// Call service
     Call { name: String},
     /// Find entity records
@@ -376,6 +380,11 @@ async fn main() -> meta_gen::Result<()> {
                 println!("write to {}.", target_file.as_display());
                 std::fs::write(target_file, code)?;
             }
+        }
+
+        Some(Command::Proto { entity_name }) => {
+            let code=meta_gen::generate_for_proto("proto", entity_name.as_str())?;
+            println!("{}", code);
         }
 
         Some(Command::Convert { file }) => {

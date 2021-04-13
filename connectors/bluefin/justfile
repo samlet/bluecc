@@ -2,5 +2,7 @@ info:
 	python -m bluefin.procs.emitter info
 srv:
 	python -m bluefin.srv.bluefin_srv
+list:
+	python -m bluefin.eth.alpha_builder objects
 
 

@@ -1,17 +1,12 @@
-"""
-This is taken from "Simple Usage" page in the docs:
-http://sanic-jwt.readthedocs.io/en/latest/pages/simpleusage.html
-"""
 import binascii
 import os
 
 from sanic import Sanic
-from sanic_jwt import exceptions
-from sanic_jwt import initialize
 from sanic.response import json
+from sanic_jwt import exceptions
+from sanic_jwt import Initialize
 from sanic_jwt import protected
 from sanic_jwt.decorators import inject_user
-
 
 class User:
     def __init__(self, id, username, password):
@@ -30,7 +25,6 @@ users = [User(1, "user1", "abcxyz"), User(2, "user2", "abcxyz")]
 
 username_table = {u.username: u for u in users}
 userid_table = {u.user_id: u for u in users}
-secret = str(binascii.hexlify(os.urandom(32)), "utf-8")
 
 
 async def retrieve_user(request, *args, **kwargs):
@@ -59,15 +53,16 @@ async def authenticate(request, *args, **kwargs):
 
     return user
 
+secret = str(binascii.hexlify(os.urandom(32)), "utf-8")
 
-app = Sanic(name='bluefin')
-sanic_jwt = initialize(app, authenticate=authenticate,
-           expiration_delta=(60 * 60),
-           secret=secret,
-           retrieve_user=retrieve_user,
-           )
+app = Sanic(__name__)
+sanic_jwt = Initialize(
+    app, authenticate=authenticate,
+    expiration_delta=(60 * 60),
+    secret=secret,
+    retrieve_user=retrieve_user
+)
 
-# .......
 
 @app.route("/hello")
 async def test(request):
@@ -94,4 +89,4 @@ async def my_unprotected_user(request, user):
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8887)
+    app.run(host="0.0.0.0", port=8887, auto_reload=True)

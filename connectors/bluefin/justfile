@@ -1,5 +1,6 @@
 info:
 	python -m bluefin.procs.emitter info
-auth:
-	python -m bluefin.srv.basic_auth
+srv:
+	python -m bluefin.srv.bluefin_srv
+
 

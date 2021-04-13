@@ -1,3 +1,7 @@
+"""
+This is taken from "Simple Usage" page in the docs:
+http://sanic-jwt.readthedocs.io/en/latest/pages/simpleusage.html
+"""
 import binascii
 import os
 

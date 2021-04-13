@@ -1,7 +1,3 @@
-"""
-This is taken from "Simple Usage" page in the docs:
-http://sanic-jwt.readthedocs.io/en/latest/pages/simpleusage.html
-"""
 import binascii
 import os
 
@@ -11,25 +7,8 @@ from sanic_jwt import initialize
 from sanic.response import json
 from sanic_jwt import protected
 from sanic_jwt.decorators import inject_user
+from .users import userid_table, username_table
 
-
-class User:
-    def __init__(self, id, username, password):
-        self.user_id = id
-        self.username = username
-        self.password = password
-
-    def __repr__(self):
-        return "User(id='{}')".format(self.user_id)
-
-    def to_dict(self):
-        return {"user_id": self.user_id, "username": self.username}
-
-
-users = [User(1, "user1", "abcxyz"), User(2, "user2", "abcxyz")]
-
-username_table = {u.username: u for u in users}
-userid_table = {u.user_id: u for u in users}
 secret = str(binascii.hexlify(os.urandom(32)), "utf-8")
 
 

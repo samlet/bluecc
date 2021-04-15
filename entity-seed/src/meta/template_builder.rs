@@ -93,6 +93,18 @@ impl EntityGenerator {
             Ok(Value::String(format!("{}", val)))
         }
 
+        fn pkg_name(value: &Value, _args: &HashMap<String, Value>) -> tera::Result<Value> {
+            let val:String = value.as_str().unwrap()
+                .trim_start_matches("org.apache.ofbiz.").to_string();
+            Ok(Value::String(format!("{}", val)))
+        }
+
+        fn start_num(value: &Value, args: &HashMap<String, Value>) -> tera::Result<Value> {
+            let base=args.get("base").expect("expect base parameter").as_u64().unwrap();
+            let val:u64 = value.as_u64().unwrap()+base;
+            Ok(Value::Number(val.into()))
+        }
+
         self.tera.add_raw_template("ent", include_str!("incls/ent.j2"))?;
         self.tera.add_raw_template("ent_rel", include_str!("incls/ent_rel.j2"))?;
         self.tera.add_raw_template("ent_drop", include_str!("incls/ent_drop.j2"))?;
@@ -124,6 +136,8 @@ impl EntityGenerator {
         self.tera.register_filter("fk", fk_name);
         self.tera.register_filter("plain_type", plain_type);
         self.tera.register_filter("var_name", var_name);
+        self.tera.register_filter("pkg", pkg_name);
+        self.tera.register_filter("start", start_num);
 
         Ok(())
     }

@@ -1,0 +1,21 @@
+import java.sql.Timestamp;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import static org.apache.commons.lang3.builder.ToStringStyle.JSON_STYLE;
+
+// Entity {{ent['entity-name'] -}} ({{ ent['package-name'] | pkg }}): {{ ent.title }}
+public class {{ent['entity-name'] -}} {
+    // keys
+    {%- for fld in keys %}
+    public {{fld['type'] | java_type}} {{fld.name}};   // {{fld['type']}}
+    {%- endfor %}
+    // fields
+    {%- for fld in flds %}
+    public {{fld['type'] | java_type}} {{fld.name}};   // {{fld['type']}}
+    {%- endfor %}
+    @Override
+    public String toString() {
+        return new ReflectionToStringBuilder(this, JSON_STYLE, null,
+                null, false, false, true)
+                .toString();
+    }
+}

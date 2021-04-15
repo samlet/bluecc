@@ -20,6 +20,7 @@ mod xml_seed;
 mod meta_conf;
 pub mod solidity_gen;
 mod proto_gen;
+mod java_gen;
 
 #[macro_use]
 extern crate serde_derive;

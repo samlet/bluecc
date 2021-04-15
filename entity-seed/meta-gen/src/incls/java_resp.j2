@@ -1,0 +1,5 @@
+pub class {{srv.name | pascal -}}Output {
+{%- for fld in outputs %}
+    public {{fld['type_name'] | java_type}} {{fld.name}}; // {% if fld.optional %}optional{% else %}required{% endif %}
+{%- endfor %}
+}

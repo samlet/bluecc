@@ -1,0 +1,7 @@
+pub class {{ srv.name | pascal }}Input {
+{%- for fld in inputs %}
+    public {{fld['type_name'] | java_type}} {{fld.name}}; // {% if fld.optional %}optional{% else %}required{% endif %}
+{%- endfor %}
+
+    public {{ srv.name | pascal }}Input {}
+}

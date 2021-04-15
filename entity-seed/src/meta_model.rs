@@ -411,5 +411,18 @@ impl FieldTypes{
             fld.proto_type.to_owned()
         }
     }
+
+    pub fn java_type(&self, field_type:&str) -> String{
+        if field_type.is_pascal_case() || field_type.contains("."){
+            return field_type.to_string();
+        }
+
+        let fld=self.get_field(field_type);
+        if fld.java_type.is_empty(){
+            "String".to_string()
+        }else{
+            fld.java_type.to_owned()
+        }
+    }
 }
 

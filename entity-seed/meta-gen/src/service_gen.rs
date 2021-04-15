@@ -35,6 +35,10 @@ impl ServiceMeta{
         Ok((srv.clone(), ents))
     }
 
+    pub fn get_entity_model(&mut self, ent_name: &str) -> Result<Entity, GenericError> {
+        self.entity_reader.get_entity_model(ent_name)
+    }
+
     pub fn srv_ent(&mut self, srv_name: &str) -> Result<Entity, GenericError> {
         let srv=self.service_reader.get_service_model(srv_name)?;
         let default_ent=ServiceMeta::get_entity_name(srv);

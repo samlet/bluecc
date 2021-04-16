@@ -1,4 +1,3 @@
-import java.sql.Timestamp;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import static org.apache.commons.lang3.builder.ToStringStyle.JSON_STYLE;
 
@@ -6,12 +5,35 @@ import static org.apache.commons.lang3.builder.ToStringStyle.JSON_STYLE;
 public class {{ent['entity-name'] -}} {
     // keys
     {%- for fld in keys %}
-    public {{fld['type'] | java_type}} {{fld.name}};   // {{fld['type']}}
+    private {{fld['type'] | java_type}} {{fld.name}};   // {{fld['type']}}
     {%- endfor %}
+
     // fields
     {%- for fld in flds %}
-    public {{fld['type'] | java_type}} {{fld.name}};   // {{fld['type']}}
+    private {{fld['type'] | java_type}} {{fld.name}};   // {{fld['type']}}
     {%- endfor %}
+
+    // getters and setters
+    {%- for fld in keys %}
+    public {{fld['type'] | java_type}} get{{fld.name | pascal}}() {
+        return {{fld.name}};
+    }
+
+    public void set{{fld.name | pascal}}({{fld['type'] | java_type}} {{fld.name}}) {
+        this.{{fld.name}} = {{fld.name}};
+    }
+    {%- endfor %}
+
+    {%- for fld in flds %}
+    public {{fld['type'] | java_type}} get{{fld.name | pascal}}() {
+        return {{fld.name}};
+    }
+
+    public void set{{fld.name | pascal}}({{fld['type'] | java_type}} {{fld.name}}) {
+        this.{{fld.name}} = {{fld.name}};
+    }
+    {%- endfor %}
+
     @Override
     public String toString() {
         return new ReflectionToStringBuilder(this, JSON_STYLE, null,

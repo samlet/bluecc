@@ -1,0 +1,29 @@
+    pub interface {{ent.name}}Activities {
+    {%- for srv in srvs %}
+        @ActivityMethod(scheduleToCloseTimeoutSeconds = 10)
+        {{srv.output}} {{srv.name}}({{srv.input}} input); // {{ srv.desc }}
+    {%- endfor %}
+    }
+
+    static final String TASK_LIST = "{{ent.name}}Activity";
+    pub interface {{ent.name}}Workflow {
+    {%- for srv in srvs %}
+        @WorkflowMethod(executionStartToCloseTimeoutSeconds = 10, taskList = TASK_LIST)
+        {{srv.output}} {{srv.name}}({{srv.input}} input); // {{ srv.desc }}
+    {%- endfor %}
+    }
+
+    public static class {{ent.name}}WorkflowImpl implements {{ent.name}}Workflow {
+
+        private final {{ent.name}}Activities activities =
+            Workflow.newActivityStub({{ent.name}}Activities.class);
+
+        {%- for srv in srvs %}
+        @Override
+        public {{srv.output}} {{srv.name}}({{srv.input}} input) {
+            // This is a blocking call that returns only after the activity has completed.
+            return activities.{{srv.name}}(input);
+        }
+        {%- endfor %}
+    }
+

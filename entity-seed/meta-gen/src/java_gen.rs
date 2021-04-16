@@ -89,6 +89,9 @@ pub fn generate_for_service(writer: &mut dyn std::io::Write,
 #[cfg(test)]
 mod lib_tests {
     use super::*;
+    use thiserror::private::PathAsDisplay;
+    use std::fs::File;
+    use std::io::Write;
 
     #[test]
     fn java_obj_gen_works() -> anyhow::Result<()> {
@@ -110,5 +113,32 @@ mod lib_tests {
         Ok(())
     }
 
+    #[test]
+    fn generate_ent_works() -> anyhow::Result<()> {
+        let entity_name="Person";
+
+        let ent_path = "src/main/java/com/bluecc/api/models";
+        // let srv_path = "src/main/java/com/bluecc/api/activities";
+
+        let ent = seed::get_entity_model(entity_name)?;
+        let pkg = ent.package_name;
+        let sub_path = pkg.trim_start_matches("org.apache.ofbiz.").split(".").join("/");
+        let target_dir = dirs::home_dir().unwrap();
+        let target_file = target_dir.join("dispat").join(ent_path).join(sub_path)
+            .join(format!("{}.java", entity_name));
+        let sub_dir = target_file.parent().unwrap();
+        if !sub_dir.exists() {
+            std::fs::create_dir_all(sub_dir)?;
+        }
+
+        println!("write to {}.", target_file.as_display());
+        let code=generate_for_entity("java_obj", entity_name)?;
+        let mut file = File::create(target_file)?;
+        let pkg_def=format!("package com.bluecc.api.models.{};\n\n",
+                            pkg.trim_start_matches("org.apache.ofbiz."));
+        file.write_all(pkg_def.as_bytes())?;
+        file.write_all(code.as_bytes())?;
+        Ok(())
+    }
 }
 

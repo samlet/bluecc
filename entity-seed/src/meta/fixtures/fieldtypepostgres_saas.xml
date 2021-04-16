@@ -43,12 +43,12 @@
                     query-type="i64" insert-type="i64" quaint-type="integer"
                     ink-type="i64" eth-type="int64" proto-type="int64"/>
     
-    <field-type-def type="id" sql-type="BIGINT" java-type="Integer"
+    <field-type-def type="id" sql-type="BIGINT" java-type="String"
                     query-type="i64" orig-type="String" quaint-type="text"
                     eth-type="bytes20" proto-type="bytes"/>
-    <field-type-def type="id-long" sql-type="BIGINT" java-type="Long" query-type="i64"
+    <field-type-def type="id-long" sql-type="BIGINT" java-type="String" query-type="i64"
                     orig-type="String" eth-type="bytes32" proto-type="bytes"/>
-    <field-type-def type="id-vlong" sql-type="BIGINT" java-type="Long" query-type="i64"
+    <field-type-def type="id-vlong" sql-type="BIGINT" java-type="String" query-type="i64"
                     orig-type="String" eth-type="bytes" proto-type="bytes"/>
     
     <field-type-def type="indicator" sql-type="BOOLEAN" sql-type-alias="BOOLEAN" java-type="String"

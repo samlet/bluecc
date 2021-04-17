@@ -5,4 +5,8 @@ srv:
 list:
 	python -m bluefin.eth.alpha_builder objects
 
+sl file:
+	python -m sagas.tool.creators normal {{file}}.py
+	streamlit run {{file}}.py
+
 

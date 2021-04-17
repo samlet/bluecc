@@ -62,6 +62,28 @@ impl Entity{
         rels
     }
 
+    pub fn all_belongs(&self) -> Vec<BelongsTo> {
+        let rels = self.relations
+            .iter()
+            .unique_by(|x| &x.rel_entity_name)
+            .map(|x| {
+                let keys = &x.keymaps.iter()
+                    .map(|k|k.field_name.to_snake_case())
+                    .join(", ");
+                let rel_keys=&x.keymaps.iter()
+                    .map(|k|k.get_rel_field().to_snake_case())
+                    .join(", ");
+                BelongsTo {
+                    field_name: keys.to_string(),
+                    model_name: x.rel_entity_name.clone(),
+                    rel_field_name: rel_keys.to_string(),
+                    fk_name: x.fk_name.clone()
+                }
+            })
+            .collect::<Vec<_>>();
+        rels
+    }
+
     pub fn get_id_fields(&self) -> Vec<&String>{
         self.fields.iter().filter(|f| f.is_id_type())
             .map(|f| &f.field_name).collect()

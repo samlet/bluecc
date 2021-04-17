@@ -37,6 +37,7 @@ $ meta-cli dump spec-srv > .store/spec-srvs.txt
 $ meta-cli rels ProductKeyword
 $ meta-cli rels -i Budget
 $ meta-cli rels -i -s Position
+$ meta-cli rels -i -s -e OrderItemPriceInfo
 $ meta-cli resource createExample
 $ meta-cli resource findProductByIdCc plugins/adapters
 $ meta-cli resource createPaymentApplication _ cr
@@ -112,6 +113,10 @@ enum Command {
         /// 查找名称中包含此关键字的实体
         #[structopt(short)]
         search_all_entity: bool,
+        /// 显示实体的meta-info
+        #[structopt(short)]
+        entity_meta: bool,
+        /// 实体名称
         entity_name: String
     },
     /// Generate service invoke wrapper
@@ -298,24 +303,32 @@ async fn main() -> meta_gen::Result<()> {
             }
         }
 
-        Some(Command::Rels { include_keys, search_all_entity, entity_name  }) => {
+        Some(Command::Rels { include_keys, search_all_entity, entity_meta, entity_name  }) => {
             let mut srvs = ServiceMeta::load()?;
             let result = srvs.get_related_srvs(entity_name.as_str())?;
             let rels = serde_json::to_string_pretty(&result)?;
-            println!("{}", rels);
+
+            if entity_meta {
+                let ent_meta = srvs.get_entity_model(entity_name.as_str());
+                if let Ok(e) = ent_meta {
+                    print_meta(&e)?;
+                }
+            }
+
+            println!("{}", rels.bold());
 
             if include_keys {
                 let names=srvs.service_reader.get_all_service_names();
                 let sets=names.iter().filter(|s|s.contains(&entity_name))
                     .collect_vec();
-                println!("{}", serde_json::to_string_pretty(&sets)?);
+                println!("{}", serde_json::to_string_pretty(&sets)?.italic());
             }
 
             if search_all_entity{
                 let names=srvs.entity_reader.get_all_entity_names();
                 let sets=names.iter().filter(|s|s.contains(&entity_name))
                     .collect_vec();
-                println!("{}", serde_json::to_string_pretty(&sets)?);
+                println!("{}", serde_json::to_string_pretty(&sets)?.italic());
             }
         }
 
@@ -339,24 +352,7 @@ async fn main() -> meta_gen::Result<()> {
 
         Some(Command::Meta { name }) => {
             let entity=seed::get_entity_model(name.as_str())?;
-            println!("entity {} ({})", name, entity.package_name);
-            #[derive(Debug, Deserialize, Serialize, Clone)]
-            struct FieldMeta{
-                field_name: String,
-                field_type: String,
-                field_info: String,
-            }
-
-            let fld_list=entity.fields.iter()
-                .map(|f|FieldMeta{
-                    field_name: f.field_name.to_owned(),
-                    field_type: f.field_type.to_owned(),
-                    field_info: if f.is_primary {"pk".to_string()} else {"_".to_string()},
-                })
-                .collect_vec();
-            deles::delegators::render(&fld_list)?;
-            deles::delegators::render(&entity.belongs())?;
-            // deles::delegators::render(&entity.relations)?;
+            print_meta(&entity)?;
         }
 
         Some(Command::Eth { write_to_file, entity_name }) => {
@@ -520,3 +516,27 @@ async fn srv_invoke_with_dynamic_works(srv_name: &str, ctx: &DynamicValue) -> Re
     Ok(())
 }
 
+fn print_meta(entity: &seed::Entity) -> meta_gen::Result<()>{
+    let name=entity.entity_name.as_str();
+    // let entity=seed::get_entity_model(name)?;
+    println!("entity {} ({})", name, entity.package_name);
+    #[derive(Debug, Deserialize, Serialize, Clone)]
+    struct FieldMeta{
+        field_name: String,
+        field_type: String,
+        field_info: String,
+    }
+
+    let fld_list=entity.fields.iter()
+        .map(|f|FieldMeta{
+            field_name: f.field_name.to_owned(),
+            field_type: f.field_type.to_owned(),
+            field_info: if f.is_primary {"pk".to_string()} else {"_".to_string()},
+        })
+        .collect_vec();
+    deles::delegators::render(&fld_list)?;
+    deles::delegators::render(&entity.all_belongs())?;
+    // deles::delegators::render(&entity.relations)?;
+
+    Ok(())
+}

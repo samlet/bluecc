@@ -41,8 +41,8 @@ pub fn render_table(values: &Vec<DynamicValue>) {
     table
         .load_preset(UTF8_FULL)
         .apply_modifier(UTF8_ROUND_CORNERS)
-        .set_content_arrangement(comfy_table::ContentArrangement::Dynamic)
-        .set_table_width(140);
+        .set_content_arrangement(comfy_table::ContentArrangement::Dynamic);
+        // .set_table_width(140);
 
     let cols=values.first().unwrap().values.keys().collect_vec();
     table.set_header(&cols);

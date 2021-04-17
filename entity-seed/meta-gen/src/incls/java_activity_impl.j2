@@ -1,0 +1,12 @@
+    public static class {{ent.name}}ActivitiesImpl implements {{ent.name}}Activities {
+        public {{ent.name}}ActivitiesImpl(ServiceProcessor processor) {
+            super(processor);
+        }
+
+    {%- for srv in srvs %}
+        @Override
+        public ServiceResult<{{srv.output}}> {{srv.name}}({{srv.input}} input) {
+            return this.processor.runSync("{{srv.name}}", input);
+        }
+    {%- endfor %}
+    }

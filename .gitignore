@@ -17,3 +17,4 @@ Cargo.lock
 **/.store/**
 
 /connectors/bluefin/.ipynb_checkpoints/
+/connectors/bluefin/poetry.lock

@@ -66,6 +66,22 @@ impl ServiceMeta{
         ServiceMeta::srv_model_params(&srv, &ents)
     }
 
+    pub fn srv_input_params(&mut self, srv_name: &str) -> Result<Vec<ModelParam>, GenericError> {
+        let params=self.srv_params(srv_name)?;
+        let r=params.iter().filter(|p|p.mode==ParamMode::In || p.mode==ParamMode::InOut)
+            .cloned()
+            .collect();
+        Ok(r)
+    }
+
+    pub fn srv_output_params(&mut self, srv_name: &str) -> Result<Vec<ModelParam>, GenericError> {
+        let params=self.srv_params(srv_name)?;
+        let r=params.iter().filter(|p|p.mode==ParamMode::Out || p.mode==ParamMode::InOut)
+            .cloned()
+            .collect();
+        Ok(r)
+    }
+
     fn get_entity_name(srv: &ModelService) -> String{
         srv.get_entity_name()
     }
@@ -196,6 +212,7 @@ fn extract_auto_attrs<'a>(ent: &'a Entity, filter: &ServiceAutoAttributes) -> Ve
 pub enum ParamMode{
     In, Out, InOut
 }
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ModelParam{
     pub name: String,

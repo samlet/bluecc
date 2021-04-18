@@ -37,11 +37,18 @@ impl Entity{
     pub fn internal_fields() -> Vec<&'static str>{
         vec![STAMP_FIELD, STAMP_TX_FIELD, CREATE_STAMP_FIELD, CREATE_STAMP_TX_FIELD]
     }
+
     pub fn pks_str(&self) -> String{
         use inflector::cases::snakecase::to_snake_case;
         let pks:Vec<String>=self.primary_keys.iter().map(|x|
             to_snake_case(&x.field_name.as_str())).collect();
         pks.iter().join(", ").to_string()
+    }
+
+    pub fn pks(&self) -> Vec<String>{
+        let pks:Vec<String>=self.primary_keys.iter().map(|x|x.field_name.to_string())
+            .collect_vec();
+        pks
     }
 
     pub fn belongs(&self) -> Vec<BelongsTo> {

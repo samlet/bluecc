@@ -21,6 +21,7 @@ mod meta_conf;
 pub mod solidity_gen;
 mod proto_gen;
 mod java_gen;
+mod exec_plan;
 
 #[macro_use]
 extern crate serde_derive;
@@ -29,8 +30,6 @@ extern crate lazy_static;
 #[macro_use] extern crate log;
 #[macro_use]
 extern crate diesel;
-// #[macro_use]
-// extern crate error_chain;
 
 pub use requests::{SrvResp, SrvErr, SrvDeles, DynamicValue, extract_val};
 pub use service_gen::{ServiceMeta, ParamMode, ModelParam};
@@ -43,23 +42,6 @@ pub use resource_gen::{generate_srv_invoker, generate_srv_ent};
 pub use proto_gen::{generate_for_proto};
 pub use xml_seed::{process_seed};
 pub use meta_conf::{META_CONF};
-
-// error_chain!{
-//     types {
-//         Error, ErrorKind, ResultExt, Result;
-//     }
-//     links {}
-//     foreign_links {
-//         Io(std::io::Error);
-//         ParseInt(::std::num::ParseIntError);
-//         ParseJson(serde_json::Error);
-//         ParseYaml(serde_yaml::Error);
-//         GenericErr(seed::GenericError);
-//         RequestErr(reqwest::Error);
-//         XmlTreeErr(roxmltree::Error);
-//         // ConfigTomlErr(toml::de::Error);
-//     }
-// }
 
 mod error{
     use thiserror::Error;

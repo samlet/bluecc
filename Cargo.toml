@@ -8,6 +8,7 @@ members = [
 	"cc-agent",
 	"deles",
 	"cc-bridge",
+	"meta-srv",
     "contracts/cc_common",
     "entity-seed/meta-gen",
     "entity-seed/meta-cli",

@@ -1,3 +1,5 @@
+from typing import List
+
 import streamlit as st
 import json
 
@@ -14,7 +16,7 @@ write_styles()
 def app_panels():
     option = st.sidebar.selectbox(
         'Which Application Panel?',
-        ('Service Requests', 'Service Meta', 'Entites'))
+        ('Service Meta', 'Main Entity', 'Service Requests', 'Entites'))
     st.sidebar.markdown(f'Current: *{option}*')
     return option
 
@@ -59,7 +61,9 @@ def service_requests():
     #                         )
     json_str = st_ace(language="json",
                       font_size=11,
-                      theme="chrome",
+                      # theme="chrome",
+                      theme="chaos",
+                      keybinding="sublime",
                       value=default_request,
                       height=180,
                       )
@@ -84,6 +88,53 @@ THEMES = [
     "tomorrow_night_eighties", "twilight", "vibrant_ink", "xcode"
 ]
 
+@st.cache(allow_output_mutation=True, suppress_st_warning=True)
+def get_model_services(main_ent: str) -> List[str]:
+    from sagas.ofbiz.services import oc
+    services = oc.all_service_names()
+    result=[]
+    for srv in services:
+        model = oc.service_model(srv)
+        ent=model.getDefaultEntityName()
+        if ent==main_ent:
+            result.append(srv)
+    return result
+
+def main_entity(main_ent):
+    from sagas.ofbiz.entities import OfEntity as e
+    from sagas.ofbiz.services import OfService as s, create_service_data_frame, MetaService
+
+    show_entity_flds=st.sidebar.checkbox(label="Show entity fields", value=False)
+
+    # srv_name='createPerson'
+    srvs=get_model_services(main_ent)
+    for srv_name in srvs:
+        model=model=MetaService(srv_name).model
+        default_ent=model.getDefaultEntityName()
+        if default_ent!='':
+            st.markdown(f"*{srv_name}*, has default entity **{default_ent}**")
+        else:
+            st.markdown(f"*Service Meta*: {srv_name}")
+        st.text(f"{model.getDescription()}")
+        df_srv=create_service_data_frame(srv_name, show_internal=False,
+                                         show_entity_flds=show_entity_flds)
+        st.table(df_srv)
+
+    st.markdown("*Entity Meta*")
+    df_ent=e('meta').Person
+    st.dataframe(df_ent)
+
+    st.markdown("*Entity Relations*")
+    df_rels=e('relations').Person
+    st.dataframe(df_rels)
+
+def service_meta(srv_name):
+    from sagas.ofbiz.services import OfService as s, create_service_data_frame, MetaService
+    model = model = MetaService(srv_name).model
+    st.markdown(f"*Service Meta*: {srv_name}")
+    st.text(f"{model.getDescription()}")
+    df_srv = create_service_data_frame(srv_name)
+    st.table(df_srv)
 
 def main():
     st.title("Composer")
@@ -92,6 +143,11 @@ def main():
 
     if panel == 'Service Requests':
         service_requests()
+    elif panel=='Main Entity':
+        main_entity(main_ent=st.sidebar.text_input(label='Main entity name', value='Person'))
+    elif panel=='Service Meta':
+        service_meta(srv_name=st.sidebar.text_input(label='Service Name',
+                                                    value='createPerson'))
     else:
         content = st_ace(language="json",
                          font_size=11,

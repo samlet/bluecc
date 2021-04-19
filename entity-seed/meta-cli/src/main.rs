@@ -129,7 +129,11 @@ enum Command {
     },
     /// Convert xml format resource to json format
     Convert {
+        /// Source xml-data file
         file: String,
+        /// Target data format, available formats: json, yaml
+        #[structopt(default_value = "json")]
+        format: String,
     },
 }
 
@@ -383,7 +387,7 @@ async fn main() -> meta_gen::Result<()> {
             println!("{}", code);
         }
 
-        Some(Command::Convert { file }) => {
+        Some(Command::Convert { file , format}) => {
             use std::fs;
             let path=PathBuf::from(file);
             let cnt=fs::read_to_string(path.as_path())?;
@@ -391,9 +395,18 @@ async fn main() -> meta_gen::Result<()> {
             let rs=meta_gen::process_seed(cnt.as_str())?;
             // println!("{}", pretty(&rs));
             let output:PathBuf=PathBuf::from(".store").join(path.file_name().unwrap())
-                .with_extension("json");
+                .with_extension(format.as_str());
             println!("export to: {}", output.display());
-            fs::write(output.as_path(), pretty(&rs))?;
+            match format.as_str() {
+                "json" => fs::write(output.as_path(), pretty(&rs)) ?,
+                "yaml" => {
+                    let yaml_str=serde_yaml::to_string(&rs)?;
+                    fs::write(output.as_path(), yaml_str) ?
+                },
+                _ => {
+                    println!("don't support format {}", format);
+                }
+            }
         }
 
         None => {
@@ -519,7 +532,7 @@ async fn srv_invoke_with_dynamic_works(srv_name: &str, ctx: &DynamicValue) -> Re
 fn print_meta(entity: &seed::Entity) -> meta_gen::Result<()>{
     let name=entity.entity_name.as_str();
     // let entity=seed::get_entity_model(name)?;
-    println!("entity {} ({})", name, entity.package_name);
+    println!("entity {} ({}): {}", name, entity.package_name, entity.title);
     #[derive(Debug, Deserialize, Serialize, Clone)]
     struct FieldMeta{
         field_name: String,

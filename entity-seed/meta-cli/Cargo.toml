@@ -42,3 +42,4 @@ error-chain = "0.12.2"
 bstr = "0.2.15"
 
 dirs = "3.0"
+serde_yaml = "0.8"

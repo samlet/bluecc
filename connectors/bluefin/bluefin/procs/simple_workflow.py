@@ -19,7 +19,7 @@ class GreetingActivities:
 
 # Activities Implementation
 class GreetingActivitiesImpl:
-    def compose_greeting(self, greeting: str, name: str):
+    def compose_greeting(self, greeting: str, name: str) -> str:
         return f"{greeting} {name}!"
 
 

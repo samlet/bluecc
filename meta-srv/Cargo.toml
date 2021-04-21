@@ -11,3 +11,4 @@ meta_gen = {package="meta-gen", version = "0.1.0",  path = "../entity-seed/meta-
 
 rocket = "0.4.7"
 rand = "0.6"
+calamine = "0.18.0"

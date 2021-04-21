@@ -1,6 +1,7 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
 mod generator;
+mod data_convert;
 
 use std::env;
 use structopt::StructOpt;
@@ -17,6 +18,7 @@ use itertools::Itertools;
 use deles::delegators::pretty;
 use std::path::PathBuf;
 use thiserror::private::PathAsDisplay;
+use crate::data_convert::convert_seed_file;
 
 #[macro_use]
 extern crate lazy_static;
@@ -388,25 +390,7 @@ async fn main() -> meta_gen::Result<()> {
         }
 
         Some(Command::Convert { file , format}) => {
-            use std::fs;
-            let path=PathBuf::from(file);
-            let cnt=fs::read_to_string(path.as_path())?;
-            seed::load_all_entities()?;
-            let rs=meta_gen::process_seed(cnt.as_str())?;
-            // println!("{}", pretty(&rs));
-            let output:PathBuf=PathBuf::from(".store").join(path.file_name().unwrap())
-                .with_extension(format.as_str());
-            println!("export to: {}", output.display());
-            match format.as_str() {
-                "json" => fs::write(output.as_path(), pretty(&rs)) ?,
-                "yaml" => {
-                    let yaml_str=serde_yaml::to_string(&rs)?;
-                    fs::write(output.as_path(), yaml_str) ?
-                },
-                _ => {
-                    println!("don't support format {}", format);
-                }
-            }
+            convert_seed_file(file.as_str(), format.as_str())?;
         }
 
         None => {

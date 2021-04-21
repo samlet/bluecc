@@ -1,6 +1,8 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 #![cfg_attr(not(feature = "std"), no_std)]
 
+mod common;
+
 use ink_lang as ink;
 
 #[ink::contract]
@@ -23,10 +25,13 @@ mod cart {
     };
     use scale::Output;
     use ink_storage::collections::stash::Entry as StashEntry;
+    use crate::common::get_hash_id;
+    // use ink_prelude::collections::BTreeSet;
 
     type TransactionId = u32;
     const WRONG_TRANSACTION_ID: &str =
         "The user specified an invalid transaction id. Abort.";
+    type ValueId=Vec<u8>;
 
     #[derive(scale::Encode, scale::Decode, SpreadLayout, PackedLayout)]
     #[cfg_attr(feature = "std",
@@ -127,6 +132,8 @@ mod cart {
         value: bool,
         order_headers: StorageStash<OrderHeader>,
         example_items: StorageStash<ExampleItem>,
+        // example_items_idx: StorageHashMap<(ValueId, ValueId), ExampleItem>,
+        example_items_bag: StorageHashMap<Hash, Vec<TransactionId>>,
     }
 
     impl Cart {
@@ -137,6 +144,8 @@ mod cart {
                 value: init_value,
                 order_headers: StorageStash::default(),
                 example_items: StorageStash::default(),
+                // example_items_idx: StorageHashMap::new(),
+                example_items_bag: StorageHashMap::new(),
             }
         }
 
@@ -189,8 +198,10 @@ mod cart {
         /// Also removes all confirmation state associated with it.
         fn take_example_item(&mut self, trans_id: TransactionId) -> Option<ExampleItem> {
             let transaction = self.example_items.take(trans_id);
-            if transaction.is_some() {
+            if let Some(t)= &transaction {
                 // self.clean_transaction_confirmations(trans_id);
+                let hid=get_hash_id(t.example_id.as_slice());
+                self.example_items_bag.take(&hid);
             }
             transaction
         }
@@ -274,13 +285,28 @@ mod cart {
         fn example_item_iter_works() {
             let mut cart = Cart::new(false);
             for i in 0..10 {
+                let id=format!("ex_{}", i);
+                let item_id=b"00001";
                 let item:ExampleItem=serde_json::from_value(json!({
                     "description": format!("no.{} example item ", i).as_bytes(),
-                    "exampleItemSeqId": b"00001",
-                    "exampleId": format!("ex_{}", i).as_bytes(),
+                    "exampleItemSeqId": item_id,
+                    "exampleId": id.as_bytes(),
                     "amount": 10
                 })).unwrap();
-                cart.submit_example_item(item.to_owned());
+
+                let new_id=cart.submit_example_item(item.to_owned());
+                // cart.example_items_idx.insert((id.as_bytes().to_vec(), item_id.to_vec()), item);
+
+                // let mut hash_output = [0x00_u8; 32];
+                // ink_env::hash_bytes::<ink_env::hash::Keccak256>(id.as_bytes(), &mut hash_output);
+                // let hash_id=Hash::from(hash_output);
+                let hash_id=get_hash_id(id.as_bytes());
+                if !cart.example_items_bag.contains_key(&hash_id){
+                    cart.example_items_bag.insert(hash_id, vec![new_id]);
+                }else{
+                    cart.example_items_bag.get_mut(&hash_id)
+                        .unwrap().push(new_id);
+                }
             }
 
             for (trans_id, val) in
@@ -315,6 +341,19 @@ mod cart {
             }
 
             assert_eq!(None, cart.example_items.get(5));
+
+            let hid=get_hash_id(b"ex_0");
+            let vals=cart.example_items_bag.get(&hid).unwrap();
+            println!("ex_0 contains: {:?}", vals);
+
+            let hid=get_hash_id(b"ex_4");
+            let vals=cart.example_items_bag.get(&hid).unwrap();
+            println!("ex_4 contains: {:?}", vals);
+
+            let hid=get_hash_id(b"ex_5");
+            let emp=Vec::new();
+            let vals=cart.example_items_bag.get(&hid).unwrap_or(&emp);
+            println!("ex_5 contains: {:?}", vals);
         }
     }
 }

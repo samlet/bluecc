@@ -1,7 +1,7 @@
 [package]
-name = "cart"
+name = "statis"
 version = "0.1.0"
-authors = ["bluecc <xiaofei.wu@gmail.com>"]
+authors = ["[your_name] <[your_email]>"]
 edition = "2018"
 
 [dependencies]
@@ -12,23 +12,15 @@ ink_storage = { version = "3.0.0-rc3", default-features = false }
 ink_lang = { version = "3.0.0-rc3", default-features = false }
 
 scale = { package = "parity-scale-codec", version = "2.1", default-features = false, features = ["derive"] }
-scale-info = { version = "0.6", default-features = false, features = ["derive"], optional = true }
-
-ink_prelude = { version = "3.0.0-rc3", default-features = false }
-# Should be removed once bitvecto-rs/bitvec#105 is resolved
-funty = "=1.1.0"
-
-serde = { version = "1", features = ["derive"], optional = true }
-serde_json = { version = "1", optional = true }
-anyhow = { version = "1", optional = true }
-
-[dev-dependencies]
-bstr = "0.2.15"
+scale-info = { version = "0.6.0", default-features = false, features = ["derive"], optional = true }
 
 [lib]
-name = "cart"
+name = "statis"
 path = "lib.rs"
-crate-type = ["cdylib"]
+crate-type = [
+	# Used for normal contract Wasm blobs.
+	"cdylib",
+]
 
 [features]
 default = ["std"]
@@ -39,15 +31,5 @@ std = [
     "ink_primitives/std",
     "scale/std",
     "scale-info/std",
-    "serde",
-    "serde_json",
-    "anyhow",
 ]
 ink-as-dependency = []
-
-[workspace]
-members = [
-    "cc_example",
-	"statis",
-]
-

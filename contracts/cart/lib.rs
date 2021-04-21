@@ -22,8 +22,11 @@ mod cart {
         Lazy,
     };
     use scale::Output;
+    use ink_storage::collections::stash::Entry as StashEntry;
 
     type TransactionId = u32;
+    const WRONG_TRANSACTION_ID: &str =
+        "The user specified an invalid transaction id. Abort.";
 
     #[derive(scale::Encode, scale::Decode, SpreadLayout, PackedLayout)]
     #[cfg_attr(feature = "std",
@@ -107,6 +110,14 @@ mod cart {
         transaction: TransactionId,
     }
 
+    /// Emitted when a transaction was canceled.
+    #[ink(event)]
+    pub struct Cancelation {
+        /// The transaction that was canceled.
+        #[ink(topic)]
+        transaction: TransactionId,
+    }
+
     /// Defines the storage of your contract.
     /// Add new fields to the below struct in order
     /// to add new static storage fields to your contract.
@@ -164,9 +175,39 @@ mod cart {
             trans_id
         }
 
+        #[ink(message)]
+        pub fn cancel_example_item(&mut self, trans_id: TransactionId) {
+            self.ensure_from_wallet();
+            if self.take_example_item(trans_id).is_some() {
+                self.env().emit_event(Cancelation {
+                    transaction: trans_id,
+                });
+            }
+        }
+
+        /// Remove the transaction identified by `trans_id` from `self.transactions`.
+        /// Also removes all confirmation state associated with it.
+        fn take_example_item(&mut self, trans_id: TransactionId) -> Option<ExampleItem> {
+            let transaction = self.example_items.take(trans_id);
+            if transaction.is_some() {
+                // self.clean_transaction_confirmations(trans_id);
+            }
+            transaction
+        }
+
+        /// Panic if the transaction `trans_id` does not exit.
+        fn ensure_example_item_exists(&self, trans_id: TransactionId) {
+            self.example_items.get(trans_id).expect(WRONG_TRANSACTION_ID);
+        }
+
         /// Panic if the sender is no owner of the wallet.
         fn ensure_caller_is_owner(&self) {
             // self.ensure_owner(&self.env().caller());
+        }
+
+        /// Panic if the sender is not this wallet.
+        fn ensure_from_wallet(&self) {
+            // assert_eq!(self.env().caller(), self.env().account_id());
         }
     }
 
@@ -228,5 +269,54 @@ mod cart {
             println!("{}", item.example_id.to_str().unwrap());
             // Ok(())
         }
+
+        #[ink::test]
+        fn example_item_iter_works() {
+            let mut cart = Cart::new(false);
+            for i in 0..10 {
+                let item:ExampleItem=serde_json::from_value(json!({
+                    "description": format!("no.{} example item ", i).as_bytes(),
+                    "exampleItemSeqId": b"00001",
+                    "exampleId": format!("ex_{}", i).as_bytes(),
+                    "amount": 10
+                })).unwrap();
+                cart.submit_example_item(item.to_owned());
+            }
+
+            for (trans_id, val) in
+            cart.example_items
+                .entries()
+                .enumerate()
+                .filter_map(|(n, entry)| {
+                    match entry {
+                        StashEntry::Vacant(_) => None,
+                        StashEntry::Occupied(value) => Some((n as u32, value)),
+                    }
+                })
+            {
+                println!("{} - {:?}", trans_id, val.example_id.to_str().unwrap());
+            }
+
+            cart.cancel_example_item(5);
+            println!(".. after take 5");
+
+            for (trans_id, val) in
+            cart.example_items
+                .entries()
+                .enumerate()
+                .filter_map(|(n, entry)| {
+                    match entry {
+                        StashEntry::Vacant(_) => None,
+                        StashEntry::Occupied(value) => Some((n as u32, value)),
+                    }
+                })
+            {
+                println!("{} - {:?}", trans_id, val.example_id.to_str().unwrap());
+            }
+
+            assert_eq!(None, cart.example_items.get(5));
+        }
     }
 }
+
+

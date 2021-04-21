@@ -1,0 +1,3 @@
+test unit:
+	cargo +nightly test {{unit}} -- --show-output
+

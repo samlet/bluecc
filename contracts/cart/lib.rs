@@ -26,7 +26,10 @@ mod cart {
     use scale::Output;
     use ink_storage::collections::stash::Entry as StashEntry;
     use crate::common::get_hash_id;
+    use ink_env::DefaultEnvironment;
+    // use ink_env::Environment;
     // use ink_prelude::collections::BTreeSet;
+    use time::{prelude::*, Duration};
 
     type TransactionId = u32;
     const WRONG_TRANSACTION_ID: &str =
@@ -123,6 +126,8 @@ mod cart {
         transaction: TransactionId,
     }
 
+    // type Timestamp = <ink_env::DefaultEnvironment as Environment>::Timestamp;
+
     /// Defines the storage of your contract.
     /// Add new fields to the below struct in order
     /// to add new static storage fields to your contract.
@@ -130,6 +135,8 @@ mod cart {
     pub struct Cart {
         /// Stores a single `bool` value on the storage.
         value: bool,
+        ts: Timestamp,
+        ms: i128,
         order_headers: StorageStash<OrderHeader>,
         example_items: StorageStash<ExampleItem>,
         // example_items_idx: StorageHashMap<(ValueId, ValueId), ExampleItem>,
@@ -142,6 +149,8 @@ mod cart {
         pub fn new(init_value: bool) -> Self {
             Self {
                 value: init_value,
+                ts: Timestamp::default(),
+                ms: 0,
                 order_headers: StorageStash::default(),
                 example_items: StorageStash::default(),
                 // example_items_idx: StorageHashMap::new(),
@@ -163,6 +172,11 @@ mod cart {
         #[ink(message)]
         pub fn flip(&mut self) {
             self.value = !self.value;
+            self.ts=self.env().block_timestamp();
+
+            let mut duration = 1.seconds();
+            duration *= -2;
+            self.ms=duration.whole_milliseconds();
         }
 
         /// Simply returns the current value of our `bool`.
@@ -355,7 +369,22 @@ mod cart {
             let vals=cart.example_items_bag.get(&hid).unwrap_or(&emp);
             println!("ex_5 contains: {:?}", vals);
         }
+
+        // $ just test timestamp_works
+        #[ink::test]
+        fn timestamp_works() {
+            let mut cart = Cart::new(false);
+            cart.flip();
+            println!("flip {} on {}", cart.get(), cart.ts);
+
+            assert_eq!(Duration::week(), 604_800.seconds());
+            let dura=Duration::weeks(1);
+            let ms=dura.whole_milliseconds();
+            println!("... {}, {}", ms, cart.ms);
+        }
     }
 }
+
+
 
 

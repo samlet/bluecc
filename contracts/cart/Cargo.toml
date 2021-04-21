@@ -18,6 +18,8 @@ ink_prelude = { version = "3.0.0-rc3", default-features = false }
 # Should be removed once bitvecto-rs/bitvec#105 is resolved
 funty = "=1.1.0"
 
+time = {version="0.2.26", default-features = false }
+
 serde = { version = "1", features = ["derive"], optional = true }
 serde_json = { version = "1", optional = true }
 anyhow = { version = "1", optional = true }
@@ -42,6 +44,7 @@ std = [
     "serde",
     "serde_json",
     "anyhow",
+    "time/std",
 ]
 ink-as-dependency = []
 

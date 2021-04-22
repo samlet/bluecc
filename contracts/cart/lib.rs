@@ -98,6 +98,20 @@ mod cart {
         pub amount_uom_id: Vec<u8>,  // id
     }
 
+    #[derive(scale::Encode, scale::Decode, SpreadLayout, PackedLayout)]
+    #[cfg_attr(feature = "std",
+        derive(Debug,PartialEq,Eq,
+        scale_info::TypeInfo,
+        ink_storage::traits::StorageLayout
+        )
+    )]
+    #[cfg_attr(feature = "std", derive(Serialize, Deserialize, Clone))]
+    #[cfg_attr(feature = "std", serde(rename_all = "camelCase"))]
+    pub struct CreateExampleItem {
+        pub example_id: Vec<u8>,       // id
+        pub example_item_seq_id: Vec<u8>,  // id
+    }
+
     impl ExampleItem{
         pub fn new(example_id: Vec<u8>, example_item_seq_id: Vec<u8>) -> Self {
             ExampleItem {
@@ -199,6 +213,25 @@ mod cart {
         }
 
         #[ink(message)]
+        pub fn create_example_item(
+            &mut self,
+            item: CreateExampleItem,
+        ) -> TransactionId {
+            self.ensure_caller_is_owner();
+            let trans_id = self.example_items.put(ExampleItem{
+                example_id: item.example_id,
+                example_item_seq_id: item.example_item_seq_id,
+                description: Default::default(),
+                amount: Default::default(),
+                amount_uom_id: Default::default(),
+            });
+            self.env().emit_event(Submission {
+                transaction: trans_id,
+            });
+            trans_id
+        }
+
+        #[ink(message)]
         pub fn cancel_example_item(&mut self, trans_id: TransactionId) {
             self.ensure_from_wallet();
             if self.take_example_item(trans_id).is_some() {
@@ -293,6 +326,24 @@ mod cart {
             println!("{:?}", item);
             println!("{}", item.example_id.to_str().unwrap());
             // Ok(())
+        }
+
+        #[ink::test]
+        fn create_example_item_works() {
+            let mut cart = Cart::new(false);
+            for i in 0..10 {
+                let id = format!("ex_{}", i);
+                let item_id = b"00001";
+                let item: CreateExampleItem = serde_json::from_value(json!({
+                    "exampleItemSeqId": item_id,
+                    "exampleId": id.as_bytes()
+                })).unwrap();
+
+                let new_id = cart.create_example_item(item);
+                println!("created {}", new_id);
+            }
+
+            assert_eq!(10, cart.example_items.len());
         }
 
         #[ink::test]

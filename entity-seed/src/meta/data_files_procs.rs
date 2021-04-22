@@ -13,6 +13,7 @@ use roxmltree::Node;
 use crate::meta::service_models::{ServiceModel, ModelService};
 use std::collections::HashMap;
 use std::iter::FromIterator;
+use itertools::Itertools;
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct DataFile{
@@ -167,9 +168,13 @@ impl ServiceModelReader{
     }
 }
 
+#[derive(Debug)]
+pub enum RelationType{One, Many}
+
 pub struct ModelReader{
     data_files: DataFiles,
     cached_ents: HashMap<String, Entity>,
+    relations: HashMap<String, Vec<(RelationType, String)>>,
 }
 
 fn fix_module_name(module_name: &str) -> String {
@@ -187,6 +192,7 @@ impl ModelReader{
         Ok(ModelReader {
             data_files: (load_z::<DataFiles>(bytes)?),
             cached_ents: HashMap::new(),
+            relations: Default::default()
         })
     }
 
@@ -250,7 +256,26 @@ impl ModelReader{
         }
 
         let vals=Vec::from_iter(self.cached_ents.values());
+        for ent in &vals {
+            let mut rels:Vec<(RelationType, String)> = ent.get_relation_entities()
+                .iter().map(|&r|(RelationType::One, r.to_owned()))
+                .collect_vec();
+            for e in &vals{
+                if e.get_relation_entities().contains(&&ent.entity_name){
+                    rels.push((RelationType::Many, e.entity_name.to_owned()));
+                }
+            }
+            self.relations.insert(ent.entity_name.to_owned(), rels);
+        }
         Ok(vals)
+    }
+
+    pub fn get_or_build_relations(&mut self, ent_name: &str) -> Result<Option<&Vec<(RelationType, String)>>, GenericError>{
+        if self.relations.is_empty(){
+            self.load_all_ents()?;
+        }
+        let rels=self.relations.get(ent_name);
+        Ok(rels)
     }
 }
 

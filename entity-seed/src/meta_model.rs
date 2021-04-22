@@ -112,6 +112,15 @@ impl Entity{
             .nth(0)
     }
 
+    pub fn get_relation_entities(&self) -> Vec<&String> {
+        let rels = self.relations
+            .iter()
+            .unique_by(|x| &x.rel_entity_name)
+            .map(|r|&r.rel_entity_name)
+            .collect_vec();
+        rels
+    }
+
     pub fn get_relation(&self, rel_name:&str) -> Option<&ModelRelation>{
         self.relations.iter().filter(|r|rel_name==r.relation_name())
             .nth(0)

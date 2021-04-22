@@ -74,6 +74,10 @@ enum Command {
     },
     /// Display entity meta
     Meta {
+        /// Load extra info for entity-meta
+        #[structopt(short)]
+        full: bool,
+        /// Entity name
         name: String,
     },
     /// Generate eth solidity contract source
@@ -356,9 +360,23 @@ async fn main() -> meta_gen::Result<()> {
             generate_srv_invoker(&mut handle, &srv, &ents, spec.as_str())?;
         }
 
-        Some(Command::Meta { name }) => {
-            let entity=seed::get_entity_model(name.as_str())?;
-            print_meta(&entity)?;
+        Some(Command::Meta { full, name }) => {
+            if !full {
+                let entity=seed::get_entity_model(name.as_str())?;
+                print_meta(&entity)?;
+            }else {
+                let mut meta = ServiceMeta::load()?;
+                meta.entity_reader.load_all_ents()?;
+                let entity = meta.get_entity_model(name.as_str())?;
+                print_meta(&entity)?;
+
+                let all_rels = meta.entity_reader.get_or_build_relations(name.as_str())?;
+                if let Some(rs) = all_rels {
+                    for r in rs {
+                        println!("{:?}", r);
+                    }
+                }
+            }
         }
 
         Some(Command::Eth { write_to_file, entity_name }) => {

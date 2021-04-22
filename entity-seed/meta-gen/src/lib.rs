@@ -22,6 +22,7 @@ pub mod solidity_gen;
 mod proto_gen;
 mod java_gen;
 mod exec_plan;
+mod entity_relations;
 
 #[macro_use]
 extern crate serde_derive;

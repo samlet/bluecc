@@ -54,5 +54,6 @@ members = [
 	"statis",
     "catalog",
     "wish_list",
+    "cc_incs",
 ]
 

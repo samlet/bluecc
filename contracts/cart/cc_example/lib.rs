@@ -1,6 +1,8 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports, unused_mut))]
 #![cfg_attr(not(feature = "std"), no_std)]
 
+mod calculate;
+
 use ink_lang as ink;
 
 #[ink::contract]
@@ -13,6 +15,12 @@ mod cc_example {
     use chrono::prelude::*;
     use ink_prelude::vec::Vec;
     use ink_prelude::string::String;
+    use crate::calculate::{mode, average};
+    // use statis::average;
+
+    // pub fn average(numbers: &[i32]) -> f32 {
+    //     numbers.iter().sum::<i32>() as f32 / numbers.len() as f32
+    // }
 
     #[derive(scale::Encode, scale::Decode, SpreadLayout, PackedLayout, Default)]
     #[cfg_attr(feature = "std",
@@ -102,6 +110,24 @@ mod cc_example {
             // dt.to_rfc3339().into_bytes()
             dt.to_rfc3339()
         }
+
+        #[ink(message)]
+        pub fn get_dt_ms(&self) -> i64{
+            let dt=Utc.datetime_from_str(self.str_val.as_str(), "%Y-%m-%d %H:%M:%S").unwrap();
+            // dt.to_rfc3339().into_bytes()
+            dt.timestamp_millis()
+        }
+
+        #[ink(message)]
+        pub fn compu_mean(&self) -> (i32, i32){
+            // use average::{MeanWithError, Estimate, Merge, assert_almost_eq};
+            // use rayon::iter::{IntoParallelIterator, ParallelIterator};
+            // let a: MeanWithError = (1..6).into_iter().map(f32::from).collect();
+            // let r=a.mean();
+            let mut numbers = [42, 1, 36, 34, 76, 378, 43, 1, 43, 54, 2, 3, 43];
+            let r=average(&numbers);
+            (r as i32, mode(&numbers) as i32)
+        }
     }
 
     /// Unit tests in Rust are normally defined within such a `#[cfg(test)]`
@@ -143,7 +169,13 @@ mod cc_example {
         fn dt_val_works() {
             let mut cc_example = CcExample::new(false);
             let rfc=cc_example.get_dt_rfc3339();
-            println!("{:?}", rfc);
+            println!("{:?}, {}", rfc, cc_example.get_dt_ms());
+        }
+
+        #[ink::test]
+        fn mean_works() {
+            let mut cc_example = CcExample::new(false);
+            println!("{:?}", cc_example.compu_mean());
         }
     }
 }

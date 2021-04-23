@@ -559,3 +559,4 @@ fn print_meta(entity: &seed::Entity) -> meta_gen::Result<()>{
 
     Ok(())
 }
+

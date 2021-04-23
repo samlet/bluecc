@@ -5,10 +5,17 @@
 //     };
 // use std::collections::BTreeMap;
 use ink_prelude::collections::BTreeMap;
+use ink_prelude::string::String;
 
 /// AVERAGE:统计选择的数据区域平均值。与MEDIAN不一样，一个是指位置，一个是数值
 pub fn average(numbers: &[i32]) -> f32 {
     numbers.iter().sum::<i32>() as f32 / numbers.len() as f32
+}
+
+// pub fn average_map(numbers: &indexmap::IndexMap<String, i64>) -> f64 {
+pub fn average_map(numbers: &BTreeMap<String, i64>) -> f64 {
+    numbers.iter().map(|(_k,v)|v).sum::<i64>() as f64
+        / numbers.len() as f64
 }
 
 /// MEDIAN:统计选择的数据区域的中间位置的那个数值

@@ -15,14 +15,17 @@ mod cc_example {
     use chrono::prelude::*;
     use ink_prelude::vec::Vec;
     use ink_prelude::string::String;
-    use crate::calculate::{mode, average};
+    use crate::calculate::{mode, average, average_map};
+    // use crate::calculate::{mode, average};
+    use ink_prelude::collections::BTreeMap;
     // use statis::average;
 
     // pub fn average(numbers: &[i32]) -> f32 {
     //     numbers.iter().sum::<i32>() as f32 / numbers.len() as f32
     // }
 
-    #[derive(scale::Encode, scale::Decode, SpreadLayout, PackedLayout, Default)]
+    // #[derive(scale::Encode, scale::Decode, SpreadLayout, PackedLayout, Default)]
+    #[derive(scale::Encode, scale::Decode, SpreadLayout, PackedLayout)]
     #[cfg_attr(feature = "std",
         derive(Debug,PartialEq,Eq,
         scale_info::TypeInfo,
@@ -49,6 +52,7 @@ mod cc_example {
     pub struct ItemSpec {
         // id: Vec<u8>,  // id
         id: String,
+        price: Decimal,
     }
 
     /// Defines the storage of your contract.
@@ -68,9 +72,9 @@ mod cc_example {
         #[ink(constructor)]
         pub fn new(init_value: bool) -> Self {
             Self { value: init_value,
-                f_val: Default::default(),
+                f_val: Decimal::new(0,0),
                 str_val: String::from("2014-11-28 12:00:09"),
-                item_spec: Default::default(),
+                item_spec: StorageStash::new(),
             }
         }
 
@@ -140,6 +144,36 @@ mod cc_example {
             let _r=cc_incs::average(&numbers);
             let _r=cc_incs::mode(&numbers);
         }
+
+        #[ink(message)]
+        pub fn add_item(&mut self, name:String, price:Decimal){
+            self.item_spec.put(ItemSpec{ id: name, price });
+        }
+
+        #[ink(message)]
+        pub fn items_total_price(&self) -> i64 {
+            let rs=self.item_spec.iter()
+                .filter_map(|n|Some(decimal::Decimal::new(n.price.num, n.price.scale).to_i64()))
+                .map(|n|n.unwrap())
+                .collect::<Vec<i64>>();
+            let total:i64=rs.iter().sum();
+            let total_dec=decimal::Decimal::from(total);
+            total_dec.to_i64().unwrap()
+        }
+
+        #[ink(message)]
+        pub fn avg_price(&self) -> i64 {
+            // let mut price_map=indexmap::IndexMap::new();
+            let mut price_map=BTreeMap::new();
+            for item in self.item_spec.iter(){
+                price_map.insert(item.id.clone(), item.price.num);
+            }
+            let result=average_map(&price_map);
+            // let result=price_map.iter().map(|(_k,v)|v).sum::<i64>() as f64 / price_map.len() as f64;
+            result as i64
+            // 0
+        }
+
     }
 
     /// Unit tests in Rust are normally defined within such a `#[cfg(test)]`
@@ -188,6 +222,23 @@ mod cc_example {
         fn mean_works() {
             let mut cc_example = CcExample::new(false);
             println!("{:?}", cc_example.compu_mean());
+        }
+
+        #[ink::test]
+        fn total_works() {
+            let mut cc_example = CcExample::new(false);
+            cc_example.add_item("basic".to_string(), Decimal::new(1800,2));
+            cc_example.add_item("basic".to_string(), Decimal::new(7200,2));
+            println!("{:?}", cc_example.items_total_price());
+        }
+
+        #[ink::test]
+        fn avg_works() {
+            let mut cc_example = CcExample::new(false);
+            cc_example.add_item("basic".to_string(), Decimal::new(1800,2));
+            cc_example.add_item("list".to_string(), Decimal::new(7200,2));
+            cc_example.add_item("discount".to_string(), Decimal::new(7200,2));
+            println!("{:?}", cc_example.avg_price());
         }
     }
 }

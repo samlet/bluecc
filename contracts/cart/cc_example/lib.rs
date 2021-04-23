@@ -128,6 +128,18 @@ mod cc_example {
             let r=average(&numbers);
             (r as i32, mode(&numbers) as i32)
         }
+
+        #[ink(message)]
+        pub fn some_test(&self) {
+            use integer_sqrt::IntegerSquareRoot;
+            // let i: i32 = 5;
+            // let _= (i as f64).sqrt(); // method not found in `f64`
+            assert_eq!(4u8.integer_sqrt(), 2);
+
+            let mut numbers = [42, 1, 36, 34, 76, 378, 43, 1, 43, 54, 2, 3, 43];
+            let _r=cc_incs::average(&numbers);
+            let _r=cc_incs::mode(&numbers);
+        }
     }
 
     /// Unit tests in Rust are normally defined within such a `#[cfg(test)]`

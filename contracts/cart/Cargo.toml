@@ -51,7 +51,6 @@ ink-as-dependency = []
 [workspace]
 members = [
     "cc_example",
-	"statis",
     "catalog",
     "wish_list",
     "cc_incs",

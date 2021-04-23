@@ -1,3 +1,6 @@
 test unit:
 	cargo +nightly test {{unit}} -- --show-output
-
+build-example:
+    cargo +nightly contract build --manifest-path cc_example/Cargo.toml
+build:
+    cargo +nightly contract build

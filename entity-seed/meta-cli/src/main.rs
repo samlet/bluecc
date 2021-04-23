@@ -365,11 +365,15 @@ async fn main() -> meta_gen::Result<()> {
                 let entity=seed::get_entity_model(name.as_str())?;
                 print_meta(&entity)?;
             }else {
+                println!("load basic meta ..");
                 let mut meta = ServiceMeta::load()?;
+                println!("load extra meta, contains all relations");
                 meta.entity_reader.load_all_ents()?;
+                println!("retrieve meta ..");
                 let entity = meta.get_entity_model(name.as_str())?;
                 print_meta(&entity)?;
 
+                println!("all relations for {}", name);
                 let all_rels = meta.entity_reader.get_or_build_relations(name.as_str())?;
                 if let Some(rs) = all_rels {
                     for r in rs {

@@ -175,6 +175,7 @@ pub struct ModelReader{
     data_files: DataFiles,
     cached_ents: HashMap<String, Entity>,
     relations: HashMap<String, Vec<(RelationType, String)>>,
+    loaded: bool,
 }
 
 fn fix_module_name(module_name: &str) -> String {
@@ -192,7 +193,8 @@ impl ModelReader{
         Ok(ModelReader {
             data_files: (load_z::<DataFiles>(bytes)?),
             cached_ents: HashMap::new(),
-            relations: Default::default()
+            relations: Default::default(),
+            loaded: false,
         })
     }
 
@@ -240,42 +242,75 @@ impl ModelReader{
     }
 
     pub fn load_all_ents(&mut self) -> Result<Vec<&Entity>, GenericError> {
-        let mut all_extends:Vec<ExtendEntity>=Vec::new();
-        for f in &self.data_files.files {
-            let mut model: EntityModel = load_xml(f.content.as_bytes());
-            model.build();
-            for e in &model.entities{
-                self.cached_ents.insert(e.entity_name.to_owned(), e.clone());
+        if !self.loaded {
+            let mut all_extends: Vec<ExtendEntity> = Vec::new();
+            for f in &self.data_files.files {
+                let mut model: EntityModel = load_xml(f.content.as_bytes());
+                model.build();
+                for e in &model.entities {
+                    self.cached_ents.insert(e.entity_name.to_owned(), e.clone());
+                }
+                all_extends.append(&mut model.extends);
             }
-            all_extends.append(&mut model.extends);
-        }
-        for ext in &mut all_extends{
-            let mut ent=self.cached_ents.get_mut(ext.entity_name.as_str()).expect("entity to extend");
-            ent.fields.append(&mut ext.fields);
-            ent.relations.append(&mut ext.relations);
+            info!("load all entities ok.");
+            for ext in &mut all_extends {
+                let mut ent = self.cached_ents.get_mut(ext.entity_name.as_str()).expect("entity to extend");
+                ent.fields.append(&mut ext.fields);
+                ent.relations.append(&mut ext.relations);
+            }
+            info!("load all extend entities ok.");
+
+            self.loaded=true;
         }
 
         let vals=Vec::from_iter(self.cached_ents.values());
-        for ent in &vals {
-            let mut rels:Vec<(RelationType, String)> = ent.get_relation_entities()
-                .iter().map(|&r|(RelationType::One, r.to_owned()))
-                .collect_vec();
-            for e in &vals{
-                if e.get_relation_entities().contains(&&ent.entity_name){
-                    rels.push((RelationType::Many, e.entity_name.to_owned()));
-                }
-            }
-            self.relations.insert(ent.entity_name.to_owned(), rels);
-        }
         Ok(vals)
     }
+
+    fn build_relations(&mut self, ent_name: &str) -> Result<(), GenericError>{
+        if self.relations.contains_key(ent_name){
+            return Ok(());
+        }
+
+        let ent=&self.get_entity_model(ent_name)?;
+        let mut rels: Vec<(RelationType, String)> = ent.get_relation_entities()
+            .iter().map(|&r| (RelationType::One, r.to_owned()))
+            .collect_vec();
+        for (_ent_name,e) in self.cached_ents.iter() {
+            if e.get_relation_entities().contains(&&ent.entity_name) {
+                rels.push((RelationType::Many, e.entity_name.to_owned()));
+            }
+        }
+        self.relations.insert(ent.entity_name.to_owned(), rels);
+        Ok(())
+    }
+
+    /*
+    fn load_all_relations(&mut self){
+        let vals=Vec::from_iter(self.cached_ents.values());
+        for ent in vals {
+            self.build_relations(&ent);
+        }
+        info!("load all relations ok.");
+    }
+     */
 
     pub fn get_or_build_relations(&mut self, ent_name: &str) -> Result<Option<&Vec<(RelationType, String)>>, GenericError>{
         if self.relations.is_empty(){
             self.load_all_ents()?;
         }
-        let rels=self.relations.get(ent_name);
-        Ok(rels)
+        // let rels=self.relations.get(ent_name);
+        // if rels.as_ref().is_none(){
+        //     self.build_relations(ent_name)?;
+        //     let rels=self.relations.get(ent_name);
+        //     Ok(rels)
+        // }else {
+        //     Ok(rels)
+        // }
+        info!("load relations for {} ..", ent_name);
+        self.build_relations(ent_name)?;
+        info!("load relations ok.");
+        Ok(self.relations.get(ent_name))
     }
 }
 

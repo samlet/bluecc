@@ -50,6 +50,8 @@ serde_yaml = "0.8"
 toml = "0.5.8"
 
 dirs = "3.0"
+#trees="0.4"
+trees = { version = "0.4.1",  path = "../../../trees"}
 
 #[dev-dependencies]
 #dirs = "3.0"

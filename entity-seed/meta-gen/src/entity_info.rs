@@ -12,6 +12,26 @@ fn tree_to_string<T:Display>( node: &Node<T> ) -> String {
     }
 }
 
+fn pprint_tree<T:Display>(node: &Node<T>) {
+    fn pprint_tree<T:Display>(node: &Node<T>, prefix: String, last: bool) {
+        let prefix_current = if last { "`- " } else { "|- " };
+
+        println!("{}{}{}", prefix, prefix_current, node.data().to_string());
+
+        let prefix_child = if last { "   " } else { "|  " };
+        let prefix = prefix + prefix_child;
+
+        if !node.has_no_child() {
+            let last_child = node.children().len() - 1;
+            for (i, child) in node.iter().enumerate() {
+                pprint_tree(&child, prefix.to_string(), i == last_child);
+            }
+        }
+    }
+
+    pprint_tree(node, "".to_string(), true);
+}
+
 #[cfg(test)]
 mod lib_tests {
     use super::*;
@@ -60,7 +80,7 @@ mod lib_tests {
 
     mod tree_walk {
         use trees::{Tree, TreeWalk, tr, walk::Visit};
-        use crate::entity_info::tree_to_string;
+        use crate::entity_info::{tree_to_string, pprint_tree};
         use std::convert::TryFrom;
 
         #[test]
@@ -105,13 +125,15 @@ mod lib_tests {
             //               "Judiciary", ("SupremeCourt", ("Roberts"))));
             // let piled = Tree::<i32>::from_tuple(tuple);
             // let tree_string = "   0( 1( 2 3bc) 4( 5 6 ) )  ";
-            let tree_string="USA (Legislature (House (Pelosi) Senate \
-            (Harris))ExecutiveJudiciary (WhiteHouse (Biden))Judiciary \
-            (SupremeCourt (Roberts)))";
+            let tree_string="USA (Legislature (House (Pelosi) Senate (Harris))\
+            ExecutiveJudiciary (WhiteHouse (Biden))\
+            Judiciary (SupremeCourt (Roberts)))";
             let piled=Tree::try_from(String::from(tree_string))?;
             println!("{}", piled.to_string());
             println!("{:?}", piled.root().locate_first_by_data(&"Legislature".to_string()).unwrap()
                 .descendants());
+
+            pprint_tree(&piled);
             Ok(())
         }
 
@@ -189,5 +211,7 @@ mod lib_tests {
 
             Ok(())
         }
+
+
     }
 }

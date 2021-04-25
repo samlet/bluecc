@@ -5,6 +5,7 @@ use roxmltree::Node;
 use crate::DynamicValue;
 use deles::delegators::pretty;
 use std::path::PathBuf;
+use itertools::Itertools;
 
 fn get_seed_entities(cnt:&str) -> crate::Result<HashSet<String>> {
     let doc = roxmltree::Document::parse(cnt)?;
@@ -22,6 +23,22 @@ fn get_seed_entities(cnt:&str) -> crate::Result<HashSet<String>> {
 pub struct SeedValue {
     pub entity: String,
     pub values: HashMap<String, serde_json::Value>,
+}
+
+impl SeedValue{
+    pub fn get_global_id(&self) -> crate::Result<String> {
+        let ent=seed::get_entity_model(self.entity.as_str())?;
+        let pk_vals=ent.pks().iter()
+            .map(|f|self.values.get(f).as_ref().unwrap().as_str().unwrap())
+            .join(":");
+        let global_id=format!("{}:{}", self.entity, pk_vals);
+        Ok(global_id)
+    }
+
+    pub fn get_encoded_global_id(&self) -> crate::Result<String> {
+        use base64::{encode};
+        Ok(encode(self.get_global_id()?.as_str()))
+    }
 }
 
 pub fn process_seed(xml_str: &str) -> crate::Result<Vec<SeedValue>> {

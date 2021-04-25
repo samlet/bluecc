@@ -1,5 +1,6 @@
 use trees::{tr, Node};
 use std::fmt::Display;
+use bstr::ByteSlice;
 
 pub fn tree_to_string<T:Display>( node: &Node<T> ) -> String {
     if node.has_no_child() {
@@ -12,11 +13,19 @@ pub fn tree_to_string<T:Display>( node: &Node<T> ) -> String {
     }
 }
 
-pub fn pprint_tree<T:Display>(node: &Node<T>) {
-    fn pprint_tree<T:Display>(node: &Node<T>, prefix: String, last: bool) {
+pub fn pprint_tree<T:Display>(node: &Node<T>, convert:bool) {
+    use base64::{decode, DecodeError};
+    fn pprint_tree<T:Display>(node: &Node<T>, prefix: String, last: bool, convert:bool) {
         let prefix_current = if last { "`- " } else { "|- " };
 
-        println!("{}{}{}", prefix, prefix_current, node.data().to_string());
+        let node_data=node.data().to_string();
+        // println!("{}", node_data);
+        let data_str=if convert {decode(node_data)
+                .expect("decode err")
+                .to_str_lossy().to_string()}
+            else {node_data};
+        // let data_str=node.data().to_string();
+        println!("{}{}{}", prefix, prefix_current, data_str);
 
         let prefix_child = if last { "   " } else { "|  " };
         let prefix = prefix + prefix_child;
@@ -24,12 +33,12 @@ pub fn pprint_tree<T:Display>(node: &Node<T>) {
         if !node.has_no_child() {
             let last_child = node.children().len() - 1;
             for (i, child) in node.iter().enumerate() {
-                pprint_tree(&child, prefix.to_string(), i == last_child);
+                pprint_tree(&child, prefix.to_string(), i == last_child, convert);
             }
         }
     }
 
-    pprint_tree(node, "".to_string(), true);
+    pprint_tree(node, "".to_string(), true, convert);
 }
 
 #[cfg(test)]
@@ -82,6 +91,7 @@ mod lib_tests {
         use trees::{Tree, TreeWalk, tr, walk::Visit};
         use crate::entity_info::{tree_to_string, pprint_tree};
         use std::convert::TryFrom;
+        use itertools::Itertools;
 
         #[test]
         fn get() {
@@ -133,7 +143,13 @@ mod lib_tests {
             println!("{:?}", piled.root().locate_first_by_data(&"Legislature".to_string()).unwrap()
                 .descendants());
 
-            pprint_tree(&piled);
+            pprint_tree(&piled, false);
+
+            // search by path
+            let path="USA/ExecutiveJudiciary";
+            let parts:Vec<String>=path.split("/").map(|s|s.to_string()).collect();
+            let sub=piled.root().locate_first_by_path(parts.iter()).unwrap();
+            pprint_tree(sub, false);
             Ok(())
         }
 

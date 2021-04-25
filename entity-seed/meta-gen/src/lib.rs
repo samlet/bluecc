@@ -43,6 +43,7 @@ pub use resource_gen::{generate_srv_invoker, generate_srv_ent};
 pub use proto_gen::{generate_for_proto};
 pub use xml_seed::{process_seed};
 pub use meta_conf::{META_CONF};
+pub use entity_info::{pprint_tree};
 
 mod error{
     use thiserror::Error;
@@ -63,6 +64,8 @@ mod error{
         YamlSerialize(#[from] serde_yaml::Error),
         #[error("request fail")]
         RequestErr(#[from] reqwest::Error),
+        #[error("redis fail")]
+        RedisErr(#[from] redis::RedisError),
         #[error("tera template fail")]
         TeraTemplateErr(#[from] tera::Error),
         #[error("config toml error")]

@@ -1,7 +1,7 @@
 use trees::{tr, Node};
 use std::fmt::Display;
 
-fn tree_to_string<T:Display>( node: &Node<T> ) -> String {
+pub fn tree_to_string<T:Display>( node: &Node<T> ) -> String {
     if node.has_no_child() {
         node.data().to_string()
     } else {
@@ -12,7 +12,7 @@ fn tree_to_string<T:Display>( node: &Node<T> ) -> String {
     }
 }
 
-fn pprint_tree<T:Display>(node: &Node<T>) {
+pub fn pprint_tree<T:Display>(node: &Node<T>) {
     fn pprint_tree<T:Display>(node: &Node<T>, prefix: String, last: bool) {
         let prefix_current = if last { "`- " } else { "|- " };
 
@@ -211,7 +211,5 @@ mod lib_tests {
 
             Ok(())
         }
-
-
     }
 }

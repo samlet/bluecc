@@ -2,6 +2,7 @@
 
 mod generator;
 mod data_convert;
+mod subscriber;
 
 use std::env;
 use structopt::StructOpt;
@@ -19,6 +20,7 @@ use deles::delegators::pretty;
 use std::path::PathBuf;
 use thiserror::private::PathAsDisplay;
 use crate::data_convert::convert_seed_file;
+use crate::subscriber::observe;
 
 #[macro_use]
 extern crate lazy_static;
@@ -141,6 +143,9 @@ enum Command {
         #[structopt(default_value = "json")]
         format: String,
     },
+    Subscribe {
+        topics: Vec<String>,
+    }
 }
 
 #[tokio::main]
@@ -413,6 +418,10 @@ async fn main() -> meta_gen::Result<()> {
 
         Some(Command::Convert { file , format}) => {
             convert_seed_file(file.as_str(), format.as_str())?;
+        }
+
+        Some(Command::Subscribe { topics }) => {
+            observe(&topics)?;
         }
 
         None => {

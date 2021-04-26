@@ -50,9 +50,11 @@ serde_yaml = "0.8"
 toml = "0.5.8"
 
 dirs = "3.0"
+tempfile = "3.2"
 #trees="0.4"
 trees = { version = "0.4.1",  path = "../../../trees"}
 redis = { version = "0.20.0", features = ["tls"] }
+petgraph = { version = "0.5"}
 
 #[dev-dependencies]
 #dirs = "3.0"

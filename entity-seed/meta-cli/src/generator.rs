@@ -38,6 +38,7 @@ impl MetaGenerator for ServiceMeta {
 
             Ok(result)
         }else{
+            // default use template 'srv_ent.j2'
             use bstr::ByteVec;
             let mut buf:Vec<u8>=Vec::new();
             generate_srv_ent(&mut buf, &ent)?;

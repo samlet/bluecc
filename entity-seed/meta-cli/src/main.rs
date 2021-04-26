@@ -3,6 +3,7 @@
 mod generator;
 mod data_convert;
 mod subscriber;
+mod routines;
 
 use std::env;
 use structopt::StructOpt;
@@ -21,6 +22,7 @@ use std::path::PathBuf;
 use thiserror::private::PathAsDisplay;
 use crate::data_convert::convert_seed_file;
 use crate::subscriber::observe;
+use crate::routines::build_status_type_works;
 
 #[macro_use]
 extern crate lazy_static;
@@ -48,6 +50,7 @@ $ meta-cli resource createPaymentApplication _ cr
 $ meta-cli meta Person
 $ meta-cli browse ProductType productTypeId description
 $ meta-cli eth -w PartyGroup
+$ meta-cli status ORDER_ITEM_STATUS
  */
 
 #[derive(StructOpt)]
@@ -145,6 +148,10 @@ enum Command {
     },
     Subscribe {
         topics: Vec<String>,
+    },
+    /// Show status changes as graph
+    Status {
+        status_type: String,
     }
 }
 
@@ -422,6 +429,10 @@ async fn main() -> meta_gen::Result<()> {
 
         Some(Command::Subscribe { topics }) => {
             observe(&topics)?;
+        }
+
+        Some(Command::Status { status_type }) => {
+            build_status_type_works(status_type.as_str()).await?;
         }
 
         None => {

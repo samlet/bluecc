@@ -83,7 +83,7 @@ pub struct StatusValidChanges {
     result: Vec<StatusValidChange>,
 }
 
-struct StateGraph{
+pub struct StateGraph{
     graph: Graph::<String, String>,
     id_map: HashMap<String, NodeIndex>,
 }
@@ -154,7 +154,7 @@ impl StateGraph{
 
         #[derive(Serialize, Deserialize, Clone, Debug)]
         pub struct StatusItems {
-            #[serde(rename = "statusItems")]
+            #[serde(rename = "statusItems", default)]
             result: Vec<StatusItem>,
         }
         let ret: SrvResp<StatusItems> = dele.srv("getStatusItemsForType", &values).await?;
@@ -167,6 +167,16 @@ impl StateGraph{
         Ok(items)
     }
 
+    pub async fn build_status_type(&mut self, dele: &SrvDeles, status_type: &str) -> crate::Result<bool>{
+        let items= self.get_status_items(&dele, status_type).await?;
+        debug!("{:?}", items);
+        for item in &items {
+            self.add_start_status(&dele, item.as_str()).await?;
+        }
+
+        if items.is_empty() {Ok(false)} else {Ok(true)}
+    }
+
     pub fn draw(&self) -> crate::Result<()>{
         use tempfile::tempdir;
         use std::fs::File;
@@ -176,7 +186,7 @@ impl StateGraph{
         // let dot_graph=Dot::with_config(&self.graph, &[Config::EdgeNoLabel]);
         let dot_graph=Dot::with_config(&self.graph, &[Config::EdgeIndexLabel]);
         let dot = format!("{:?}", dot_graph);
-        println!("{}", dot);
+        debug!("{}", dot);
 
         let dir = tempdir()?;
         let file_path = dir.path().join("tmp-graph.dot");
@@ -191,7 +201,7 @@ impl StateGraph{
             .output()
             .expect("failed to execute process");
         // let out = output.stdout;
-        println!("status: {}", output.status);
+        // println!("status: {}", output.status);
         io::stdout().write_all(&output.stdout).unwrap();
         io::stderr().write_all(&output.stderr).unwrap();
 
@@ -258,6 +268,17 @@ mod lib_tests {
         for item in items {
             stg.add_start_status(&dele, item.as_str()).await?;
         }
+        stg.draw()?;
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn build_status_type_works() -> crate::Result<()> {
+        let mut dele = SrvDeles::new();
+        dele.use_default_token().await?;
+        let status_type="ORDER_ITEM_STATUS";
+        let mut stg=StateGraph::new();
+        stg.build_status_type(&dele, status_type).await?;
         stg.draw()?;
         Ok(())
     }

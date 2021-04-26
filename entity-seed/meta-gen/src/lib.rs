@@ -24,6 +24,7 @@ mod java_gen;
 mod exec_plan;
 mod entity_info;
 mod status_item;
+mod meta_services;
 
 #[macro_use]
 extern crate serde_derive;

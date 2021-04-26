@@ -7,7 +7,7 @@ use serde_json::json;
 use petgraph::Graph;
 use petgraph::dot::{Dot, Config};
 use std::collections::HashMap;
-use petgraph::graph::NodeIndex;
+use petgraph::graph::{NodeIndex, Edge, Node};
 use itertools::Itertools;
 
 /// $ meta-cli entity StatusItem
@@ -218,6 +218,23 @@ impl StateGraph{
 
         Ok(())
     }
+
+    pub fn edges(&self) -> &[Edge<String, u32>] {
+        self.graph.raw_edges()
+    }
+
+    pub fn node(&self, index: NodeIndex<u32>) -> &Node<String, u32> {
+        &self.graph.raw_nodes()[index.index()]
+    }
+
+    pub fn topo(&self) -> Vec<String>{
+        let order = petgraph::algo::toposort(&self.graph, None).unwrap();
+        let order_ids:Vec<String>=order.iter().map(|n:&NodeIndex<u32>|{
+            let src= self.node(*n);
+            src.weight.to_string()
+        }).collect();
+        order_ids
+    }
 }
 
 #[cfg(test)]
@@ -315,6 +332,17 @@ mod lib_tests {
         stg.add_start_status(&dele, start_st).await?;
         stg.add_start_status(&dele, "ITEM_APPROVED").await?;
         stg.draw()?;
+
+        for edge in stg.edges() {
+            let src= stg.node(edge.source());
+            let target=stg.node(edge.target());
+            // "ITEM_CREATED" -> "ITEM_APPROVED": Approve Item
+            println!("{:?} -> {:?}: {}", src.weight, target.weight, edge.weight);
+        }
+
+        let order_ids=stg.topo();
+        // ["ITEM_CREATED", "ITEM_REJECTED", "ITEM_APPROVED", "ITEM_CANCELLED", "ITEM_COMPLETED"]
+        println!("{:?}", order_ids);
 
         Ok(())
     }

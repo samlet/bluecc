@@ -132,6 +132,7 @@ impl StateGraph{
                 self.id_map.get(start_st).unwrap().to_owned()
             };
         let rs = ret.data.unwrap().rs;
+        // add nodes
         for v in rs.iter() {
             if !self.id_map.contains_key(&v.status_id_to) {
                 let i = self.graph.add_node(v.status_id_to.to_owned());
@@ -139,6 +140,7 @@ impl StateGraph{
             }
         }
 
+        // add edges
         for node in rs.iter() {
             let target = self.id_map.get(node.status_id_to.as_str()).unwrap();
             self.graph.add_edge(left, *target, node.transition_name.to_string());
@@ -160,7 +162,8 @@ impl StateGraph{
         let ret: SrvResp<StatusItems> = dele.srv("getStatusItemsForType", &values).await?;
         // println!("{}", ret.pretty_str()?);
         assert!(ret.is_ok());
-        let items=ret.data.as_ref().unwrap().result.iter()
+        let rs=ret.data.unwrap().result;
+        let items=rs.iter()
             .map(|s|s.id.status_id.as_ref().unwrap().to_owned())
             .collect_vec();
 

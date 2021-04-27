@@ -49,6 +49,7 @@ pub use xml_seed::{process_seed};
 pub use meta_conf::{META_CONF};
 pub use entity_info::{pprint_tree};
 pub use status_item::{StateGraph};
+pub use chart_gen::{ChartGen};
 
 mod error{
     use thiserror::Error;

@@ -51,6 +51,7 @@ $ meta-cli meta Person
 $ meta-cli browse ProductType productTypeId description
 $ meta-cli eth -w PartyGroup
 $ meta-cli status ORDER_ITEM_STATUS
+$ meta-cli status -c EXAMPLE_STATUS
  */
 
 #[derive(StructOpt)]
@@ -151,6 +152,10 @@ enum Command {
     },
     /// Show status changes as graph
     Status {
+        /// Print state-machine code
+        #[structopt(short)]
+        code: bool,
+        /// Status type entity, for instance, ORDER_ITEM_STATUS
         status_type: String,
     }
 }
@@ -431,8 +436,8 @@ async fn main() -> meta_gen::Result<()> {
             observe(&topics)?;
         }
 
-        Some(Command::Status { status_type }) => {
-            build_status_type_works(status_type.as_str()).await?;
+        Some(Command::Status { code, status_type }) => {
+            build_status_type_works(status_type.as_str(), code).await?;
         }
 
         None => {

@@ -25,6 +25,8 @@ mod exec_plan;
 mod entity_info;
 mod status_item;
 mod meta_services;
+mod chart_gen;
+mod charts;
 
 #[macro_use]
 extern crate serde_derive;

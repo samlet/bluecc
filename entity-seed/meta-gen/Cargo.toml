@@ -56,6 +56,7 @@ trees = { version = "0.4.1",  path = "../../../trees"}
 redis = { version = "0.20.0", features = ["tls"] }
 petgraph = { version = "0.5"}
 jsonpath = { package="jsonpath_lib", git="https://github.com/RedisJSON/jsonpath.git", branch="public-parser" }
+rust-fsm = { version = "0.5", features = ["dsl"] }
 
 #[dev-dependencies]
 #dirs = "3.0"

@@ -1,0 +1,16 @@
+state_machine! {
+    {{ chart_name }}Chart({{ start }})
+{%- for src, targets in trans_map %}
+    {%- set target_num = targets | length %}
+    {%- if target_num==1 %}
+        {%- set target = targets | first %}
+        {{src}}({{ target.transition }}) => {{ target.dest }},
+    {%- else %}
+        {{ src }} =>  {
+            {%- for target in targets %}
+                {{ target.transition }} => {{ target.dest }},
+            {%- endfor %}
+        },
+    {%- endif %}
+{%- endfor %}
+}

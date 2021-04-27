@@ -228,7 +228,8 @@ impl StateGraph{
     }
 
     pub fn topo(&self) -> Vec<String>{
-        let order = petgraph::algo::toposort(&self.graph, None).unwrap();
+        let order = petgraph::algo::toposort(&self.graph, None)
+            .expect("topo sort fail");
         let order_ids:Vec<String>=order.iter().map(|n:&NodeIndex<u32>|{
             let src= self.node(*n);
             src.weight.to_string()
@@ -241,6 +242,7 @@ impl StateGraph{
 mod lib_tests {
     use super::*;
     use itertools::Itertools;
+    use inflector::Inflector;
 
     #[tokio::test]
     async fn perform_find_status_item_works() -> crate::Result<()> {
@@ -318,6 +320,7 @@ mod lib_tests {
 
         let stg=StateGraph::wrap(deps);
         stg.draw()?;
+        println!("{:?}", stg.topo());
 
         Ok(())
     }
@@ -337,7 +340,7 @@ mod lib_tests {
             let src= stg.node(edge.source());
             let target=stg.node(edge.target());
             // "ITEM_CREATED" -> "ITEM_APPROVED": Approve Item
-            println!("{:?} -> {:?}: {}", src.weight, target.weight, edge.weight);
+            println!("{:?} -> {:?}: {}", src.weight, target.weight, edge.weight.to_pascal_case());
         }
 
         let order_ids=stg.topo();

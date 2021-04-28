@@ -67,6 +67,30 @@ mod lib_tests {
     }
 
     #[test]
+    fn status_item_rels_works() -> anyhow::Result<()> {
+        let mut meta = ServiceMeta::load()?;
+        let all_ents=meta.entity_reader.get_all_entity_names();
+        let mut prod_rels=Vec::new();
+        let spec_ent="StatusItem".to_string();
+        let mut count=0;
+        for (_i, ent_name) in all_ents.iter().enumerate() {
+            let ent = meta.get_entity_model(ent_name)?;
+            let rels = ent.get_relation_entities();
+            if rels.contains(&&spec_ent){
+                count+=1;
+                println!("{}. {}", count, ent_name);
+                if ent_name.contains("Product"){
+                    prod_rels.push(ent_name);
+                }
+            }
+        }
+
+        println!("prod rels: {:?}", prod_rels);
+
+        Ok(())
+    }
+
+    #[test]
     fn entity_type_works() -> anyhow::Result<()> {
         let mut reader=seed::meta::ModelReader::load()?;
         let names=reader.get_all_entity_names();

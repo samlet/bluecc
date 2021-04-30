@@ -1,0 +1,34 @@
+start: StopMap::Stopped
+class: Stoplight
+package: smc_ex4
+
+map: StopMap
+branches:
+    Stopped:
+        Start:
+            EastWestGreen: |
+                InitLights();
+                TurnLight("NSLIGHT", "RED");
+                TurnLight("EWLIGHT", "GREEN");
+                InformCanvas("EastWest");
+                SetTimer("EastWest");
+        # Ignore pause, continue and stop because we ain't running.
+        Pause:
+            nil:
+        Continue:
+            nil:
+        Stop:
+            nil:
+    EastWestGreen:
+        Timeout:
+            EastWestYellow: |
+                TurnLight("EWLIGHT", "YELLOW");
+                InformCanvas("YELLOW");
+                SetTimer("Yellow");
+    EastWestYellow:
+        Timeout:
+            NorthSouthGreen: |
+                TurnLight("EWLIGHT", "RED");
+                TurnLight("NSLIGHT", "GREEN");
+                InformCanvas("NorthSouth");
+                SetTimer("NorthSouth");

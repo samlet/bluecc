@@ -15,7 +15,7 @@ pub struct EntityGenerator{
 impl EntityGenerator {
     pub fn new(entities: Vec<String>) -> Self {
         let mut gen=EntityGenerator { entities, belongs_filter: true, tera: Tera::default() };
-        gen.init();
+        gen.init().expect("init");
         gen
     }
 

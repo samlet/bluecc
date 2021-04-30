@@ -87,7 +87,7 @@ where
     std::fs::write(json_output, &val)?;
 
     let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
-    e.write_all(&val.as_bytes());
+    e.write_all(&val.as_bytes())?;
     let compressed_bytes = e.finish()?;
     let zout=format!("{}z", json_output);
     std::fs::write(&zout, compressed_bytes)?;

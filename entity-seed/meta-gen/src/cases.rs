@@ -25,7 +25,8 @@ pub struct CaseResource{
     /// When the resource was created
     pub created: u64,
     pub url: Option<String>,
-    pub name: Option<String>,
+    #[serde(default)]
+    pub name: String,
     pub description: Option<String>,
     pub method: Option<String>,
     pub body: Option<ResourceBody>,
@@ -40,6 +41,7 @@ pub struct CaseResource{
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Authentication{
+    #[serde(default)]
     pub token: String,
     #[serde(rename = "type", default)]
     pub type_name: String,
@@ -48,7 +50,9 @@ pub struct Authentication{
 #[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct ResourceBody{
+    #[serde(default)]
     pub mime_type: String,
+    #[serde(default)]
     pub text: String,
 }
 
@@ -61,13 +65,13 @@ pub struct ResourceHeader{
 
 impl Cases{
     fn get_children_names(&self, root_name: &str) -> Vec<String>{
-        let empty="_".to_string();
+        // let empty="_".to_string();
         let srv_root=self.resources.iter()
-            .find(|&r|Some(root_name.to_string())==r.name).unwrap();
+            .find(|&r|root_name.to_string()==r.name).unwrap();
         let children=self.resources.iter().filter(|r|r.parent_id==srv_root.id)
             .collect_vec();
         let child_names=children.iter()
-            .map(|&n|n.name.as_ref().unwrap_or(&empty).to_owned())
+            .map(|&n|n.name.to_owned())
             .collect::<Vec<String>>();
         child_names
     }
@@ -231,20 +235,20 @@ mod lib_tests {
     fn case_names_works() -> anyhow::Result<()> {
         let cases_data=include_str!("cases/Insomnia_2021-03-29.yaml");
         let cases:Cases=serde_yaml::from_str(cases_data)?;
-        let empty="_".to_string();
+        // let empty="_".to_string();
         let names=cases.resources.iter()
-            .map(|r|(r.name.as_ref().unwrap_or(&empty), &r.type_name))
+            .map(|r|(r.name.to_owned(), &r.type_name))
             .collect_vec();
         println!("{}", pretty(&names));
 
         let srv_root=cases.resources.iter()
-            .find(|&r|Some("ofbiz-srvs".to_string())==r.name).unwrap();
+            .find(|&r|"ofbiz-srvs".to_string()==r.name).unwrap();
         let children=cases.resources.iter().filter(|r|r.parent_id==srv_root.id)
             .collect_vec();
         let child_names=children.iter()
-            .map(|&n|n.name.as_ref().unwrap_or(&empty))
+            .map(|&n|n.name.to_owned())
             .collect_vec();
-        println!("{}'s children: {}", srv_root.name.as_ref().unwrap(), pretty(&child_names));
+        println!("{}'s children: {}", srv_root.name, pretty(&child_names));
 
         Ok(())
     }
@@ -340,6 +344,59 @@ mod lib_tests {
 
         let resp=item.request(&client, vars).await?;
         println!("{}", pretty(&resp));
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn test_fail_srv_works() -> anyhow::Result<()> {
+        use std::{env, fs};
+
+        let target_dir = dirs::home_dir().unwrap();
+        let target_dir = target_dir.join("Downloads/fixtures");
+        let mut files=Vec::new();
+        for entry in fs::read_dir(target_dir)? {
+            let entry = entry?;
+            let path = entry.path();
+
+            let metadata = fs::metadata(&path)?;
+            let last_modified = metadata.modified()?.elapsed()?.as_secs();
+
+            // if last_modified < 24 * 3600 && metadata.is_file() {
+            //     println!(
+            //         "Last modified: {:?} seconds, is read only: {:?}, size: {:?} bytes, filename: {:?}",
+            //         last_modified,
+            //         metadata.permissions().readonly(),
+            //         metadata.len(),
+            //         path.file_name().expect("No filename")
+            //     );
+            // }
+            files.push((path.as_path().to_string_lossy().to_string().to_owned(), last_modified));
+        }
+        files.sort_by(|a,b| a.1.cmp(&b.1));
+        for (f,ts) in &files {
+            println!("{:?} {}", f, ts);
+        }
+        let latest=files.first().unwrap().0.to_string();
+        println!("the latest file: {}", latest);
+
+        // parse as cases
+        let bytes=std::fs::read(latest)?;
+        let cases:Cases=serde_yaml::from_reader(&*bytes)?;
+        println!("total cases {}", cases.resources.len());
+
+        let workloads:Vec<&CaseResource>=cases.resources.iter()
+            .filter(|r|r.type_name=="request_group" && r.name.starts_with("workload:"))
+            .collect();
+        for workload in &workloads{
+            println!("{}: {}", workload.id, workload.name);
+            let states:Vec<&CaseResource>=cases.resources.iter()
+                .filter(|r|r.parent_id==workload.id && r.type_name=="request_group")
+                .collect();
+            for st in &states{
+                println!("\t - {}: {}", st.id, st.name);
+            }
+        }
 
         Ok(())
     }

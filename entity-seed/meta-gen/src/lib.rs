@@ -1,4 +1,5 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports, unused_mut))]
+#![allow(dead_code, unused_imports, unused_mut)]
+// #![cfg_attr(debug_assertions, allow(dead_code, unused_imports, unused_mut))]
 
 mod seed_gen;
 mod conn;

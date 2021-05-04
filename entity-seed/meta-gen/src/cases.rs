@@ -7,6 +7,109 @@ use deles::delegators::pretty;
 use itertools::Itertools;
 use reqwest::Client;
 
+pub struct CasesManager{
+    cases: Cases,
+    cases_by_id_map: HashMap<String, usize>,
+
+    cases_file: String,
+    // tree: CaseTree,
+    workloads: Vec<Workload>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct Workload{
+    name: String,
+    id: String,
+    index: usize,
+    states: Vec<WorkState>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct WorkState{
+    name: String,
+    id: String,
+    index: usize,
+}
+
+impl CasesManager{
+    pub fn load() -> crate::Result<Self> {
+        use std::{env, fs};
+
+        let target_dir = dirs::home_dir().unwrap();
+        let target_dir = target_dir.join("Downloads/fixtures");
+        let mut files=Vec::new();
+        for entry in fs::read_dir(target_dir)? {
+            let entry = entry?;
+            let path = entry.path();
+
+            let metadata = fs::metadata(&path)?;
+            let last_modified = metadata.modified()?.elapsed()?.as_secs();
+
+            files.push((path.as_path().to_string_lossy().to_string().to_owned(), last_modified));
+        }
+
+        files.sort_by(|a,b| a.1.cmp(&b.1));
+        for (f,ts) in &files {
+            debug!("{:?} {}", f, ts);
+        }
+        let latest=files.first().unwrap().0.to_owned();
+        debug!("the latest file: {}", latest);
+
+        // parse as cases
+        let bytes=std::fs::read(latest.as_str())?;
+        let cases:Cases=serde_yaml::from_reader(&*bytes)?;
+        debug!("total cases {}", cases.resources.len());
+
+        let workloads:Vec<&CaseResource>=cases.resources.iter()
+            .filter(|r|r.type_name=="request_group" && r.name.starts_with("workload:"))
+            .collect();
+        let cases_by_id_map:HashMap<String, usize>=cases.resources.iter()
+            .enumerate()
+            .map(|(i, r)|(r.id.to_string(), i))
+            .collect();
+        let mut workload_rs=Vec::new();
+        for workload in &workloads{
+            debug!("{}: {}", workload.id, workload.name);
+            let mut work_states=Vec::new();
+            let states:Vec<&CaseResource>=cases.resources.iter()
+                .filter(|r|r.parent_id==workload.id && r.type_name=="request_group")
+                .collect();
+            for st in &states{
+                debug!("\t - {}: {}", st.id, st.name);
+                work_states.push(WorkState{
+                    name: st.name.to_string(),
+                    id: st.id.to_string(),
+                    index: *cases_by_id_map.get(st.id.as_str()).unwrap(),
+                });
+            }
+
+            workload_rs.push(Workload{
+                name: workload.name.to_string(),
+                id: workload.id.to_string(),
+                index: *cases_by_id_map.get(workload.id.as_str()).unwrap(),
+                states: work_states,
+            });
+        }
+
+        Ok(CasesManager{ cases, cases_by_id_map,
+            cases_file:latest.to_owned(),
+            workloads:workload_rs,
+        })
+    }
+
+    pub fn workload_by_name(&self, name: &str) -> Option<&Workload> {
+        let full_name=format!("workload:{}", name);
+        self.workloads.iter().find(|w|w.name==full_name)
+    }
+
+    pub fn workload_names(&self) -> Vec<String>{
+        self.workloads.iter()
+            .map(|f|f.name.strip_prefix("workload:")
+                .expect("trim prefix").to_string())
+            .collect_vec()
+    }
+}
+
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Cases{
     pub resources: Vec<CaseResource>,
@@ -349,7 +452,7 @@ mod lib_tests {
     }
 
     #[tokio::test]
-    async fn test_fail_srv_works() -> anyhow::Result<()> {
+    async fn workload_list_works() -> anyhow::Result<()> {
         use std::{env, fs};
 
         let target_dir = dirs::home_dir().unwrap();
@@ -397,6 +500,25 @@ mod lib_tests {
                 println!("\t - {}: {}", st.id, st.name);
             }
         }
+
+        Ok(())
+    }
+
+    #[test]
+    fn workload_names_works() -> anyhow::Result<()> {
+        let cases_mgr=CasesManager::load()?;
+        let names=cases_mgr.workload_names();
+        println!("{:?}", names);
+
+        Ok(())
+    }
+
+    #[test]
+    fn load_states_works() -> anyhow::Result<()> {
+        let cases_mgr=CasesManager::load()?;
+        // let workload=cases_mgr.workloads.get(0).unwrap();
+        let workload= cases_mgr.workload_by_name("Example");
+        println!("{}", pretty(workload.unwrap()));
 
         Ok(())
     }

@@ -58,5 +58,7 @@ petgraph = { version = "0.5"}
 jsonpath = { package="jsonpath_lib", git="https://github.com/RedisJSON/jsonpath.git", branch="public-parser" }
 rust-fsm = { version = "0.5", features = ["dsl"] }
 
+slab = "0.4.3"
+
 #[dev-dependencies]
 #dirs = "3.0"

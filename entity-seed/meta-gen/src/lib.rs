@@ -63,6 +63,8 @@ mod error{
         Parse(#[from] std::num::ParseIntError),
         #[error("xml parse fail")]
         ParseXml(#[from] roxmltree::Error),
+        #[error("time error")]
+        SystemTimeErr(#[from] std::time::SystemTimeError),
         #[error("json parse fail")]
         JsonSerialize(#[from] serde_json::Error),
         #[error("xml parse fail")]

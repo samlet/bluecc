@@ -116,6 +116,7 @@ mod lib_tests {
         use crate::entity_info::{tree_to_string, pprint_tree};
         use std::convert::TryFrom;
         use itertools::Itertools;
+        use seed::Entity;
 
         #[test]
         fn get() {
@@ -248,6 +249,32 @@ mod lib_tests {
                 /( tr(1) /tr(2)/tr(3) )
                 /( tr(4) /tr(5)/tr(6) );
             assert_eq!( tree_to_string( &tree ), "0( 1( 2 3 ) 4( 5 6 ) )" );
+
+            Ok(())
+        }
+
+        #[test]
+        fn slab_works() -> anyhow::Result<()> {
+            use slab::Slab;
+
+            let mut nodes: Slab<Entity> = Slab::new();
+            let ent = seed::get_entity_model("Person")?;
+            let idx = nodes.insert(ent.clone());
+            println!("idx {}", idx);
+            let idx = nodes.insert(ent.clone());
+            println!("idx {}", idx);
+
+            let ent_ref = &nodes[idx];
+            println!("ent {}", ent_ref.entity_name);
+
+            ent.relations.iter().for_each(|n| {
+                let e = seed::get_entity_model(n.rel_entity_name.as_str())
+                    .expect("get ent");
+                nodes.insert(e);
+            });
+            let name_idx=nodes.iter().map(|(i,e)| (i, &e.entity_name))
+                .collect_vec();
+            println!("{:?}", name_idx);
 
             Ok(())
         }

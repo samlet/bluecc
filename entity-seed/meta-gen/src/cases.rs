@@ -29,6 +29,7 @@ pub struct WorkState{
     name: String,
     id: String,
     index: usize,
+    actions: Vec<usize>,
 }
 
 impl CasesManager{
@@ -76,10 +77,15 @@ impl CasesManager{
                 .collect();
             for st in &states{
                 debug!("\t - {}: {}", st.id, st.name);
+                let actions:Vec<usize>=cases.resources.iter()
+                    .filter(|r|r.parent_id==st.id)
+                    .map(|r|*cases_by_id_map.get(r.id.as_str()).unwrap())
+                    .collect();
                 work_states.push(WorkState{
                     name: st.name.to_string(),
                     id: st.id.to_string(),
                     index: *cases_by_id_map.get(st.id.as_str()).unwrap(),
+                    actions
                 });
             }
 
@@ -108,11 +114,64 @@ impl CasesManager{
                 .expect("trim prefix").to_string())
             .collect_vec()
     }
+
+    pub fn cases(&self) -> &Cases{
+        &self.cases
+    }
+
+    pub fn print_workload(&self, workload_name:&str){
+        let workload= self.workload_by_name(workload_name);
+        if let Some(w)=workload {
+            println!("{}", pretty(w));
+            // let st=w.states.get(0).unwrap();
+            for st in &w.states {
+                let cases = self.cases();
+                let act_names = st.actions.iter().map(|a| cases.resource(*a))
+                    .map(|r| r.name.to_string())
+                    .collect_vec();
+                println!("{} => \n {:?}", st.name, act_names);
+            }
+        }
+    }
+
+    pub fn print_action(&self, workload_name: &str, act_name: &str){
+        let workload= self.workload_by_name(workload_name);
+        fn extract(body: &Option<ResourceBody>) -> String {
+            if let Some(r)=body{
+                r.text.to_owned()
+            }else{
+                "".to_string()
+            }
+        }
+        if let Some(w)=workload {
+            for st in &w.states {
+                let cases = self.cases();
+                let acts = st.actions.iter()
+                    .map(|a| cases.resource(*a))
+                    .filter(|a|a.name==act_name)
+                    .map(|a| (a.name.to_string(), extract(&a.body)))
+                    .collect_vec();
+                if !acts.is_empty() {
+                    println!("{} => ", st.name);
+                    for (name, code) in &acts{
+                        println!("{}", name);
+                        println!("{}", code);
+                    }
+                }
+            }
+        }
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Cases{
     pub resources: Vec<CaseResource>,
+}
+
+impl Cases{
+    pub fn resource(&self, idx: usize) -> &CaseResource {
+        self.resources.get(idx).expect("index")
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -517,8 +576,15 @@ mod lib_tests {
     fn load_states_works() -> anyhow::Result<()> {
         let cases_mgr=CasesManager::load()?;
         // let workload=cases_mgr.workloads.get(0).unwrap();
-        let workload= cases_mgr.workload_by_name("Example");
-        println!("{}", pretty(workload.unwrap()));
+        cases_mgr.print_workload("Example");
+
+        Ok(())
+    }
+
+     #[test]
+    fn print_state_action_works() -> anyhow::Result<()> {
+        let cases_mgr=CasesManager::load()?;
+        cases_mgr.print_action("Example", "createExampleStatus");
 
         Ok(())
     }

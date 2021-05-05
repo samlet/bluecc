@@ -1,0 +1,34 @@
+_id: req_d9fdd04972964fb4a07a43c3b2683279
+parentId: fld_1fd31a0d9ffd49b681871c0f685c884e
+modified: 1617091924074
+created: 1617091884042
+url: "{{ _.ofbiz_srvs }}/updateProduct"
+name: updateProduct
+description: ""
+method: POST
+body:
+  mimeType: application/json
+  text: |
+    {
+    "productId": "Test_product_A",
+    "productName": "Test_name_B",
+    "description": "Updated description"
+    }
+parameters: []
+headers:
+  - name: Content-Type
+    value: application/json
+    id: pair_df19d714632e4e50ac3ef6cfb7100196
+authentication:
+  token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJ1c2VyTG9naW5JZCI6ImFkbWluIiwiaXNzIjoiQXBhY2hlT0ZCaXoiLCJleHAiOjE2MzQ1OTc3NTcsImlhdCI6MTYxNjU5Nzc1N30.Luuf2bK7ZJ8KE_CtsA3iPZ189i-Qbm2qK5r5VfeQcJqIyTKy4DHf2fBAp37W8OtU6SIplwCdnbTMtHuCZ5h8cA
+  type: bearer
+metaSortKey: -1616938845861.375
+isPrivate: false
+settingStoreCookies: true
+settingSendCookies: true
+settingDisableRenderRequestBody: false
+settingEncodeUrl: true
+settingRebuildPath: true
+settingFollowRedirects: global
+_type: request
+

@@ -122,7 +122,8 @@ impl CasesManager{
     pub fn print_workload(&self, workload_name:&str){
         let workload= self.workload_by_name(workload_name);
         if let Some(w)=workload {
-            println!("{}", pretty(w));
+            // println!("{}", pretty(w));
+            println!("{} ({})", w.name, w.id);
             // let st=w.states.get(0).unwrap();
             for st in &w.states {
                 let cases = self.cases();

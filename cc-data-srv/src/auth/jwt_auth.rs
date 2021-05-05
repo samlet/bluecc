@@ -99,3 +99,18 @@ fn jwt_from_header(headers: &HeaderMap<HeaderValue>) -> Result<String> {
     }
     Ok(auth_header.trim_start_matches(BEARER).to_owned())
 }
+
+#[cfg(test)]
+mod lib_tests {
+    use super::*;
+
+    #[test]
+    fn create_jwt_works() -> anyhow::Result<()> {
+        let role=Role::Admin;
+        let token=create_jwt("samlet", &role)?;
+        println!("{}", token);
+
+        Ok(())
+    }
+}
+

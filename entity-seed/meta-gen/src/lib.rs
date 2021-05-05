@@ -1,3 +1,4 @@
+#![feature(in_band_lifetimes)]
 #![allow(dead_code, unused_imports, unused_mut)]
 // #![cfg_attr(debug_assertions, allow(dead_code, unused_imports, unused_mut))]
 
@@ -28,6 +29,7 @@ mod status_item;
 mod meta_services;
 mod chart_gen;
 mod charts;
+mod action_meta;
 
 #[macro_use]
 extern crate serde_derive;

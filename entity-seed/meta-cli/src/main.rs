@@ -23,6 +23,7 @@ use thiserror::private::PathAsDisplay;
 use crate::data_convert::convert_seed_file;
 use crate::subscriber::observe;
 use crate::routines::build_status_type_works;
+use meta_gen::cases::CasesManager;
 
 #[macro_use]
 extern crate lazy_static;
@@ -52,6 +53,8 @@ $ meta-cli browse ProductType productTypeId description
 $ meta-cli eth -w PartyGroup
 $ meta-cli status ORDER_ITEM_STATUS
 $ meta-cli status -c EXAMPLE_STATUS
+$ meta-cli workload Example
+$ meta-cli workload Example sendExamplePushNotifications
  */
 
 #[derive(StructOpt)]
@@ -157,7 +160,12 @@ enum Command {
         code: bool,
         /// Status type entity, for instance, ORDER_ITEM_STATUS
         status_type: String,
-    }
+    },
+    Workload {
+        workload_name: String,
+        #[structopt(default_value = "")]
+        action: String,
+    },
 }
 
 #[tokio::main]
@@ -438,6 +446,16 @@ async fn main() -> meta_gen::Result<()> {
 
         Some(Command::Status { code, status_type }) => {
             build_status_type_works(status_type.as_str(), code).await?;
+        }
+
+        Some(Command::Workload { workload_name, action }) => {
+            let cases_mgr=CasesManager::load()?;
+            cases_mgr.print_workload(workload_name.as_str());
+            if !action.is_empty(){
+                println!("action request {} --- ✁", action.yellow());
+                cases_mgr.print_action(workload_name.as_str(),
+                                       action.as_str());
+            }
         }
 
         None => {

@@ -66,6 +66,21 @@ impl ServiceMeta{
         ServiceMeta::srv_model_params(&srv, &ents)
     }
 
+    pub fn has_interface(&mut self, srv_name:&str) -> crate::Result<bool>{
+        let srv = self.service_reader.get_service_model(srv_name)?;
+        Ok(srv.has_interface())
+    }
+
+    pub fn get_interface(&mut self, srv_name:&str) -> crate::Result<Option<String>>{
+        let srv = self.service_reader.get_service_model(srv_name)?;
+        if srv.has_interface(){
+            Ok(srv.implements.iter()
+                .map(|i|i.service.to_owned()).nth(0))
+        }else {
+            Ok(None)
+        }
+    }
+
     pub fn srv_input_params(&mut self, srv_name: &str) -> Result<Vec<ModelParam>, GenericError> {
         let params=self.srv_params(srv_name)?;
         let r=params.iter().filter(|p|p.mode==ParamMode::In || p.mode==ParamMode::InOut)

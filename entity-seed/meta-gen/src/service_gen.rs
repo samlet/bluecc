@@ -256,6 +256,14 @@ impl ModelParam{
         qtype
     }
 
+    pub fn param_java_type(&self) -> String{
+        let mut qtype = self.type_name.to_owned();
+        if !self.type_name.is_pascal_case() {
+            qtype = FIELD_MAPPINGS.java_type(self.type_name.as_str());
+        }
+        qtype
+    }
+
     pub fn param_value_type(&self, spec:&str) -> String {
         let raw_type= &self.type_name;
         let mut val:String = FIELD_MAPPINGS.orig_type(raw_type);

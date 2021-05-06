@@ -46,6 +46,17 @@ impl<T: Serialize> SrvResp<T> {
     }
 }
 
+impl SrvResp<DynamicValue>{
+    pub fn get_list(&self, key: &str) -> Option<&Vec<Value>> {
+        if let Some(r)=&self.data{
+            if let Some(rs)= r.values.get(key){
+                return rs.as_array();
+            }
+        }
+        None
+    }
+}
+
 #[derive(Clone)]
 pub struct SrvDeles {
     client: Client,

@@ -1,0 +1,21 @@
+// -*- tab-width: 4; -*-
+%start {{ workload.name }}Map::Idle
+%class {{ workload.name }}
+%package workloads
+%fsmclass {{ workload.name }}Fsm
+
+%map {{ workload.name }}Map
+%%
+{% for state in workload.states %}
+    {{ state.name }}
+    {
+    {% for act in state.actions %}
+        {{ act.name }}
+            {{ act.target }}
+            {
+                {{ act.code }}
+            }
+    {% endfor %}
+    }
+{% endfor %}
+%%

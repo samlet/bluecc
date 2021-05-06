@@ -76,6 +76,17 @@ pub struct FindProductByIdCcResp {
 
 const FIND_PRODUCT_BY_ID_CC: &'static str = "findProductByIdCc";
 
+
+pub async fn find_cc(dele: &SrvDeles, entity_name: &str, max_rows: usize)
+    -> Result<SrvResp<DynamicValue>, GenericError> {
+    let values: DynamicValue = serde_json::from_value(json!({
+        "entityName": entity_name,
+        "maxRows": max_rows,
+    }))?;
+    dele.srv("findCc", &values).await
+}
+
+
 #[cfg(test)]
 mod lib_tests {
     use super::*;
@@ -83,6 +94,7 @@ mod lib_tests {
     use crate::resources::product::Product;
     use crate::extract_val;
     use deles::delegators::pretty;
+    use serde_json::Value;
 
     #[tokio::test]
     async fn find_prod_works() -> Result<(), GenericError> {
@@ -361,6 +373,21 @@ mod lib_tests {
 
         let result=selector("$.result[*].statusId").unwrap();
         println!("{}", pretty(&result));
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn find_cc_wrapper_works() -> anyhow::Result<()> {
+        let mut dele = SrvDeles::new();
+        dele.use_default_token().await?;
+        let resp= find_cc(&dele, "Person", 5).await?;
+        assert!(resp.is_ok());
+        if let Some(rs)=resp.get_list("result"){
+            for r in rs{
+                println!("{}", pretty(r));
+            }
+        }
 
         Ok(())
     }

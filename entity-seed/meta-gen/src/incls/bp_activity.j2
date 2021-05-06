@@ -1,0 +1,6 @@
+  public interface {{ act.name }}Activities {
+    {%- for method in act.methods %}
+    @ActivityMethod(scheduleToCloseTimeoutSeconds = 10)
+    Map<String, Object> {{ method.name }}({{ method.input_str}});
+    {%- endfor %}
+  }

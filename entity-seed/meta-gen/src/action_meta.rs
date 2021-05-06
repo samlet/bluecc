@@ -43,10 +43,32 @@ fn get_json_parameter_names(res: &CaseResource) -> crate::Result<Vec<String>>{
     Ok(Vec::default())
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+struct ActivityParameter{
+    name: String,
+    type_name: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct ActivityMethod{
+    name: String,
+    parameters: Vec<ActivityParameter>,
+    #[serde(skip_deserializing)]
+    input_str: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct ActivityMeta{
+    name: String,
+    methods: Vec<ActivityMethod>,
+}
+
 #[cfg(test)]
 mod lib_tests {
     use super::*;
     use crate::ServiceMeta;
+    use deles::delegators::pretty;
+    use tera::{Tera, Context};
 
     #[test]
     fn get_service_works() -> anyhow::Result<()> {
@@ -79,10 +101,38 @@ mod lib_tests {
             println!("{:?}", pnames);
 
             let paras=meta.iter().filter(|p|para_names.contains(&p.name))
-                .map(|p|(p.name.to_string(), p.type_name.to_string()))
+                .map(|p|ActivityParameter{
+                    name: p.name.to_string(),
+                    type_name: p.param_java_type()
+                })
                 .collect_vec();
-            println!("{:?}", paras);
+            let input_str=paras.iter()
+                    .map(|p| format!("{} {}", p.type_name, p.name))
+                    .collect_vec()
+                    .join(", ");
+            let method=ActivityMethod{
+                name:s.to_string(),
+                parameters: paras,
+                input_str: input_str,
+            };
+            println!("{}", pretty(&method));
+            let act_meta=ActivityMeta{
+                name: "Hello".to_string(),
+                methods: vec![method] };
+
+            // generate code from template
+            let mut tera = Tera::default();
+            tera.add_raw_template("bp_act", include_str!("incls/bp_activity.j2"))?;
+            tera.add_raw_template("bp_act_impl", include_str!("incls/bp_activity_impl.j2"))?;
+            let mut context = Context::new();
+            context.insert("act", &act_meta);
+
+            let result = tera.render("bp_act", &context)?;
+            println!("{}", result);
+            let result = tera.render("bp_act_impl", &context)?;
+            println!("{}", result);
         }
+
         Ok(())
     }
 }

@@ -1,0 +1,4 @@
+  public interface {{ flow.name }}Workflow {
+    @WorkflowMethod(executionStartToCloseTimeoutSeconds = 10, taskList = TASK_LIST)
+    Map<String, Object> execute(String name);
+  }

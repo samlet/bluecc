@@ -1,0 +1,7 @@
+  public static class {{ act.name }}ActivitiesImpl implements {{ act.name }}Activities {
+    {%- for method in act.methods %}
+    @Override
+    Map<String, Object> {{ method.name }}({{ method.input_str}}) {
+    }
+    {%- endfor %}
+  }

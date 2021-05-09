@@ -40,11 +40,13 @@ regex = "1.4.5"
 uuid = { version = "0.8", features = ["serde", "v4"] }
 
 cdrs = { version = "2" }
+cdrs_helpers_derive = "0.4.0"
 jsonpath = { package="jsonpath_lib", git="https://github.com/RedisJSON/jsonpath.git", branch="public-parser" }
 rust-fsm = { version = "0.5", features = ["dsl"] }
 petgraph = { version = "0.5", features = ["serde-1"]}
 rules = {package="json-rules-engine", path="../../rules", features = ["eval"]}
 rhai = { version = "0.19", features = ["sync", "no_function", "no_optimize", "no_module", "no_closure", "serde", "unchecked"]}
+maplit = "1.0.2"
 
 [dev-dependencies]
 env_logger = "0.8.3"

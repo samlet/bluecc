@@ -10,6 +10,7 @@ extern crate maplit;
 mod store;
 mod graph_meta;
 mod rules;
+pub mod handlers;
 
 mod error{
     use thiserror::Error;

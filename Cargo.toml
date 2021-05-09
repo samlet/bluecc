@@ -9,6 +9,7 @@ members = [
 	"deles",
 	"cc-bridge",
 	"meta-srv",
+	"blueprints",
     "contracts/cc_common",
     "entity-seed/meta-gen",
     "entity-seed/meta-cli",

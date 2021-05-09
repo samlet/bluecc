@@ -106,8 +106,11 @@ enum Command {
     Find {
         entity_name: String
     },
+    /// Browse entity data
     Browse {
+        /// Entity name
         entity_name: String,
+        /// Columns, with camelcase pattern
         cols: Vec<String>,
     },
     /// Show entity seed-data
@@ -162,6 +165,7 @@ enum Command {
         status_type: String,
     },
     Workload {
+        #[structopt(default_value = "")]
         workload_name: String,
         #[structopt(default_value = "")]
         action: String,
@@ -450,11 +454,16 @@ async fn main() -> meta_gen::Result<()> {
 
         Some(Command::Workload { workload_name, action }) => {
             let cases_mgr=CasesManager::load()?;
-            cases_mgr.print_workload(workload_name.as_str());
-            if !action.is_empty(){
-                println!("action request {} --- ✁", action.yellow());
-                cases_mgr.print_action(workload_name.as_str(),
-                                       action.as_str());
+            if !workload_name.is_empty() {
+                cases_mgr.print_workload(workload_name.as_str());
+                if !action.is_empty() {
+                    println!("action request {} --- ✁", action.yellow());
+                    cases_mgr.print_action(workload_name.as_str(),
+                                           action.as_str());
+                }
+            }else{
+                let names=cases_mgr.workload_names();
+                println!("{}", pretty(&names));
             }
         }
 

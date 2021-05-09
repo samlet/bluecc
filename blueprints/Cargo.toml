@@ -1,0 +1,51 @@
+[package]
+name = "blueprints"
+version = "0.1.0"
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+common = {package="common", version = "0.1.0",  path = "../common"}
+#deles = { package="deles", version = "0.1.0",  path = "../deles"}
+
+log = "0.4"
+env_logger = "0.8.3"
+anyhow = "1.0"
+futures = "0.3"
+paw = "1.0"
+structopt = { version = "0.3", features = [ "paw" ] }
+itertools = "0.10"
+thiserror = "1.0"
+lazy_static = "1.4.0"
+Inflector = "0.11.4"
+error-chain = "0.12.2"
+
+serde = "1.0"
+serde_json = "1.0.11"
+serde_derive = "1.0"
+chrono = { version = "0.4.0", features = ["serde"] }
+bigdecimal = { version = "0.2", features=["serde"] }
+
+tokio = { version = "1", features = ["macros", "fs", "io-util", "full"] }
+warp = "0.3"
+reqwest = { version = "0.11", features = ["json", "blocking"] }
+jsonwebtoken = "7"
+#casbin = { version = "2.0", default-features = false, features = ["runtime-async-std", "logging", "incremental"] }
+casbin = { version = "2.0", default-features = false, features = ["runtime-tokio", "logging", "incremental"] }
+async-trait = "0.1.42"
+
+csv = "1.1"
+regex = "1.4.5"
+uuid = { version = "0.8", features = ["serde", "v4"] }
+
+cdrs = { version = "2" }
+jsonpath = { package="jsonpath_lib", git="https://github.com/RedisJSON/jsonpath.git", branch="public-parser" }
+rust-fsm = { version = "0.5", features = ["dsl"] }
+
+[dev-dependencies]
+env_logger = "0.8.3"
+maplit = "1.0.0"
+regex = "0.2.5"
+cdrs_helpers_derive = "0.4"
+

@@ -60,5 +60,9 @@ rust-fsm = { version = "0.5", features = ["dsl"] }
 
 slab = "0.4.3"
 
+actix = "0.11"
+#actix-rt = "1.1" # <-- Runtime for actix
+actix-rt="2.2"
+
 #[dev-dependencies]
 #dirs = "3.0"

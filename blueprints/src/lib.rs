@@ -11,6 +11,7 @@ mod store;
 mod graph_meta;
 mod rules;
 pub mod handlers;
+mod actors;
 
 mod error{
     use thiserror::Error;

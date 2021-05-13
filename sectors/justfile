@@ -1,0 +1,5 @@
+pserver:
+	cargo run --bin pubsub_main server 127.0.0.1:4000
+pclient:
+	cargo run --bin pubsub_main client 127.0.0.1:4000
+

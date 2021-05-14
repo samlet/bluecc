@@ -100,8 +100,8 @@ impl EntityGenerator {
         }
 
         fn start_num(value: &Value, args: &HashMap<String, Value>) -> tera::Result<Value> {
-            let base=args.get("base").expect("expect base parameter").as_u64().unwrap();
-            let val:u64 = value.as_u64().unwrap()+base;
+            let base=args.get("base").expect("expect base parameter").as_i64().unwrap();
+            let val:i64 = value.as_i64().unwrap()+base;
             Ok(Value::Number(val.into()))
         }
 

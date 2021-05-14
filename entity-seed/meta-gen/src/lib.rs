@@ -30,6 +30,7 @@ mod meta_services;
 mod chart_gen;
 mod charts;
 mod action_meta;
+mod capnp_gen;
 
 #[macro_use]
 extern crate serde_derive;

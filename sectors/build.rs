@@ -9,6 +9,8 @@ fn main() {
     ::capnpc::CompilerCommand::new()
         .file("protocols/pubsub.capnp")
         .file("protocols/addressbook.capnp")
+        .file("protocols/filesys.capnp")
+        .file("protocols/test_ents.capnp")
         .run().unwrap();
 }
 

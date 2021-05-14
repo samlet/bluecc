@@ -343,6 +343,8 @@ pub struct FieldTypeDef{
     pub eth_type: String,
     #[serde(rename = "proto-type", default)]
     pub proto_type: String,
+    #[serde(rename = "capnp-type", default)]
+    pub capnp_type: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -447,6 +449,15 @@ impl FieldTypes{
             "string".to_string()
         }else{
             fld.proto_type.to_owned()
+        }
+    }
+
+    pub fn capnp_type(&self, field_type:&str) -> String{
+        let fld=self.get_field(field_type);
+        if fld.capnp_type.is_empty(){
+            "Text".to_string()
+        }else{
+            fld.capnp_type.to_owned()
         }
     }
 

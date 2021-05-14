@@ -1,0 +1,11 @@
+# Entity {{ent['entity-name'] -}} ({{ ent['package-name'] | pkg }}): {{ ent.title }}
+struct {{ent['entity-name'] -}} {
+    # keys
+    {%- for fld in keys %}
+    {{fld.name}} @{{loop.index | start(base=-1)}} :{{fld['type'] | capnp_type}};   # {{fld['type']}}
+    {%- endfor %}
+    # fields
+    {%- for fld in flds %}
+    {{fld.name}} @{{loop.index | start(base=fld_start)}} :{{fld['type'] | capnp_type}};   # {{fld['type']}}
+    {%- endfor %}
+}

@@ -1,0 +1,28 @@
+interfaces:
+    Product:
+        main_entity: Product
+        creator: createProduct
+        retrieve: performFindList
+        processors:
+            - service: updateProduct
+              when: *
+            - service: createProductFeature
+            - service: applyFeatureToProduct
+            - service: createProductFeatureIactn
+            - service: createFeaturePrice
+    Example:
+        main_entity: Example
+        creator: createExample
+        retrieve: performFindList
+        processors:
+            - service: updateExample
+            # when用于检查当前对象代理的状态, 只是状态匹配时才可以调用这个服务
+            # 状态的切换不一定要用fsm来定义, 可以往sector放入rules-actor,
+            # rules-actor可以按条件触发, 并切换对象状态
+            # rules配置可以动态更新, 所以不用在此处定义
+            - service: sendExamplePushNotifications
+              when: submitting
+        terminators:
+            - service: createExampleStatus
+              request: {statusId: "EXST_TESTED"}
+              response: {statusDescription: "OK"}

@@ -42,14 +42,18 @@ impl Handler<Fibonacci> for SyncActor {
 }
 
 #[actix::main]
-async fn main() {
+async fn main() -> anyhow::Result<()>{
     // start sync arbiter with 3 threads
     let addr = SyncArbiter::start(3, || SyncActor);
 
     // send 5 messages
     for n in 5..10 {
-        println!("{:?}", addr.send(Fibonacci(n)).await.unwrap());
+        // will print: Ok(5) Ok(8) ...
+        println!("{:?}", addr.send(Fibonacci(n)).await?);
     }
 
     System::current().stop();
+
+    Ok(())
 }
+

@@ -1,0 +1,21 @@
+example:
+    states:
+        default:
+            - signal: findExampleType
+              service: findCc
+              request: { entityName: "ExampleType" }
+            - signal: findExample
+              service: findCc
+              request: { entityName: "Example" }
+            - signal: getStatusItems
+              request: { statusTypeIds":["EXAMPLE_STATUS"] }
+        preparing:
+        idle:
+            - signal: createExample
+              succ: processing
+        processing:
+        suspending:
+        submitting:
+        closing:
+        closed:
+

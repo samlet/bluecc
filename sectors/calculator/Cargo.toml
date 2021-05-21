@@ -1,0 +1,24 @@
+[package]
+
+name = "calculator"
+version = "0.0.0"
+authors = [ "David Renshaw <dwrenshaw@sandstorm.io>"  ]
+build = "build.rs"
+edition = "2018"
+
+[[bin]]
+
+name = "calculator"
+path = "main.rs"
+
+[build-dependencies]
+capnpc = { version="0.14" }
+
+[dependencies]
+capnp = { version="0.14" }
+futures = "0.3.0"
+tokio = { version = "1.0.0", features = ["net", "rt", "macros"]}
+tokio-util = { version = "0.6.0", features = ["compat"] }
+
+[dependencies.capnp-rpc]
+version = "0.14"

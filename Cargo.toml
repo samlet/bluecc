@@ -10,10 +10,12 @@ members = [
 	"cc-bridge",
 	"meta-srv",
 	"blueprints",
-	"sectors",
     "contracts/cc_common",
     "entity-seed/meta-gen",
     "entity-seed/meta-cli",
+	"sectors",
+	"sectors/calculator",
+	"sectors/hello-world",
 ]
 exclude = ["contracts/cc_common", "contracts/cart"]
 

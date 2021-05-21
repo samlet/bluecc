@@ -45,9 +45,50 @@ fn gen_capnp_id() -> String {
     stdout
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+struct CapnpIntf{
+    name: String,
+    parent_type: Option<String>,
+    services: Vec<CapnpService>,
+    modifiers: Vec<CapnpModifier>,
+    entry: CapnpEntry,
+}
+
+// 包含了default-entity的服务, 使用modifier, 同时生成modifier结构和方法声明
+#[derive(Serialize, Deserialize, Debug)]
+struct CapnpModifier{
+    name: String,
+    fields: Vec<CapnpParam>,
+    params: Vec<CapnpParam>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct CapnpEntry{
+    list_fields: Vec<CapnpParam>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct CapnpService{
+    name: String,
+    params: Vec<CapnpParam>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct CapnpParam{
+    name: String,
+    type_name: String,
+    default_value: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct CapnpOutline{
+
+}
+
 #[cfg(test)]
 mod lib_tests {
     use super::*;
+    use crate::ServiceMeta;
 
     #[test]
     fn gen_works() -> anyhow::Result<()> {
@@ -60,5 +101,21 @@ mod lib_tests {
         Ok(())
     }
 
+    fn print_rels(entity_name: &str) -> anyhow::Result<()>{
+        // let entity_name="Person";
+        let mut srvs = ServiceMeta::load()?;
+        let result = srvs.get_related_srvs(entity_name)?;
+        let rels = serde_json::to_string_pretty(&result)?;
+        println!("{}", rels);
+
+        Ok(())
+    }
+
+    #[test]
+    fn build_capnp_interface_works() -> anyhow::Result<()> {
+
+
+        Ok(())
+    }
 }
 

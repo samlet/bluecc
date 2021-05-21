@@ -1,0 +1,6 @@
+server:
+	../../../target/debug/calculator server 127.0.0.1:4040
+client:
+	../../../target/debug/calculator client 127.0.0.1:4040
+
+

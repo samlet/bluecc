@@ -23,6 +23,7 @@ struct StringResp(String);
 #[derive(Message)]
 #[rtype(result = "StringResp")]
 struct StringGetKey(String, String);
+
 #[derive(Message)]
 #[rtype(result = "()")]
 struct StringSetKey(String, String, String);
@@ -134,12 +135,12 @@ mod lib_tests {
         System::new().block_on(async {
             let doc_actor = DocActor::new().unwrap().start();
             doc_actor
-                .send(StringSetKey(key.to_string(), ".entity".to_string(), "\"NewEnt\"".to_string()))
+                .send(StringSetKey(key.to_string(), ".entity".to_string(), "\"NewEnt2\"".to_string()))
                 .await.expect("set");
             let res = doc_actor
                 .send(StringGetKey(key.to_string(), ".entity".to_string()))
                 .await.expect("get");
-            assert_eq!(StringResp("\"NewEnt\"".to_string()), res);
+            assert_eq!(StringResp("\"NewEnt2\"".to_string()), res);
         });
 
         Ok(())
